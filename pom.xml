@@ -79,6 +79,7 @@
         <module>nft</module>
         <module>sign</module>
         <module>listener-log</module>
+        <module>contract</module>
     </modules>
     
 </project>

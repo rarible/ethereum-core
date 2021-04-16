@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <parent>
+        <artifactId>rarible-ethereum-parent</artifactId>
+        <groupId>com.rarible.ethereum</groupId>
+        <version>1.0-SNAPSHOT</version>
+    </parent>
+    <modelVersion>4.0.0</modelVersion>
+    <artifactId>contracts-test</artifactId>
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>net.alchim31.maven</groupId>
+                <artifactId>scala-maven-plugin</artifactId>
+            </plugin>
+            <plugin>
+                <groupId>io.daonomic.scalether</groupId>
+                <artifactId>scalether-maven-plugin</artifactId>
+                <configuration>
+                    <contracts>
+                        <contract>
+                            <truffle>src/main/truffle/TestERC20.json</truffle>
+                            <packageName>com.rarible.contracts.test.erc20</packageName>
+                            <type>MONO</type>
+                        </contract>
+                        <contract>
+                            <truffle>src/main/truffle/TestERC721.json</truffle>
+                            <packageName>com.rarible.contracts.test.erc721</packageName>
+                            <type>MONO</type>
+                        </contract>
+                        <contract>
+                            <truffle>src/main/truffle/TestWETH9.json</truffle>
+                            <packageName>com.rarible.contracts.test.weth</packageName>
+                            <type>MONO</type>
+                        </contract>
+                        <contract>
+                            <truffle>src/main/truffle/TestERC1271.json</truffle>
+                            <packageName>com.rarible.contracts.test.erc1271</packageName>
+                            <type>MONO</type>
+                        </contract>
+                        <contract>
+                            <truffle>src/main/truffle/TestERC1155.json</truffle>
+                            <packageName>com.rarible.contracts.test.erc1155</packageName>
+                            <type>MONO</type>
+                        </contract>
+                    </contracts>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
+
+    <dependencies>
+        <dependency>
+            <groupId>com.rarible.scalether</groupId>
+            <artifactId>contract-mono_${scala.major.version}</artifactId>
+            <version>${scalether.version}</version>
+        </dependency>
+    </dependencies>
+
+</project>

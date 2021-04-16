@@ -35,6 +35,7 @@
     <modules>
         <module>contracts-interfaces</module>
         <module>contracts-test</module>
+        <module>converters</module>
     </modules>
     
 </project>

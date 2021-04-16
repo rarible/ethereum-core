@@ -19,5 +19,21 @@
         </plugins>
     </build>
 
+    <dependencies>
+        <dependency>
+            <groupId>com.rarible.ethereum</groupId>
+            <artifactId>rarible-ethereum-sign</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.rarible.core</groupId>
+            <artifactId>rarible-core-test-common</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.rarible.scalether</groupId>
+            <artifactId>domain-test_${scala.major.version}</artifactId>
+            <version>${scalether.version}</version>
+            <scope>test</scope>
+        </dependency>
+    </dependencies>
 
 </project>

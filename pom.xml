@@ -45,6 +45,11 @@
                 <artifactId>rarible-ethereum-common</artifactId>
                 <version>1.0-SNAPSHOT</version>
             </dependency>
+            <dependency>
+                <groupId>com.rarible.ethereum</groupId>
+                <artifactId>rarible-ethereum-sign</artifactId>
+                <version>1.0-SNAPSHOT</version>
+            </dependency>
         </dependencies>
     </dependencyManagement>
 

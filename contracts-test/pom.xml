@@ -17,7 +17,7 @@
                 <artifactId>scala-maven-plugin</artifactId>
             </plugin>
             <plugin>
-                <groupId>io.daonomic.scalether</groupId>
+                <groupId>com.rarible.scalether</groupId>
                 <artifactId>scalether-maven-plugin</artifactId>
                 <configuration>
                     <contracts>

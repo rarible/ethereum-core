@@ -78,6 +78,7 @@
         <module>common</module>
         <module>nft</module>
         <module>sign</module>
+        <module>listener-log</module>
     </modules>
     
 </project>

@@ -73,6 +73,21 @@
                 <artifactId>rarible-ethereum-contract</artifactId>
                 <version>1.0-SNAPSHOT</version>
             </dependency>
+            <dependency>
+                <groupId>com.rarible.ethereum</groupId>
+                <artifactId>rarible-ethereum-listener-log-domain</artifactId>
+                <version>1.0-SNAPSHOT</version>
+            </dependency>
+            <dependency>
+                <groupId>com.rarible.ethereum</groupId>
+                <artifactId>rarible-ethereum-listener-log-service</artifactId>
+                <version>1.0-SNAPSHOT</version>
+            </dependency>
+            <dependency>
+                <groupId>com.rarible.ethereum</groupId>
+                <artifactId>rarible-ethereum-block</artifactId>
+                <version>1.0-SNAPSHOT</version>
+            </dependency>
         </dependencies>
     </dependencyManagement>
 
@@ -85,6 +100,9 @@
         <module>sign</module>
         <module>listener-log</module>
         <module>contract</module>
+        <module>listener-log-domain</module>
+        <module>listener-log-service</module>
+        <module>block</module>
     </modules>
     
 </project>

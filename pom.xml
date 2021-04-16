@@ -29,6 +29,22 @@
                 <type>pom</type>
                 <scope>import</scope>
             </dependency>
+            <dependency>
+                <groupId>com.rarible.ethereum</groupId>
+                <artifactId>rarible-ethereum-contracts-interfaces</artifactId>
+                <version>1.0-SNAPSHOT</version>
+            </dependency>
+            <dependency>
+                <groupId>com.rarible.ethereum</groupId>
+                <artifactId>rarible-ethereum-contracts-test</artifactId>
+                <version>1.0-SNAPSHOT</version>
+                <scope>test</scope>
+            </dependency>
+            <dependency>
+                <groupId>com.rarible.ethereum</groupId>
+                <artifactId>rarible-ethereum-common</artifactId>
+                <version>1.0-SNAPSHOT</version>
+            </dependency>
         </dependencies>
     </dependencyManagement>
 
@@ -36,6 +52,9 @@
         <module>contracts-interfaces</module>
         <module>contracts-test</module>
         <module>converters</module>
+        <module>common</module>
+        <module>nft</module>
+        <module>sign</module>
     </modules>
     
 </project>

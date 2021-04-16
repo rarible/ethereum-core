@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <parent>
+        <artifactId>rarible-ethereum-parent</artifactId>
+        <groupId>com.rarible.ethereum</groupId>
+        <version>1.0-SNAPSHOT</version>
+    </parent>
+    <modelVersion>4.0.0</modelVersion>
+    <artifactId>rarible-ethereum-common</artifactId>
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>net.alchim31.maven</groupId>
+                <artifactId>scala-maven-plugin</artifactId>
+            </plugin>
+        </plugins>
+    </build>
+
+    <dependencies>
+        <dependency>
+            <groupId>com.rarible.scalether</groupId>
+            <artifactId>domain_${scala.major.version}</artifactId>
+            <version>${scalether.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.rarible.scalether</groupId>
+            <artifactId>abi_${scala.major.version}</artifactId>
+            <version>${scalether.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.rarible.scalether</groupId>
+            <artifactId>util_${scala.major.version}</artifactId>
+            <version>${scalether.version}</version>
+        </dependency>
+    </dependencies>
+
+</project>

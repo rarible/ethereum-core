@@ -21,6 +21,6 @@ data class Part(
     )
 
     companion object {
-        private val TYPE_HASH: Word = keccak256("Part(address account,uint256 value)")
+        private val TYPE_HASH: Word = keccak256("Part(address account,uint96 value)")
     }
 }

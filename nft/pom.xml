@@ -34,6 +34,16 @@
             <version>${scalether.version}</version>
             <scope>test</scope>
         </dependency>
+        <dependency>
+            <groupId>com.rarible.ethereum</groupId>
+            <artifactId>rarible-ethereum-contracts-test</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.rarible.rpc</groupId>
+            <artifactId>transport-mono_${scala.major.version}</artifactId>
+            <version>${scalether.version}</version>
+            <scope>test</scope>
+        </dependency>
     </dependencies>
 
 </project>

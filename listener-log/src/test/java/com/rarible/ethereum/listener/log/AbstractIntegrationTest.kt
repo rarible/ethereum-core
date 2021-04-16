@@ -1,6 +1,5 @@
 package com.rarible.ethereum.listener.log
 
-import com.fasterxml.jackson.databind.ObjectMapper
 import com.rarible.core.test.ext.EthereumTest
 import com.rarible.core.test.ext.MongoCleanup
 import com.rarible.core.test.ext.MongoTest
@@ -80,8 +79,8 @@ class EthereumConfigurationIntr {
         EthPubSub(WebSocketPubSubTransport(ethereumWebsockerUrl, 500000))
 
     @Bean
-    fun ethereum(mapper: ObjectMapper) =
-        MonoEthereum(WebClientTransport(ethereumUrl, mapper, 10000, 10000))
+    fun ethereum() =
+        MonoEthereum(WebClientTransport(ethereumUrl, MonoEthereum.mapper(), 10000, 10000))
 
     @Bean
     fun sender(ethereum: MonoEthereum) = MonoSigningTransactionSender(

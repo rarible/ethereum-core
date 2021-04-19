@@ -15,22 +15,20 @@ import com.rarible.rpc.domain.Word
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.toList
 import kotlinx.coroutines.runBlocking
-import org.apache.commons.lang3.RandomStringUtils
 import org.apache.commons.lang3.RandomUtils
 import org.apache.commons.lang3.RandomUtils.nextBytes
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Test
+import org.slf4j.Logger
+import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration
-import org.springframework.data.mongodb.core.findAllAndRemove
-import org.springframework.data.mongodb.core.findById
-import org.springframework.data.mongodb.core.findOne
+import org.springframework.data.mongodb.core.*
 import org.springframework.data.mongodb.core.query.Criteria
 import org.springframework.data.mongodb.core.query.Query
 import org.springframework.data.mongodb.core.query.Update
 import org.springframework.data.mongodb.core.query.lt
-import org.springframework.data.mongodb.core.updateFirst
 import scalether.domain.Address
 import java.math.BigInteger
 
@@ -76,8 +74,6 @@ class ListenTransfersTest : AbstractIntegrationTest() {
     @Test
     fun confirmPending() {
         val contract = TestERC20.deployAndWait(sender, poller, "NAME", "NM").block()!!
-        val queue = RandomStringUtils.randomAlphabetic(10)
-
         val value = BigInteger.valueOf(RandomUtils.nextLong(0, 1000000))
         contract.mint(sender.from(), value).execute().verifySuccess()
         assertEquals(contract.balanceOf(sender.from()).call().block()!!, value)
@@ -110,7 +106,6 @@ class ListenTransfersTest : AbstractIntegrationTest() {
     @Test
     fun revertPending() {
         val contract = TestERC20.deployAndWait(sender, poller, "NAME", "NM").block()!!
-        val queue = RandomStringUtils.randomAlphabetic(10)
 
         val value = BigInteger.valueOf(RandomUtils.nextLong(0, 1000000))
         contract.mint(sender.from(), value).execute().verifySuccess()
@@ -196,9 +191,10 @@ class ListenTransfersTest : AbstractIntegrationTest() {
             type = ReindexTopicTaskHandler.TOPIC,
             param = TransferEvent.id().toString(),
             lastStatus = TaskStatus.NONE,
-            state = number,
+            state = number + 1,
             running = false
         )
+        logger.info("saving $newTask")
         mongo.save(newTask).block()
 
         taskService.readAndRun()
@@ -211,6 +207,11 @@ class ListenTransfersTest : AbstractIntegrationTest() {
                 .hasFieldOrPropertyWithValue(Task::lastStatus.name, TaskStatus.COMPLETED)
         }
 
-        assertEquals(mongo.count(Query(), "transfer").block()!!.toInt(), transfers.size)
+        assertThat(mongo.find<LogEvent>(Query(), "transfer").collectList().block())
+            .hasSize(transfers.size)
+    }
+
+    companion object {
+        val logger: Logger = LoggerFactory.getLogger(ListenTransfersTest::class.java)
     }
 }

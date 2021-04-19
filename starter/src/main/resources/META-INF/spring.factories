@@ -1,0 +1,3 @@
+org.springframework.boot.autoconfigure.EnableAutoConfiguration=\
+com.rarible.ethereum.autoconfigure.EthereumAutoConfiguration,\
+com.rarible.ethereum.autoconfigure.EthPubSubAutoConfiguration

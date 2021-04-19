@@ -72,5 +72,10 @@
             <groupId>com.rarible.core</groupId>
             <artifactId>rarible-core-test-common</artifactId>
         </dependency>
+        <dependency>
+            <groupId>com.rarible.ethereum</groupId>
+            <artifactId>rarible-ethereum-starter</artifactId>
+            <scope>test</scope>
+        </dependency>
     </dependencies>
 </project>

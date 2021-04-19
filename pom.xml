@@ -93,6 +93,11 @@
                 <artifactId>rarible-ethereum-block</artifactId>
                 <version>1.0-SNAPSHOT</version>
             </dependency>
+            <dependency>
+                <groupId>com.rarible.ethereum</groupId>
+                <artifactId>rarible-ethereum-starter</artifactId>
+                <version>1.0-SNAPSHOT</version>
+            </dependency>
         </dependencies>
     </dependencyManagement>
 
@@ -109,6 +114,7 @@
         <module>listener-log-service</module>
         <module>block</module>
         <module>domain</module>
+        <module>starter</module>
     </modules>
     
 </project>

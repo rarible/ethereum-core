@@ -65,20 +65,8 @@ class AbstractIntegrationTest {
     PropertySource(value = ["classpath:/ethereum.properties", "classpath:/ethereum-test.properties"], ignoreResourceNotFound = true)
 )
 class EthereumConfigurationIntr {
-    @Value("\${parityUrls}")
-    lateinit var ethereumUrl: String
-    @Value("\${parityWebSocketUrls}")
-    lateinit var ethereumWebsockerUrl: String
     @Value("\${ethereumPrivateKey}")
     lateinit var privateKey: String
-
-    @Bean
-    fun pubsub() =
-        EthPubSub(WebSocketPubSubTransport(ethereumWebsockerUrl, 500000))
-
-    @Bean
-    fun ethereum() =
-        MonoEthereum(WebClientTransport(ethereumUrl, MonoEthereum.mapper(), 10000, 10000))
 
     @Bean
     fun sender(ethereum: MonoEthereum) = MonoSigningTransactionSender(

@@ -40,8 +40,6 @@ class AbstractIntegrationTest {
     protected lateinit var ethereum: MonoEthereum
     @Autowired
     protected lateinit var mongo: ReactiveMongoOperations
-    @Autowired
-    protected lateinit var logListenService: LogListenService
 
     private fun Mono<Word>.waitReceipt(): TransactionReceipt {
         val value = this.block()

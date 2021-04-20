@@ -11,11 +11,12 @@ import com.rarible.ethereum.contract.repository.ContractRepository
 import com.rarible.rpc.RpcCodeException
 import com.rarible.rpc.domain.Binary
 import kotlinx.coroutines.reactive.awaitFirst
+import org.springframework.stereotype.Service
 import reactor.core.publisher.Mono
 import scalether.domain.Address
 import scalether.transaction.MonoTransactionSender
 
-@Suppress("MemberVisibilityCanBePrivate")
+@Service
 class ContractService(
     private val contractRepository: ContractRepository,
     private val sender: MonoTransactionSender

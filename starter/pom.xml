@@ -22,6 +22,12 @@
             <optional>true</optional>
         </dependency>
         <dependency>
+            <groupId>com.rarible.scalether</groupId>
+            <artifactId>transaction-mono_${scala.major.version}</artifactId>
+            <version>${scalether.version}</version>
+            <optional>true</optional>
+        </dependency>
+        <dependency>
             <groupId>com.rarible.rpc</groupId>
             <artifactId>transport-mono_${scala.major.version}</artifactId>
             <version>${scalether.version}</version>

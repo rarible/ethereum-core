@@ -44,6 +44,9 @@ class BlockRepository(
     fun findFirstByIdAsc(): Mono<BlockHead> =
         mongo.findOne(Query().with(Sort.by(Sort.Direction.ASC, BlockHead::id.name)))
 
+    fun findFirstByIdDesc(): Mono<BlockHead> =
+        mongo.findOne(Query().with(Sort.by(Sort.Direction.DESC, BlockHead::id.name)))
+
     companion object {
         val logger: Logger = LoggerFactory.getLogger(BlockRepository::class.java)
     }

@@ -35,6 +35,10 @@
             <artifactId>util_${scala.major.version}</artifactId>
             <version>${scalether.version}</version>
         </dependency>
+        <dependency>
+            <groupId>javax.validation</groupId>
+            <artifactId>validation-api</artifactId>
+        </dependency>
     </dependencies>
 
 </project>

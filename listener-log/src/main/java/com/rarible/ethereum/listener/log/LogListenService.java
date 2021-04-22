@@ -124,7 +124,6 @@ public class LogListenService {
                     return Mono.empty();
                 });
         })
-            .timeout(Duration.ofSeconds(20))
             .subscriberContext(ctx -> LoggerContext.addToContext(ctx, event.getContextParams()));
     }
 

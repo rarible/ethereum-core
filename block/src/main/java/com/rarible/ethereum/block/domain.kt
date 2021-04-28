@@ -1,6 +1,6 @@
 package com.rarible.ethereum.block
 
-import com.rarible.rpc.domain.Bytes
+import io.daonomic.rpc.domain.Bytes
 
 data class BlockEvent<B : Block>(
     val block: B,

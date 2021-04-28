@@ -1,7 +1,7 @@
 package com.rarible.ethereum.log.service
 
 import com.rarible.ethereum.listener.log.domain.LogEvent
-import com.rarible.rpc.domain.Word
+import io.daonomic.rpc.domain.Word
 import org.springframework.data.mongodb.core.ReactiveMongoOperations
 import reactor.core.publisher.Mono
 

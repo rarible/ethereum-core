@@ -3,9 +3,9 @@ package com.rarible.ethereum.sign.service
 import com.rarible.contracts.test.erc1271.TestERC1271
 import com.rarible.core.test.ext.EthereumTest
 import com.rarible.core.test.ext.EthereumTestExtension
-import com.rarible.rpc.domain.Binary
-import com.rarible.rpc.domain.Word
-import com.rarible.rpc.mono.WebClientTransport
+import io.daonomic.rpc.domain.Binary
+import io.daonomic.rpc.domain.Word
+import io.daonomic.rpc.mono.WebClientTransport
 import kotlinx.coroutines.reactive.awaitFirst
 import kotlinx.coroutines.runBlocking
 import org.apache.commons.lang3.RandomUtils

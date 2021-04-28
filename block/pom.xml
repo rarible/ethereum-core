@@ -16,7 +16,7 @@
             <artifactId>reactor-core</artifactId>
         </dependency>
         <dependency>
-            <groupId>com.rarible.rpc</groupId>
+            <groupId>io.daonomic.rpc</groupId>
             <artifactId>domain_${scala.major.version}</artifactId>
             <version>${scalether.version}</version>
         </dependency>
@@ -29,7 +29,7 @@
             <artifactId>rarible-core-test-common</artifactId>
         </dependency>
         <dependency>
-            <groupId>com.rarible.rpc</groupId>
+            <groupId>io.daonomic.rpc</groupId>
             <artifactId>domain-test_${scala.major.version}</artifactId>
             <version>${scalether.version}</version>
             <scope>test</scope>

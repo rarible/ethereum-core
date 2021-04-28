@@ -8,8 +8,8 @@ import com.rarible.ethereum.contract.model.Erc1155Token
 import com.rarible.ethereum.contract.model.Erc20Token
 import com.rarible.ethereum.contract.model.Erc721Token
 import com.rarible.ethereum.contract.repository.ContractRepository
-import com.rarible.rpc.RpcCodeException
-import com.rarible.rpc.domain.Binary
+import io.daonomic.rpc.RpcCodeException
+import io.daonomic.rpc.domain.Binary
 import kotlinx.coroutines.reactive.awaitFirst
 import org.springframework.stereotype.Service
 import reactor.core.publisher.Mono

@@ -1,7 +1,7 @@
 package com.rarible.ethereum.common
 
-import com.rarible.rpc.domain.Bytes
-import com.rarible.rpc.domain.Word
+import io.daonomic.rpc.domain.Bytes
+import io.daonomic.rpc.domain.Word
 import org.web3j.crypto.Hash
 import scalether.domain.Address
 import scalether.util.Hex

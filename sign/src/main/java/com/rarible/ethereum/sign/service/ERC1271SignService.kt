@@ -1,9 +1,9 @@
 package com.rarible.ethereum.sign.service
 
 import com.rarible.contracts.erc1271.IERC1271
-import com.rarible.rpc.RpcCodeException
-import com.rarible.rpc.domain.Binary
-import com.rarible.rpc.domain.Word
+import io.daonomic.rpc.RpcCodeException
+import io.daonomic.rpc.domain.Binary
+import io.daonomic.rpc.domain.Word
 import kotlinx.coroutines.reactive.awaitFirst
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory

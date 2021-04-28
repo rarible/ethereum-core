@@ -5,7 +5,7 @@ import com.rarible.ethereum.nft.model.LazyERC1155
 import com.rarible.ethereum.nft.model.LazyERC721
 import com.rarible.ethereum.nft.model.LazyNft
 import com.rarible.ethereum.sign.service.ERC1271SignService
-import com.rarible.rpc.domain.Word
+import io.daonomic.rpc.domain.Word
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.coroutineScope

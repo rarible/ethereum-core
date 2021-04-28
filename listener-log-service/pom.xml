@@ -24,7 +24,7 @@
             <artifactId>rarible-core-logging</artifactId>
         </dependency>
         <dependency>
-            <groupId>com.rarible.scalether</groupId>
+            <groupId>io.daonomic.scalether</groupId>
             <artifactId>abi_${scala.major.version}</artifactId>
             <version>${scalether.version}</version>
         </dependency>

@@ -4,7 +4,7 @@ import com.rarible.core.logging.LoggingUtils
 import com.rarible.ethereum.listener.log.domain.LogEvent
 import com.rarible.ethereum.listener.log.domain.LogEventStatus
 import com.rarible.ethereum.listener.log.mongock.ChangeLog00001
-import com.rarible.rpc.domain.Word
+import io.daonomic.rpc.domain.Word
 import org.bson.types.ObjectId
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory

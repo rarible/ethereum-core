@@ -16,25 +16,25 @@
             <artifactId>spring-boot-autoconfigure</artifactId>
         </dependency>
         <dependency>
-            <groupId>com.rarible.scalether</groupId>
+            <groupId>io.daonomic.scalether</groupId>
             <artifactId>core-mono_${scala.major.version}</artifactId>
             <version>${scalether.version}</version>
             <optional>true</optional>
         </dependency>
         <dependency>
-            <groupId>com.rarible.scalether</groupId>
+            <groupId>io.daonomic.scalether</groupId>
             <artifactId>transaction-mono_${scala.major.version}</artifactId>
             <version>${scalether.version}</version>
             <optional>true</optional>
         </dependency>
         <dependency>
-            <groupId>com.rarible.rpc</groupId>
+            <groupId>io.daonomic.rpc</groupId>
             <artifactId>transport-mono_${scala.major.version}</artifactId>
             <version>${scalether.version}</version>
             <optional>true</optional>
         </dependency>
         <dependency>
-            <groupId>com.rarible.scalether</groupId>
+            <groupId>io.daonomic.scalether</groupId>
             <artifactId>transport-mono_${scala.major.version}</artifactId>
             <version>${scalether.version}</version>
             <optional>true</optional>

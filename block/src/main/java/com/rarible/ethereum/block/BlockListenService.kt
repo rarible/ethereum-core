@@ -9,8 +9,8 @@ import reactor.core.publisher.Flux
 
 interface Block {
     val blockNumber: Long
-    val blockHash: com.rarible.rpc.domain.Bytes
-    val parentBlockHash: com.rarible.rpc.domain.Bytes
+    val blockHash: io.daonomic.rpc.domain.Bytes
+    val parentBlockHash: io.daonomic.rpc.domain.Bytes
 }
 
 class BlockListenService<B : Block>(

@@ -2,7 +2,7 @@ package com.rarible.ethereum.listener.log
 
 import com.rarible.core.task.TaskHandler
 import com.rarible.ethereum.listener.log.persist.BlockRepository
-import com.rarible.rpc.domain.Word
+import io.daonomic.rpc.domain.Word
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.reactive.asFlow
 import org.springframework.stereotype.Component

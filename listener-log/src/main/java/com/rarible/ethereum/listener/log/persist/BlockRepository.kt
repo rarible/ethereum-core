@@ -4,7 +4,7 @@ import com.rarible.core.logging.LoggingUtils
 import com.rarible.core.mongo.repository.AbstractMongoRepository
 import com.rarible.ethereum.listener.log.domain.BlockHead
 import com.rarible.ethereum.listener.log.domain.BlockStatus
-import com.rarible.rpc.domain.Word
+import io.daonomic.rpc.domain.Word
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.data.domain.Sort

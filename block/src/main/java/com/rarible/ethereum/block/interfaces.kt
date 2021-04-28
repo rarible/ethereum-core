@@ -1,6 +1,6 @@
 package com.rarible.ethereum.block
 
-import com.rarible.rpc.domain.Bytes
+import io.daonomic.rpc.domain.Bytes
 import reactor.core.publisher.Flux
 import reactor.core.publisher.Mono
 

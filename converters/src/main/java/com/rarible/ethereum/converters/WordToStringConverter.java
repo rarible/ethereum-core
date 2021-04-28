@@ -1,6 +1,6 @@
 package com.rarible.ethereum.converters;
 
-import com.rarible.rpc.domain.Word;
+import io.daonomic.rpc.domain.Word;
 import org.springframework.core.convert.converter.Converter;
 
 public class WordToStringConverter implements Converter<Word, String> {

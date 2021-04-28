@@ -2,7 +2,7 @@ package com.rarible.ethereum.listener.log.domain
 
 import com.fasterxml.jackson.annotation.JsonTypeInfo
 import com.rarible.core.common.Identifiable
-import com.rarible.rpc.domain.Word
+import io.daonomic.rpc.domain.Word
 import org.bson.types.ObjectId
 import org.springframework.data.annotation.Id
 import org.springframework.data.annotation.Version

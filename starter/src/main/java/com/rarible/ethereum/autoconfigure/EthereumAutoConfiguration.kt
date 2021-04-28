@@ -1,6 +1,6 @@
 package com.rarible.ethereum.autoconfigure
 
-import com.rarible.rpc.mono.WebClientTransport
+import io.daonomic.rpc.mono.WebClientTransport
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty

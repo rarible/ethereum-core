@@ -1,6 +1,6 @@
 package com.rarible.ethereum.listener.log.domain
 
-import com.rarible.rpc.domain.Word
+import io.daonomic.rpc.domain.Word
 import org.springframework.data.annotation.Id
 import org.springframework.data.mongodb.core.mapping.Document
 

@@ -21,17 +21,17 @@
 
     <dependencies>
         <dependency>
-            <groupId>com.rarible.scalether</groupId>
+            <groupId>io.daonomic.scalether</groupId>
             <artifactId>domain_${scala.major.version}</artifactId>
             <version>${scalether.version}</version>
         </dependency>
         <dependency>
-            <groupId>com.rarible.scalether</groupId>
+            <groupId>io.daonomic.scalether</groupId>
             <artifactId>abi_${scala.major.version}</artifactId>
             <version>${scalether.version}</version>
         </dependency>
         <dependency>
-            <groupId>com.rarible.scalether</groupId>
+            <groupId>io.daonomic.scalether</groupId>
             <artifactId>util_${scala.major.version}</artifactId>
             <version>${scalether.version}</version>
         </dependency>

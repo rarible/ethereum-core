@@ -28,6 +28,10 @@
         <version>1.1-SNAPSHOT</version>
     </parent>
 
+    <properties>
+        <nexus.maven.public>http://nexus.rarible.int/repository/maven-public/</nexus.maven.public>
+    </properties>
+
     <dependencyManagement>
         <dependencies>
             <dependency>

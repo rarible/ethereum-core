@@ -4,8 +4,8 @@ import com.rarible.ethereum.block.BlockState
 import com.rarible.ethereum.block.Blockchain
 import com.rarible.ethereum.listener.log.domain.BlockHead
 import com.rarible.ethereum.listener.log.persist.BlockRepository
-import com.rarible.rpc.domain.Bytes
-import com.rarible.rpc.domain.Word
+import io.daonomic.rpc.domain.Bytes
+import io.daonomic.rpc.domain.Word
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Value

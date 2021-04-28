@@ -17,7 +17,7 @@
                 <artifactId>scala-maven-plugin</artifactId>
             </plugin>
             <plugin>
-                <groupId>com.rarible.scalether</groupId>
+                <groupId>io.daonomic.scalether</groupId>
                 <artifactId>scalether-maven-plugin</artifactId>
                 <configuration>
                     <contracts>
@@ -59,7 +59,7 @@
 
     <dependencies>
         <dependency>
-            <groupId>com.rarible.scalether</groupId>
+            <groupId>io.daonomic.scalether</groupId>
             <artifactId>contract-mono_${scala.major.version}</artifactId>
             <version>${scalether.version}</version>
         </dependency>

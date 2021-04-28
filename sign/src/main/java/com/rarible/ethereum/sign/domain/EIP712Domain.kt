@@ -2,8 +2,8 @@ package com.rarible.ethereum.sign.domain
 
 import com.rarible.ethereum.common.Tuples
 import com.rarible.ethereum.common.keccak256
-import com.rarible.rpc.domain.Binary
-import com.rarible.rpc.domain.Word
+import io.daonomic.rpc.domain.Binary
+import io.daonomic.rpc.domain.Word
 import scala.Tuple5
 import scalether.domain.Address
 import scalether.util.Hash

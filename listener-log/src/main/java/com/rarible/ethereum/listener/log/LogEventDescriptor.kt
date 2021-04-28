@@ -1,7 +1,7 @@
 package com.rarible.ethereum.listener.log
 
 import com.rarible.ethereum.listener.log.domain.EventData
-import com.rarible.rpc.domain.Word
+import io.daonomic.rpc.domain.Word
 import org.reactivestreams.Publisher
 import reactor.core.publisher.Mono
 import scalether.domain.Address

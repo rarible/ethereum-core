@@ -2,7 +2,7 @@ package com.rarible.ethereum.listener.log.mock
 
 import com.rarible.contracts.test.erc20.TransferEvent
 import com.rarible.ethereum.listener.log.LogEventDescriptor
-import com.rarible.rpc.domain.Word
+import io.daonomic.rpc.domain.Word
 import org.springframework.stereotype.Component
 import reactor.core.publisher.Mono
 import scalether.domain.Address

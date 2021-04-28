@@ -20,7 +20,7 @@
             <artifactId>rarible-core-mongo</artifactId>
         </dependency>
         <dependency>
-            <groupId>com.rarible.scalether</groupId>
+            <groupId>io.daonomic.scalether</groupId>
             <artifactId>domain_${scala.major.version}</artifactId>
             <version>${scalether.version}</version>
         </dependency>

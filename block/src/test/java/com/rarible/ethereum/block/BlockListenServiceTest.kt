@@ -1,8 +1,8 @@
 package com.rarible.ethereum.block
 
-import com.rarible.rpc.domain.Binary
-import com.rarible.rpc.domain.BinaryFactory
-import com.rarible.rpc.domain.Bytes
+import io.daonomic.rpc.domain.Binary
+import io.daonomic.rpc.domain.BinaryFactory
+import io.daonomic.rpc.domain.Bytes
 import org.junit.jupiter.api.Test
 import reactor.core.publisher.Flux
 import reactor.core.publisher.Mono

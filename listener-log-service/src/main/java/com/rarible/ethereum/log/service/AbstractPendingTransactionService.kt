@@ -4,8 +4,8 @@ import com.rarible.core.logging.LoggingUtils
 import com.rarible.ethereum.listener.log.domain.LogEvent
 import com.rarible.ethereum.log.LogEventsListener
 import com.rarible.ethereum.log.domain.TransactionDto
-import com.rarible.rpc.domain.Binary
-import com.rarible.rpc.domain.Word
+import io.daonomic.rpc.domain.Binary
+import io.daonomic.rpc.domain.Word
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.slf4j.Marker

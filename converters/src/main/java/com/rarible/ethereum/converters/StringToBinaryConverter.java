@@ -1,6 +1,6 @@
 package com.rarible.ethereum.converters;
 
-import com.rarible.rpc.domain.Binary;
+import io.daonomic.rpc.domain.Binary;
 import org.springframework.core.convert.converter.Converter;
 
 public class StringToBinaryConverter implements Converter<String, Binary> {

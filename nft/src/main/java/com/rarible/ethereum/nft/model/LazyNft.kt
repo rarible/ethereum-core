@@ -3,8 +3,8 @@ package com.rarible.ethereum.nft.model
 import com.rarible.ethereum.common.Tuples
 import com.rarible.ethereum.common.keccak256
 import com.rarible.ethereum.nft.misc.hash
-import com.rarible.rpc.domain.Binary
-import com.rarible.rpc.domain.Word
+import io.daonomic.rpc.domain.Binary
+import io.daonomic.rpc.domain.Word
 import scala.Tuple5
 import scala.Tuple6
 import scalether.domain.Address

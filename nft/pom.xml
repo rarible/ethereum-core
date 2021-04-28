@@ -29,7 +29,7 @@
             <artifactId>rarible-core-test-common</artifactId>
         </dependency>
         <dependency>
-            <groupId>com.rarible.scalether</groupId>
+            <groupId>io.daonomic.scalether</groupId>
             <artifactId>domain-test_${scala.major.version}</artifactId>
             <version>${scalether.version}</version>
             <scope>test</scope>
@@ -39,7 +39,7 @@
             <artifactId>rarible-ethereum-contracts-test</artifactId>
         </dependency>
         <dependency>
-            <groupId>com.rarible.rpc</groupId>
+            <groupId>io.daonomic.rpc</groupId>
             <artifactId>transport-mono_${scala.major.version}</artifactId>
             <version>${scalether.version}</version>
             <scope>test</scope>

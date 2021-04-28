@@ -1,7 +1,7 @@
 package com.rarible.ethereum.converters;
 
 import com.rarible.core.mongo.converter.SimpleMongoConverter;
-import com.rarible.rpc.domain.Word;
+import io.daonomic.rpc.domain.Word;
 import org.springframework.core.convert.converter.Converter;
 import org.springframework.stereotype.Component;
 

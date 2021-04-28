@@ -11,7 +11,7 @@ import com.rarible.ethereum.listener.log.domain.BlockStatus
 import com.rarible.ethereum.listener.log.domain.LogEvent
 import com.rarible.ethereum.listener.log.domain.LogEventStatus
 import com.rarible.ethereum.listener.log.mock.Transfer
-import com.rarible.rpc.domain.Word
+import io.daonomic.rpc.domain.Word
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.toList
 import kotlinx.coroutines.runBlocking
@@ -144,7 +144,7 @@ class ListenTransfersTest : AbstractIntegrationTest() {
         val beneficiary = Address.apply(nextBytes(20))
 
         val nonce = ethereum.ethGetTransactionCount(sender.from(), "latest").block()!!.toLong()
-        val fakeHash = Word.apply(nextBytes(32))
+        val fakeHash = Word(nextBytes(32))
         val saved = mongo.save(LogEvent(Transfer(sender.from(), beneficiary, value), contract.address(), TransferEvent.id(), fakeHash, sender.from(), nonce, LogEventStatus.PENDING, index = 0, minorLogIndex = 0, visible = true), "transfer").block()!!
 
         TestERC20.deploy(sender, "NAME", "NM").verifySuccess()

@@ -9,7 +9,7 @@ import com.fasterxml.jackson.databind.annotation.JsonDeserialize
 import com.fasterxml.jackson.databind.annotation.JsonSerialize
 import com.fasterxml.jackson.databind.deser.std.StdScalarDeserializer
 import com.fasterxml.jackson.databind.ser.std.StdScalarSerializer
-import com.rarible.rpc.domain.Binary
+import io.daonomic.rpc.domain.Binary
 import scalether.abi.Uint256Type
 import java.math.BigInteger
 

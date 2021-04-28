@@ -10,7 +10,7 @@ import com.rarible.ethereum.listener.log.domain.LogEvent
 import com.rarible.ethereum.listener.log.domain.LogEventStatus
 import com.rarible.ethereum.listener.log.domain.NewBlockEvent
 import com.rarible.ethereum.listener.log.persist.LogEventRepository
-import com.rarible.rpc.domain.Word
+import io.daonomic.rpc.domain.Word
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.slf4j.Marker

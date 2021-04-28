@@ -4,10 +4,10 @@ import com.rarible.contracts.test.erc721.rarible.ERC721Rarible
 import com.rarible.ethereum.nft.model.LazyERC721
 import com.rarible.ethereum.nft.model.Part
 import com.rarible.ethereum.sign.domain.EIP712Domain
-import com.rarible.rpc.domain.Binary
-import com.rarible.rpc.domain.Request
-import com.rarible.rpc.domain.Word
-import com.rarible.rpc.mono.WebClientTransport
+import io.daonomic.rpc.domain.Binary
+import io.daonomic.rpc.domain.Request
+import io.daonomic.rpc.domain.Word
+import io.daonomic.rpc.mono.WebClientTransport
 import kotlinx.coroutines.reactive.awaitFirst
 import kotlinx.coroutines.reactive.awaitFirstOrNull
 import kotlinx.coroutines.runBlocking
@@ -122,10 +122,12 @@ internal class LazyERC721Test {
     private suspend fun Mono<Word>.verifySuccess(): TransactionReceipt {
         val receipt = waitReceipt()
         Assertions.assertTrue(receipt.success()) {
-            val result = ethereum.executeRaw(Request(1, "trace_replayTransaction", Lists.toScala(
+            val result = ethereum.executeRaw(
+                Request(1, "trace_replayTransaction", Lists.toScala(
                 receipt.transactionHash().toString(),
                 Lists.toScala("trace")
-            ), "2.0")).block()!!
+            ), "2.0")
+            ).block()!!
             "traces: ${result.result().get()}"
         }
         return receipt

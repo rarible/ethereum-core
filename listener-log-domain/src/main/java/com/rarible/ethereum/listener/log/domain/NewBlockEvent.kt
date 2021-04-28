@@ -1,7 +1,7 @@
 package com.rarible.ethereum.listener.log.domain
 
 import com.fasterxml.jackson.annotation.JsonIgnore
-import com.rarible.rpc.domain.Word
+import io.daonomic.rpc.domain.Word
 
 data class NewBlockEvent(val number: Long, val hash: Word, val timestamp: Long, val reverted: Word? = null) {
     @get:JsonIgnore

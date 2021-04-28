@@ -7,8 +7,8 @@ import com.rarible.ethereum.nft.model.LazyNft
 import com.rarible.ethereum.nft.model.Part
 import com.rarible.ethereum.sign.domain.EIP712Domain
 import com.rarible.ethereum.sign.service.ERC1271SignService
-import com.rarible.rpc.domain.Binary
-import com.rarible.rpc.domain.Word
+import io.daonomic.rpc.domain.Binary
+import io.daonomic.rpc.domain.Word
 import io.mockk.*
 import kotlinx.coroutines.runBlocking
 import org.apache.commons.lang3.RandomUtils

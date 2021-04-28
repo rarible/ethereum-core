@@ -6,7 +6,7 @@ import com.rarible.ethereum.listener.log.domain.LogEventStatus
 import com.rarible.ethereum.listener.log.domain.NewBlockEvent
 import com.rarible.ethereum.listener.log.persist.LogEventRepository
 import com.rarible.ethereum.log.LogEventsListener
-import com.rarible.rpc.domain.Word
+import io.daonomic.rpc.domain.Word
 import org.apache.commons.lang3.time.DateUtils
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory

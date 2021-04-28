@@ -1,7 +1,7 @@
 package com.rarible.ethereum.log.domain
 
-import com.rarible.rpc.domain.Binary
-import com.rarible.rpc.domain.Word
+import io.daonomic.rpc.domain.Binary
+import io.daonomic.rpc.domain.Word
 import scalether.domain.Address
 
 data class TransactionDto(

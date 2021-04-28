@@ -2,7 +2,7 @@ package com.rarible.ethereum.nft.model
 
 import com.rarible.ethereum.common.Tuples
 import com.rarible.ethereum.common.keccak256
-import com.rarible.rpc.domain.Word
+import io.daonomic.rpc.domain.Word
 import scala.Tuple3
 import scalether.domain.Address
 

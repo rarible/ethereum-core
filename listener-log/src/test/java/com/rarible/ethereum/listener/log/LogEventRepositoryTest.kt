@@ -4,13 +4,12 @@ import com.rarible.ethereum.listener.log.domain.EventData
 import com.rarible.ethereum.listener.log.domain.LogEvent
 import com.rarible.ethereum.listener.log.domain.LogEventStatus
 import com.rarible.ethereum.listener.log.persist.LogEventRepository
-import com.rarible.rpc.domain.Word
+import io.daonomic.rpc.domain.Word
 import org.apache.commons.lang3.RandomUtils
 import org.assertj.core.api.Assertions.assertThat
 import org.bson.types.ObjectId
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
-import org.springframework.boot.autoconfigure.EnableAutoConfiguration
 import scalether.domain.Address
 import java.util.concurrent.ThreadLocalRandom
 

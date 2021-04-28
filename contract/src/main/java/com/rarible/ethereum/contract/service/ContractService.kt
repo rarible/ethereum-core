@@ -3,10 +3,10 @@ package com.rarible.ethereum.contract.service
 import com.rarible.contracts.erc165.IERC165
 import com.rarible.contracts.erc20.IERC20
 import com.rarible.contracts.erc721.IERC721
-import com.rarible.ethereum.contract.model.Contract
-import com.rarible.ethereum.contract.model.Erc1155Token
-import com.rarible.ethereum.contract.model.Erc20Token
-import com.rarible.ethereum.contract.model.Erc721Token
+import com.rarible.core.contract.model.Contract
+import com.rarible.core.contract.model.Erc1155Token
+import com.rarible.core.contract.model.Erc20Token
+import com.rarible.core.contract.model.Erc721Token
 import com.rarible.ethereum.contract.repository.ContractRepository
 import io.daonomic.rpc.RpcCodeException
 import io.daonomic.rpc.domain.Binary

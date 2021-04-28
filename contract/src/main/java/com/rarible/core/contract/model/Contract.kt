@@ -1,4 +1,4 @@
-package com.rarible.ethereum.contract.model
+package com.rarible.core.contract.model
 
 import com.fasterxml.jackson.annotation.JsonSubTypes
 import com.fasterxml.jackson.annotation.JsonTypeInfo

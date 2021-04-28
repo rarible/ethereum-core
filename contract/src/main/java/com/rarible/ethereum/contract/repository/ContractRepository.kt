@@ -1,6 +1,6 @@
 package com.rarible.ethereum.contract.repository
 
-import com.rarible.ethereum.contract.model.Contract
+import com.rarible.core.contract.model.Contract
 import kotlinx.coroutines.reactive.awaitFirst
 import kotlinx.coroutines.reactive.awaitFirstOrNull
 import org.springframework.data.mongodb.core.ReactiveMongoTemplate

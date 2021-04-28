@@ -5,7 +5,7 @@ import com.rarible.contracts.test.erc20.TestERC20
 import com.rarible.contracts.test.erc721.TestERC721
 import com.rarible.core.test.containers.MongodbReactiveBaseTest
 import com.rarible.core.test.containers.OpenEthereumTestContainer
-import com.rarible.ethereum.contract.model.ContractType
+import com.rarible.core.contract.model.ContractType
 import com.rarible.ethereum.contract.repository.ContractRepository
 import kotlinx.coroutines.reactive.awaitFirst
 import kotlinx.coroutines.runBlocking

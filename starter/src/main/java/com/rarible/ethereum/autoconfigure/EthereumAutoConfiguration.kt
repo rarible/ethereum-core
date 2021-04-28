@@ -20,6 +20,8 @@ class EthereumAutoConfiguration(
     @Bean
     @ConditionalOnMissingBean(MonoEthereum::class)
     fun ethereum() = with (ethereumProperties) {
-        MonoEthereum(WebClientTransport(httpUrl, MonoEthereum.mapper(), requestTimeoutMs, readWriteTimeoutMs))
+        MonoEthereum(object : WebClientTransport(httpUrl, MonoEthereum.mapper(), requestTimeoutMs, readWriteTimeoutMs) {
+            override fun maxInMemorySize(): Int = maxFrameSize
+        })
     }
 }

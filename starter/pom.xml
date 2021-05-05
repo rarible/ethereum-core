@@ -16,6 +16,11 @@
             <artifactId>spring-boot-autoconfigure</artifactId>
         </dependency>
         <dependency>
+            <groupId>com.rarible.ethereum</groupId>
+            <artifactId>rarible-ethereum-converters</artifactId>
+            <optional>true</optional>
+        </dependency>
+        <dependency>
             <groupId>io.daonomic.scalether</groupId>
             <artifactId>core-mono_${scala.major.version}</artifactId>
             <version>${scalether.version}</version>
@@ -38,6 +43,16 @@
             <artifactId>transport-mono_${scala.major.version}</artifactId>
             <version>${scalether.version}</version>
             <optional>true</optional>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-test</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.junit.jupiter</groupId>
+            <artifactId>junit-jupiter-engine</artifactId>
+            <scope>test</scope>
         </dependency>
     </dependencies>
 

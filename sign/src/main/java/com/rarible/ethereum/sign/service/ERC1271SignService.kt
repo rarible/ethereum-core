@@ -71,7 +71,7 @@ class ERC1271SignService(
 
     private companion object {
         val logger: Logger = LoggerFactory.getLogger(ERC1271SignService::class.java)
-        val MAGIC_VALUE: Binary = Binary.apply("0x20c13b0b")
+        val MAGIC_VALUE: Binary = Binary.apply("0x1626ba7e")
         private const val START = "\u0019Ethereum Signed Message:\n"
 
         private fun addStart(message: String): Binary {

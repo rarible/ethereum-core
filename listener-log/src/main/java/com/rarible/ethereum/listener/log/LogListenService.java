@@ -44,6 +44,7 @@ public class LogListenService {
     private final RetryBackoffSpec backoff;
     private final List<LogEventListener<?>> listeners;
     private final Map<Word, LogEventListener<?>> listenersMap;
+    private final long maxProcessTime;
 
     public LogListenService(
         LogEventRepository logEventRepository,
@@ -55,9 +56,11 @@ public class LogListenService {
         BlockListenService<SimpleBlock> blockListenService,
         @Value("${ethereumBackoffMaxAttempts:5}") long maxAttempts,
         @Value("${ethereumBackoffMinBackoff:100}") long minBackoff,
+        @Value("${ethereumMaxProcessTime:300000}") long maxProcessTime,
         @Value("${ethereumBlockBatchSize:100}") long batchSize
     ) {
         this.backoff = Retry.backoff(maxAttempts, Duration.ofMillis(minBackoff));
+        this.maxProcessTime = maxProcessTime;
         this.blockRepository = blockRepository;
         this.ethereum = ethereum;
         this.logEventsListeners = logEventsListeners;
@@ -113,6 +116,7 @@ public class LogListenService {
             return onBlockEvent(event)
                 .collectList()
                 .flatMap(it -> postProcessLogs(it).thenReturn(BlockStatus.SUCCESS))
+                .timeout(Duration.ofMillis(maxProcessTime))
                 .onErrorResume(ex -> {
                     logger.error(marker, "Unable to handle event " + event, ex);
                     return Mono.just(BlockStatus.ERROR);

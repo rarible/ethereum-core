@@ -9,6 +9,7 @@ import com.rarible.ethereum.listener.log.persist.BlockRepository
 import io.micrometer.core.instrument.Gauge
 import io.micrometer.core.instrument.MeterRegistry
 import kotlinx.coroutines.reactive.awaitFirst
+import kotlinx.coroutines.time.delay
 import java.time.Instant
 import kotlin.math.max
 
@@ -32,6 +33,8 @@ class BlockchainMonitoringWorker(
         lastSeenBlockHead = blockRepository.findFirstByIdDesc().awaitFirst()
         erroBlocksCount = blockRepository.findByStatus(BlockStatus.ERROR).count().awaitFirst()
         pendingBlocksCount = blockRepository.findByStatus(BlockStatus.PENDING).count().awaitFirst()
+
+        delay(pollingPeriod)
     }
 
     private fun getBlockDelay(): Double? {

@@ -4,14 +4,12 @@ import com.rarible.core.logging.LoggingUtils
 import com.rarible.core.mongo.repository.AbstractMongoRepository
 import com.rarible.ethereum.listener.log.domain.BlockHead
 import com.rarible.ethereum.listener.log.domain.BlockStatus
-import io.daonomic.rpc.domain.Word
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.data.domain.Sort
 import org.springframework.data.mongodb.core.ReactiveMongoOperations
 import org.springframework.data.mongodb.core.find
 import org.springframework.data.mongodb.core.findOne
-import org.springframework.data.mongodb.core.query.Criteria
 import org.springframework.data.mongodb.core.query.Query
 import org.springframework.data.mongodb.core.query.Update
 import org.springframework.data.mongodb.core.query.isEqualTo
@@ -33,11 +31,14 @@ class BlockRepository(
             .map { it.id }
     }
 
-    fun updateBlockStatus(number: Long, hash: Word, status: BlockStatus): Mono<Void> {
+    fun updateBlockStatus(number: Long, status: BlockStatus): Mono<Void> {
         return LoggingUtils.withMarker { marker ->
-            logger.info(marker, "updateBlockStatus $number $hash $status")
-            val c = Criteria.where("_id").`is`(number).and("hash").`is`(hash)
-            mongo.updateFirst(Query(c), Update().set("status", status), BlockHead::class.java).then()
+            logger.info(marker, "updateBlockStatus $number $status")
+            mongo.updateFirst(
+                Query(BlockHead::id isEqualTo number),
+                Update().set("status", status),
+                BlockHead::class.java
+            ).then()
         }
     }
 

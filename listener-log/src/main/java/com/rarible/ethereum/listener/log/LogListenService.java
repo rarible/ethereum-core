@@ -121,7 +121,7 @@ public class LogListenService {
                     logger.error(marker, "Unable to handle event " + event, ex);
                     return Mono.just(BlockStatus.ERROR);
                 })
-                .flatMap(status -> blockRepository.updateBlockStatus(event.getNumber(), event.getHash(), status))
+                .flatMap(status -> blockRepository.updateBlockStatus(event.getNumber(), status))
                 .then()
                 .onErrorResume(ex -> {
                     logger.error(marker, "Unable to save block status " + event, ex);

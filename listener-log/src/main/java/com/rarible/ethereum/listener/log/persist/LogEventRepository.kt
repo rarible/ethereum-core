@@ -39,6 +39,22 @@ class LogEventRepository(
         return mongo.findOne(Query.query(c).withHint(ChangeLog00001.VISIBLE_INDEX_NAME), LogEvent::class.java, collection)
     }
 
+    fun findByKey(
+        collection: String,
+        transactionHash: Word,
+        blockHash: Word,
+        logIndex: Int,
+        minorLogIndex: Int
+    ): Mono<LogEvent> {
+        val c = Criteria().andOperator(
+            LogEvent::transactionHash isEqualTo transactionHash,
+            LogEvent::blockHash isEqualTo blockHash,
+            LogEvent::logIndex isEqualTo logIndex,
+            LogEvent::minorLogIndex isEqualTo minorLogIndex
+        )
+        return mongo.findOne(Query(c), LogEvent::class.java, collection)
+    }
+
     fun save(collection: String, event: LogEvent): Mono<LogEvent> {
         return mongo.save(event, collection)
     }

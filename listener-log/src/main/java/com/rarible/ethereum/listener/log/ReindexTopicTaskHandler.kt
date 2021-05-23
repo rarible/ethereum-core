@@ -1,17 +1,17 @@
 package com.rarible.ethereum.listener.log
 
 import com.rarible.core.task.TaskHandler
-import com.rarible.ethereum.listener.log.persist.BlockRepository
 import io.daonomic.rpc.domain.Word
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.reactive.asFlow
 import org.springframework.stereotype.Component
 import reactor.core.publisher.Flux
+import scalether.core.MonoEthereum
 
 @Component
 class ReindexTopicTaskHandler(
     private val logListenService: LogListenService,
-    private val blockRepository: BlockRepository
+    private val ethereum: MonoEthereum
 ) : TaskHandler<Long> {
 
     override val type: String
@@ -30,8 +30,7 @@ class ReindexTopicTaskHandler(
     }
 
     private fun fetchNormalBlockNumber() =
-        blockRepository.findFirstByIdAsc()
-            .map { it.id }
+        ethereum.ethBlockNumber().map { it.toLong() }
 
     companion object {
         const val TOPIC = "TOPIC"

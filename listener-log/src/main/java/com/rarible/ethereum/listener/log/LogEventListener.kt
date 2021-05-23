@@ -160,6 +160,7 @@ class LogEventListener<T : EventData>(
                     .flatMap { toSave ->
                         logger.info(marker, "saving $toSave to ${descriptor.collection}")
                         logEventRepository.findVisibleByKey(descriptor.collection, toSave.transactionHash, toSave.topic, toSave.index, toSave.minorLogIndex)
+                            .switchIfEmpty(logEventRepository.findByKey(descriptor.collection, toSave.transactionHash, toSave.blockHash!!, toSave.logIndex!!, toSave.minorLogIndex))
                             .toOptional()
                             .flatMap { opt ->
                                 if (opt.isPresent) {

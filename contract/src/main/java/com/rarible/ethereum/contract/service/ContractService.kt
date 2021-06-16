@@ -36,8 +36,10 @@ class ContractService(
         val erc165 = IERC165(address, sender)
 
         return when {
-            isSupportedInterface(ERC721, erc165) ||
-            isSupportedInterface(CK, erc165) -> {
+            isSupportedInterface(ERC721, erc165)
+                || isSupportedInterface(ERC721_DEPRECATED1, erc165)
+                || isSupportedInterface(ERC721_DEPRECATED2, erc165)
+            -> {
                 val erc721 = IERC721(address, sender)
                 Erc721Token(
                     id = address,
@@ -82,7 +84,9 @@ class ContractService(
 
     companion object {
         val ERC721: Binary = Binary.apply("0x80ac58cd")
-        val CK: Binary = Binary.apply("0x80ac58cd")
+        val ERC721_DEPRECATED1: Binary = Binary.apply("0xd31b620d")
+        val ERC721_DEPRECATED2: Binary = Binary.apply("0x80ac58cd")
+        val CK: Binary = ERC721_DEPRECATED2
         val ERC1155: Binary = Binary.apply("0xd9b67a26")
     }
 }

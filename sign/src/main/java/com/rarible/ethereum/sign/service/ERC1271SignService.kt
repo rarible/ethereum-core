@@ -75,8 +75,8 @@ class ERC1271SignService(
         private const val START = "\u0019Ethereum Signed Message:\n"
 
         private fun addStart(message: String): Binary {
-            val resultMessage = START + message.length + message
-            return Binary.apply(resultMessage.toByteArray(StandardCharsets.US_ASCII))
+            val resultMessage = START + message.toByteArray(StandardCharsets.UTF_8).size + message
+            return Binary.apply(resultMessage.toByteArray(StandardCharsets.UTF_8))
         }
     }
 }

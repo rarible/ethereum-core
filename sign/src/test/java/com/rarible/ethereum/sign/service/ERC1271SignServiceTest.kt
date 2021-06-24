@@ -35,6 +35,16 @@ internal class ERC1271SignServiceTest {
     }
 
     @Test
+    fun `should verify signature with UTF-8`() = runBlocking<Unit> {
+        val result = signService.isSigner(
+            Address.apply("0x76c5855e93bd498b6331652854c4549d34bc3a30"),
+            "11Ằ☭:fox_face::mouse:ößt 桜どラ ❉",
+            Binary.apply("0x1917e545f491815865abaaaeba5fb115160376f5110c1c7a125702dd45f4430d3c2653c437abc794c5d68dfe486c7d5524f77bced85bbf544efdb8260d7e89db1c")
+        )
+        assertThat(result).isTrue()
+    }
+
+    @Test
     fun `should verify signature`() = runBlocking<Unit> {
         val signer = signingTransactionSender()
 

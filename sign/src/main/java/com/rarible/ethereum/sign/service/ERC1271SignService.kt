@@ -74,7 +74,7 @@ class ERC1271SignService(
         val MAGIC_VALUE: Binary = Binary.apply("0x1626ba7e")
         private const val START = "\u0019Ethereum Signed Message:\n"
 
-        private fun addStart(message: String): Binary {
+        fun addStart(message: String): Binary {
             val resultMessage = START + message.toByteArray(StandardCharsets.UTF_8).size + message
             return Binary.apply(resultMessage.toByteArray(StandardCharsets.UTF_8))
         }

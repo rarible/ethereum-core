@@ -134,10 +134,6 @@ class LogEventListener<T : EventData>(
 
         return descriptor.convert(log, timestamp).toFlux()
             .collectList()
-            .onErrorResume {
-                logger.error(marker, "Unable to convert log $log", it)
-                Mono.empty()
-            }
             .flatMapIterable { dataCollection ->
                 dataCollection.mapIndexed { minorLogIndex, data ->
                     LogEvent(

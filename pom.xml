@@ -119,6 +119,15 @@
         </dependencies>
     </dependencyManagement>
 
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.jacoco</groupId>
+                <artifactId>jacoco-maven-plugin</artifactId>
+            </plugin>
+        </plugins>
+    </build>
+
     <modules>
         <module>contracts-interfaces</module>
         <module>contracts-test</module>
@@ -134,6 +143,7 @@
         <module>domain</module>
         <module>starter</module>
         <module>monitoring</module>
+        <module>test-coverage</module>
     </modules>
     
 </project>

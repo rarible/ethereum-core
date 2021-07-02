@@ -28,6 +28,7 @@ import java.math.BigInteger
 
 class LogEventListener<T : EventData>(
     val descriptor: LogEventDescriptor<T>,
+    private val onLogEventListeners: List<OnLogEventListener>,
     private val pendingLogService: PendingLogService,
     private val logEventRepository: LogEventRepository,
     private val ethereum: MonoEthereum,
@@ -40,7 +41,9 @@ class LogEventListener<T : EventData>(
     private val topic = descriptor.topic
 
     init {
-        logger.info("Creating LogEventListener for ${descriptor.javaClass.simpleName}")
+        logger.info(
+            "Creating LogEventListener for ${descriptor.javaClass.simpleName}, got onLogEventListeners: ${onLogEventListeners.joinToString { it.javaClass.simpleName }}"
+        )
     }
 
     fun onBlockEvent(event: NewBlockEvent): Flux<LogEvent> {
@@ -150,6 +153,11 @@ class LogEventListener<T : EventData>(
                         visible = true
                     )
                 }
+            }
+            .flatMap {
+                Flux
+                    .concat(onLogEventListeners.map { listener -> listener.onLogEvent(it) })
+                    .then(Mono.just(it))
             }
             .flatMap {
                 Mono.just(it)

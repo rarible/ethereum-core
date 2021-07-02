@@ -52,6 +52,7 @@ public class LogListenService {
         MonoEthereum ethereum,
         List<LogEventsListener> logEventsListeners,
         List<LogEventDescriptor<?>> descriptors,
+        List<OnLogEventListener> onLogEventListeners,
         PendingLogService pendingLogService,
         BlockListenService<SimpleBlock> blockListenService,
         @Value("${ethereumBackoffMaxAttempts:5}") long maxAttempts,
@@ -65,12 +66,30 @@ public class LogListenService {
         this.ethereum = ethereum;
         this.logEventsListeners = logEventsListeners;
         this.blockListenService = blockListenService;
+
         logger.info("injected descriptors: {}", descriptors);
+
         this.listeners = descriptors.stream()
-            .map(it -> new LogEventListener<>(it, pendingLogService, logEventRepository, ethereum, backoff, batchSize))
+            .map(descriptor -> {
+                List<OnLogEventListener> topicOnEventListeners = onLogEventListeners.stream()
+                        .filter(onEventlistener -> onEventlistener.getTopic() == descriptor.getTopic())
+                        .collect(toList());
+
+                return new LogEventListener<>(
+                        descriptor,
+                        topicOnEventListeners,
+                        pendingLogService,
+                        logEventRepository,
+                        ethereum,
+                        backoff,
+                        batchSize
+                    );
+                }
+            )
             .collect(toList());
+
         this.listenersMap = listeners.stream()
-            .collect(Collectors.toMap(it -> it.getDescriptor().getTopic(), it -> it));
+                .collect(Collectors.toMap(it -> it.getDescriptor().getTopic(), it -> it));
     }
 
     public LogEventListener<?> getListenerByTopic(Word topic) {

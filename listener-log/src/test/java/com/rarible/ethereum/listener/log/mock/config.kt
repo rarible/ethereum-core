@@ -7,7 +7,6 @@ import com.rarible.contracts.test.erc1155.TransferSingleEvent
 import com.rarible.ethereum.listener.log.OnLogEventListener
 import io.mockk.every
 import io.mockk.mockk
-import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration
 import org.springframework.context.annotation.Bean
 import reactor.core.publisher.Mono
@@ -19,7 +18,7 @@ class TestLogConfiguration {
     @Bean
     fun onErc20TransferEventListener1() : OnLogEventListener {
         return mockk {
-            every { topic } returns TransferEvent.id()
+            every { topics } returns listOf(TransferEvent.id(), TransferSingleEvent.id())
             every { onLogEvent(any()) } returns Mono.empty()
         }
     }
@@ -27,7 +26,7 @@ class TestLogConfiguration {
     @Bean
     fun onErc20TransferEventListener2() : OnLogEventListener {
         return mockk {
-            every { topic } returns TransferEvent.id()
+            every { topics } returns listOf(TransferSingleEvent.id(), TransferEvent.id())
             every { onLogEvent(any()) } returns Mono.empty()
         }
     }
@@ -35,7 +34,7 @@ class TestLogConfiguration {
     @Bean
     fun onOtherEventListener() : OnLogEventListener {
         return mockk {
-            every { topic } returns TransferSingleEvent.id()
+            every { topics } returns listOf(TransferSingleEvent.id())
             every { onLogEvent(any()) } returns Mono.empty()
         }
     }

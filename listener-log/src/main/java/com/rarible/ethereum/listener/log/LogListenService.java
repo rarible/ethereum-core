@@ -72,7 +72,7 @@ public class LogListenService {
         this.listeners = descriptors.stream()
             .map(descriptor -> {
                 List<OnLogEventListener> topicOnEventListeners = onLogEventListeners.stream()
-                        .filter(onEventlistener -> onEventlistener.getTopic() == descriptor.getTopic())
+                        .filter(onEventListener -> onEventListener.getTopics().contains(descriptor.getTopic()) )
                         .collect(toList());
 
                 return new LogEventListener<>(

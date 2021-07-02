@@ -51,9 +51,6 @@ class ListenTransfersTest : AbstractIntegrationTest() {
 
     @Test
     fun mintAndListen() {
-        clearMocks(onErc20TransferEventListener1, onErc20TransferEventListener2)
-        prepareOnTransferLogEventListenerMocks(onErc20TransferEventListener1, onErc20TransferEventListener2)
-
         val contract = TestERC20.deployAndWait(sender, poller, "NAME", "NM").block()!!
 
         val beneficiary = Address.apply(nextBytes(20))

@@ -12,6 +12,7 @@ import com.rarible.ethereum.listener.log.domain.LogEvent
 import com.rarible.ethereum.listener.log.domain.LogEventStatus
 import com.rarible.ethereum.listener.log.mock.Transfer
 import io.daonomic.rpc.domain.Word
+import io.mockk.*
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.toList
 import kotlinx.coroutines.runBlocking
@@ -29,6 +30,7 @@ import org.springframework.data.mongodb.core.query.Criteria
 import org.springframework.data.mongodb.core.query.Query
 import org.springframework.data.mongodb.core.query.Update
 import org.springframework.data.mongodb.core.query.lt
+import reactor.core.publisher.Mono
 import scalether.domain.Address
 import java.math.BigInteger
 
@@ -38,8 +40,20 @@ class ListenTransfersTest : AbstractIntegrationTest() {
     @Autowired
     private lateinit var taskService: TaskService
 
+    @Autowired
+    private lateinit var onErc20TransferEventListener1: OnLogEventListener
+
+    @Autowired
+    private lateinit var onErc20TransferEventListener2 : OnLogEventListener
+
+    @Autowired
+    private lateinit var onOtherEventListener : OnLogEventListener
+
     @Test
     fun mintAndListen() {
+        clearMocks(onErc20TransferEventListener1, onErc20TransferEventListener2)
+        prepareOnTransferLogEventListenerMocks(onErc20TransferEventListener1, onErc20TransferEventListener2)
+
         val contract = TestERC20.deployAndWait(sender, poller, "NAME", "NM").block()!!
 
         val beneficiary = Address.apply(nextBytes(20))
@@ -58,6 +72,18 @@ class ListenTransfersTest : AbstractIntegrationTest() {
             assertEquals(t.from, Address.apply(ByteArray(20)))
             assertEquals(t.to, beneficiary)
             assertEquals(t.value, value)
+
+            verify(exactly = 1) { onErc20TransferEventListener1.onLogEvent(withArg {
+                assertEquals(it.id, event.id)
+                assertEquals(it.topic, event.topic)
+                assertEquals(it.data, event.data)
+            })}
+            verify(exactly = 1) { onErc20TransferEventListener2.onLogEvent(withArg {
+                assertEquals(it.id, event.id)
+                assertEquals(it.topic, event.topic)
+                assertEquals(it.data, event.data)
+            })}
+            verify(exactly = 0) { onOtherEventListener.onLogEvent(any()) }
         }
 
         mongo.updateFirst<BlockHead>(
@@ -73,6 +99,9 @@ class ListenTransfersTest : AbstractIntegrationTest() {
 
     @Test
     fun confirmPending() {
+        clearMocks(onErc20TransferEventListener1, onErc20TransferEventListener2)
+        prepareOnTransferLogEventListenerMocks(onErc20TransferEventListener1, onErc20TransferEventListener2)
+
         val contract = TestERC20.deployAndWait(sender, poller, "NAME", "NM").block()!!
         val value = BigInteger.valueOf(RandomUtils.nextLong(0, 1000000))
         contract.mint(sender.from(), value).execute().verifySuccess()
@@ -105,6 +134,9 @@ class ListenTransfersTest : AbstractIntegrationTest() {
 
     @Test
     fun revertPending() {
+        clearMocks(onErc20TransferEventListener1, onErc20TransferEventListener2)
+        prepareOnTransferLogEventListenerMocks(onErc20TransferEventListener1, onErc20TransferEventListener2)
+
         val contract = TestERC20.deployAndWait(sender, poller, "NAME", "NM").block()!!
 
         val value = BigInteger.valueOf(RandomUtils.nextLong(0, 1000000))
@@ -131,6 +163,9 @@ class ListenTransfersTest : AbstractIntegrationTest() {
 
     @Test
     fun revertCancelled() {
+        clearMocks(onErc20TransferEventListener1, onErc20TransferEventListener2)
+        prepareOnTransferLogEventListenerMocks(onErc20TransferEventListener1, onErc20TransferEventListener2)
+
         val contract = TestERC20.deployAndWait(sender, poller, "NAME", "NM").block()!!
 
         val value = BigInteger.valueOf(RandomUtils.nextLong(0, 1000000))
@@ -159,6 +194,9 @@ class ListenTransfersTest : AbstractIntegrationTest() {
 
     @Test
     fun reindex() {
+        clearMocks(onErc20TransferEventListener1, onErc20TransferEventListener2)
+        prepareOnTransferLogEventListenerMocks(onErc20TransferEventListener1, onErc20TransferEventListener2)
+
         val number = ethereum.ethBlockNumber().block()!!.toLong()
 
         val contract = TestERC20.deployAndWait(sender, poller, "NAME", "NM").block()!!
@@ -209,6 +247,12 @@ class ListenTransfersTest : AbstractIntegrationTest() {
 
         assertThat(mongo.find<LogEvent>(Query(), "transfer").collectList().block())
             .hasSize(transfers.size)
+    }
+
+    private fun prepareOnTransferLogEventListenerMocks(vararg listeners: OnLogEventListener) {
+        listeners.forEach {
+            every { it.onLogEvent(any()) } returns Mono.empty()
+        }
     }
 
     companion object {

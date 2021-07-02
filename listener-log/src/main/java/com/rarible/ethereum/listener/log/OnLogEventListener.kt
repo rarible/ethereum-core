@@ -5,7 +5,7 @@ import io.daonomic.rpc.domain.Word
 import reactor.core.publisher.Mono
 
 interface OnLogEventListener {
-    val topic: Word
+    val topics: List<Word>
 
     fun onLogEvent(logEvent: LogEvent): Mono<Void>
 }

@@ -12,11 +12,13 @@ import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.boot.test.context.TestConfiguration
 import org.springframework.context.annotation.Import
 import org.springframework.test.context.junit.jupiter.SpringExtension
+import scalether.core.MonoParity
 
 @ExtendWith(SpringExtension::class)
 @SpringBootTest(
     properties = [
-        "rarible.ethereum.converter.enabled=true"
+        "rarible.ethereum.converter.enabled=true",
+        "rarible.ethereum.parity.httpUrl=localhost:6543"
     ]
 )
 @Import(StartersTest.Configuration::class)
@@ -31,12 +33,15 @@ class StartersTest {
     @Autowired
     private lateinit var stringToEthAddressConverter: StringToEthAddressConverter
 
+    @Autowired
+    private lateinit var monoParity: MonoParity
 
     @Test
     fun test() {
         assertThat(ethUInt256ToHexStringConverter).isNotNull
         assertThat(hexStringToEthUInt256Converter).isNotNull
         assertThat(stringToEthAddressConverter).isNotNull
+        assertThat(monoParity).isNotNull
     }
 
     @TestConfiguration

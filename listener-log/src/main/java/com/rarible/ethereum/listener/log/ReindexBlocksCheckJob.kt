@@ -15,12 +15,12 @@ class ReindexBlocksCheckJob(
         initialDelayString = "\${pendingBlocksCheckJobInterval:${DateUtils.MILLIS_PER_MINUTE}}"
     )
     fun job() {
-        logger.info("started")
+        logger.info("Started reindex pending blocks")
         try {
             reindexBlockService.indexPendingBlocks().block()
-            logger.info("ended")
+            logger.info("End reindex pending blocks")
         } catch (e: Exception) {
-            logger.error("error", e)
+            logger.error("Error pending block reindex", e)
         }
     }
 

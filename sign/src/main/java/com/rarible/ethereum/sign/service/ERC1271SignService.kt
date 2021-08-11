@@ -1,6 +1,7 @@
 package com.rarible.ethereum.sign.service
 
 import com.rarible.contracts.erc1271.IERC1271
+import com.rarible.ethereum.common.keccak256
 import io.daonomic.rpc.RpcCodeException
 import io.daonomic.rpc.domain.Binary
 import io.daonomic.rpc.domain.Word
@@ -53,20 +54,31 @@ class ERC1271SignService(
             "Invalid signature size ${signature.bytes().size}, should be 65 bytes"
         }
         return try {
-            val v = fixV(signature.bytes()[64])
+            val (v, h) = fixVAndHash(signature.bytes()[64], hash)
             val r = ByteArray(32)
             val s = ByteArray(32)
             System.arraycopy(signature.bytes(), 0, r, 0, 32)
             System.arraycopy(signature.bytes(), 32, s, 0, 32)
-            val publicKey = Sign.signedMessageHashToKey(hash.bytes(), Sign.SignatureData(v, r, s))
+            val publicKey = Sign.signedMessageHashToKey(h.bytes(), Sign.SignatureData(v, r, s))
             Address.apply(Keys.getAddress(publicKey))
         } catch (ex: Exception) {
             throw InvalidSignatureException("Invalid signature structure", ex)
         }
     }
 
-    private fun fixV(v: Byte): Byte {
-        return if (v < 27) (27 + v).toByte() else v
+    /**
+     * Returns an Ethereum Signed Message, created from a `hash`. This replicates the behavior of the
+     * https://github.com/ethereum/wiki/wiki/JSON-RPC#eth_sign JSON-RPC method applied to message hash.
+     */
+    private fun getEthSignedMessageHash(hash: Word): Word =
+        keccak256(Binary.apply("${START}32".toByteArray()).add(hash))
+
+    private fun fixVAndHash(v: Byte, hash: Word): Pair<Byte, Word> = when(v.toInt()) {
+        0, 1 -> (27 + v).toByte() to hash
+        27, 28 -> v to hash
+        //For hardware wallets that do not support EIP-712 we artificially increment v by 4 to distinguish signing of message's hash by 'eth_sign'.
+        31, 32 -> (v - 4).toByte() to getEthSignedMessageHash(hash)
+        else -> error("Value of 'v' is not recognised: $v")
     }
 
     companion object {

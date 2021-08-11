@@ -3,6 +3,8 @@ package com.rarible.ethereum.sign.service
 import com.rarible.contracts.test.erc1271.TestERC1271
 import com.rarible.core.test.ext.EthereumTest
 import com.rarible.core.test.ext.EthereumTestExtension
+import com.rarible.ethereum.common.generateNewKeys
+import com.rarible.ethereum.common.keccak256
 import io.daonomic.rpc.domain.Binary
 import io.daonomic.rpc.domain.Word
 import io.daonomic.rpc.mono.WebClientTransport
@@ -42,6 +44,26 @@ internal class ERC1271SignServiceTest {
             Binary.apply("0x1917e545f491815865abaaaeba5fb115160376f5110c1c7a125702dd45f4430d3c2653c437abc794c5d68dfe486c7d5524f77bced85bbf544efdb8260d7e89db1c")
         )
         assertThat(result).isTrue()
+    }
+
+    @Test
+    internal fun `should verify signature with v greater than 30`() = runBlocking<Unit> {
+        fun ethSign(message: ByteArray, privateKey: BigInteger): Sign.SignatureData {
+            val prefixedMessage = "\u0019Ethereum Signed Message:\n${message.size}".toByteArray() + message
+            val publicKey = Sign.publicKeyFromPrivate(privateKey)
+            return Sign.signMessage(prefixedMessage, publicKey, privateKey)
+        }
+
+        val (privateKey, _, address) = generateNewKeys()
+
+        // Some arbitrarily encoded data. In real life this may be EIP-712 encoding of the 'Order' struct.
+        val data = Binary(RandomUtils.nextBytes(333))
+        val dataHash = keccak256(data)
+
+        val signedHash = ethSign(dataHash.bytes(), privateKey)
+        val v30Signature = Sign.SignatureData((signedHash.v + 4).toByte(), signedHash.r, signedHash.s).toBinary()
+
+        assertThat(signService.isSigner(address, dataHash, v30Signature)).isTrue()
     }
 
     @Test

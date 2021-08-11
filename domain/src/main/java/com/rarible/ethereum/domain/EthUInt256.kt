@@ -10,6 +10,7 @@ import com.fasterxml.jackson.databind.annotation.JsonSerialize
 import com.fasterxml.jackson.databind.deser.std.StdScalarDeserializer
 import com.fasterxml.jackson.databind.ser.std.StdScalarSerializer
 import io.daonomic.rpc.domain.Binary
+import io.daonomic.rpc.domain.Word
 import scalether.abi.Uint256Type
 import java.math.BigInteger
 
@@ -70,6 +71,10 @@ data class EthUInt256(val value: BigInteger) : Comparable<EthUInt256>  {
             return EthUInt256(BigInteger.valueOf(value))
         }
 
+        fun of(value: Int): EthUInt256 {
+            return EthUInt256(BigInteger.valueOf(value.toLong()))
+        }
+
         fun of(value: String): EthUInt256 {
             return if (value.startsWith("0x")) {
                 EthUInt256(Uint256Type.decode(Binary.apply(value), 0).value())
@@ -80,6 +85,10 @@ data class EthUInt256(val value: BigInteger) : Comparable<EthUInt256>  {
 
         fun of(value: BigInteger): EthUInt256 {
             return EthUInt256(value)
+        }
+
+        fun of(value: Word): EthUInt256 {
+            return EthUInt256(value.toBigInteger())
         }
     }
 

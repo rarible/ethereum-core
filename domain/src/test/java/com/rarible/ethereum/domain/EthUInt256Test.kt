@@ -13,6 +13,14 @@ internal class EthUInt256Test {
     }
 
     @Test
+    fun `should deserialize from decimal string`() {
+        assertThat(EthUInt256.of("30110008.0"))
+            .isEqualTo(EthUInt256.of(30110008L))
+        assertThat(EthUInt256.of("30110008"))
+            .isEqualTo(EthUInt256.of(30110008L))
+    }
+
+    @Test
     fun serialize() {
         val mapper = ObjectMapper()
         assertThat(mapper.writeValueAsString(SimpleData(EthUInt256.TEN)))

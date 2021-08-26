@@ -7,6 +7,7 @@ import org.bson.types.ObjectId
 import org.springframework.data.annotation.Id
 import org.springframework.data.annotation.Version
 import scalether.domain.Address
+import java.time.Instant
 
 data class LogEvent(
     val data: EventData,
@@ -25,7 +26,10 @@ data class LogEvent(
     @Id
     override val id: ObjectId = ObjectId.get(),
     @Version
-    val version: Long? = null
+    val version: Long? = null,
+
+    val createdAt: Instant = Instant.EPOCH,
+    val updatedAt: Instant = Instant.EPOCH
 ) : Identifiable<ObjectId>
 
 @JsonTypeInfo(use = JsonTypeInfo.Id.CLASS, property = "@class")

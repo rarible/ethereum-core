@@ -25,6 +25,7 @@ import scalether.domain.response.Block
 import scalether.domain.response.Log
 import scalether.util.Hex
 import java.math.BigInteger
+import java.time.Instant
 
 class LogEventListener<T : EventData>(
     val descriptor: LogEventDescriptor<T>,
@@ -150,7 +151,9 @@ class LogEventListener<T : EventData>(
                         logIndex = log.logIndex().toInt(),
                         minorLogIndex = minorLogIndex,
                         index = index,
-                        visible = true
+                        visible = true,
+                        createdAt = Instant.now(),
+                        updatedAt = Instant.now()
                     )
                 }
             }
@@ -169,8 +172,9 @@ class LogEventListener<T : EventData>(
                             .flatMap { opt ->
                                 if (opt.isPresent) {
                                     val found = opt.get()
-                                    val withCorrectId = toSave.copy(id = found.id, version = found.version)
-                                    if (withCorrectId != found) {
+                                    val withCorrectId = toSave.copy(id = found.id, version = found.version, updatedAt = Instant.now())
+
+                                    if (equals(withCorrectId, found).not()) {
                                         logger.info(marker, "Saving changed LogEvent $withCorrectId to ${descriptor.collection}")
                                         logEventRepository.save(descriptor.collection, withCorrectId)
                                     } else {
@@ -194,6 +198,12 @@ private fun BigInteger.encodeForFilter(): String {
 
 private fun List<Log>.groupByBlock(): Flux<BlockLogs> {
     return Flux.fromIterable(this.groupBy { it.blockHash() }.entries.map { e -> BlockLogs(e.key, e.value) })
+}
+
+private fun equals(first: LogEvent, second: LogEvent): Boolean {
+    val fixedFirst = first.copy(updatedAt = Instant.EPOCH, createdAt = Instant.EPOCH)
+    val fixedSecond = second.copy(updatedAt = Instant.EPOCH, createdAt = Instant.EPOCH)
+    return fixedFirst == fixedSecond
 }
 
 data class BlockLogs(val blockHash: Word, val logs: List<Log>)

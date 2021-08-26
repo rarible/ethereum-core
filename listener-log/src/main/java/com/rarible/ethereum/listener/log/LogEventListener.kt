@@ -173,7 +173,8 @@ class LogEventListener<T : EventData>(
                                 if (opt.isPresent) {
                                     val found = opt.get()
                                     val withCorrectId = toSave.copy(id = found.id, version = found.version, updatedAt = Instant.now())
-                                    if (withCorrectId != found) {
+
+                                    if (equals(withCorrectId, found).not()) {
                                         logger.info(marker, "Saving changed LogEvent $withCorrectId to ${descriptor.collection}")
                                         logEventRepository.save(descriptor.collection, withCorrectId)
                                     } else {
@@ -197,6 +198,12 @@ private fun BigInteger.encodeForFilter(): String {
 
 private fun List<Log>.groupByBlock(): Flux<BlockLogs> {
     return Flux.fromIterable(this.groupBy { it.blockHash() }.entries.map { e -> BlockLogs(e.key, e.value) })
+}
+
+private fun equals(first: LogEvent, second: LogEvent): Boolean {
+    val fixedFirst = first.copy(updatedAt = Instant.EPOCH, createdAt = Instant.EPOCH)
+    val fixedSecond = second.copy(updatedAt = Instant.EPOCH, createdAt = Instant.EPOCH)
+    return fixedFirst == fixedSecond
 }
 
 data class BlockLogs(val blockHash: Word, val logs: List<Log>)

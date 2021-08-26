@@ -25,6 +25,7 @@ import scalether.domain.response.Block
 import scalether.domain.response.Log
 import scalether.util.Hex
 import java.math.BigInteger
+import java.time.Instant
 
 class LogEventListener<T : EventData>(
     val descriptor: LogEventDescriptor<T>,
@@ -150,7 +151,9 @@ class LogEventListener<T : EventData>(
                         logIndex = log.logIndex().toInt(),
                         minorLogIndex = minorLogIndex,
                         index = index,
-                        visible = true
+                        visible = true,
+                        createdAt = Instant.now(),
+                        updatedAt = Instant.now()
                     )
                 }
             }
@@ -169,7 +172,7 @@ class LogEventListener<T : EventData>(
                             .flatMap { opt ->
                                 if (opt.isPresent) {
                                     val found = opt.get()
-                                    val withCorrectId = toSave.copy(id = found.id, version = found.version)
+                                    val withCorrectId = toSave.copy(id = found.id, version = found.version, updatedAt = Instant.now())
                                     if (withCorrectId != found) {
                                         logger.info(marker, "Saving changed LogEvent $withCorrectId to ${descriptor.collection}")
                                         logEventRepository.save(descriptor.collection, withCorrectId)

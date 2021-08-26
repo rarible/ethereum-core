@@ -17,6 +17,8 @@ import reactor.core.publisher.Mono
 import reactor.kotlin.core.publisher.toFlux
 import scalether.core.MonoEthereum
 import scalether.domain.response.Block
+import java.time.Duration
+import java.time.Instant
 
 @Service
 class PendingLogsCheckJob(
@@ -33,6 +35,7 @@ class PendingLogsCheckJob(
         collections.toFlux()
             .flatMap { collection ->
                 logEventRepository.findPendingLogs(collection)
+                    .filter { it.createdAt + SAFE_PENDING_BLOCK_PERIOD <= Instant.now() }
                     .flatMap { processLog(collection, it) }
             }
             .collectList()
@@ -84,11 +87,12 @@ class PendingLogsCheckJob(
 
     private fun markLogAsDropped(log: LogEvent, collection: String): Mono<LogEvent> =
         logEventRepository.findLogEvent(collection, log.id)
-            .map { it.copy(status = LogEventStatus.DROPPED, visible = false) }
+            .map { it.copy(status = LogEventStatus.DROPPED, visible = false, updatedAt = Instant.now()) }
             .flatMap { logEventRepository.save(collection, it) }
             .retryOptimisticLock()
 
     companion object {
+        val SAFE_PENDING_BLOCK_PERIOD: Duration = Duration.ofMinutes(2)
         val logger: Logger = LoggerFactory.getLogger(PendingLogsCheckJob::class.java)
     }
 }

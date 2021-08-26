@@ -11,6 +11,7 @@ import org.bson.types.ObjectId
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import scalether.domain.Address
+import java.time.Instant
 import java.util.concurrent.ThreadLocalRandom
 
 class LogEventRepositoryTest : AbstractIntegrationTest() {
@@ -81,7 +82,9 @@ class LogEventRepositoryTest : AbstractIntegrationTest() {
             topic = topic,
             transactionHash = Word.apply(blockHash),
             index = 1,
-            minorLogIndex = 1
+            minorLogIndex = 1,
+            createdAt = Instant.now(),
+            updatedAt = Instant.now()
         )
     }
 }

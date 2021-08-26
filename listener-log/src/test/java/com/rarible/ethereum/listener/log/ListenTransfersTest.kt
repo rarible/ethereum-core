@@ -33,6 +33,7 @@ import org.springframework.data.mongodb.core.query.lt
 import reactor.core.publisher.Mono
 import scalether.domain.Address
 import java.math.BigInteger
+import java.time.Instant
 
 @ExperimentalCoroutinesApi
 @EnableAutoConfiguration
@@ -112,7 +113,21 @@ class ListenTransfersTest : AbstractIntegrationTest() {
         val transferReceipt = contract.transfer(beneficiary, value).execute().verifySuccess()
         val tx = ethereum.ethGetTransactionByHash(transferReceipt.transactionHash()).block()!!.get()
 
-        val saved = mongo.save(LogEvent(Transfer(sender.from(), beneficiary, value), contract.address(), TransferEvent.id(), tx.hash(), sender.from(), tx.nonce().toLong(), LogEventStatus.PENDING, index = 0, minorLogIndex = 0, visible = true), "transfer").block()!!
+        val saved = mongo.save(
+            LogEvent(
+                Transfer(sender.from(), beneficiary, value),
+                contract.address(),
+                TransferEvent.id(),
+                tx.hash(),
+                sender.from(),
+                tx.nonce().toLong(),
+                LogEventStatus.PENDING,
+                index = 0,
+                minorLogIndex = 0,
+                visible = true,
+                createdAt = Instant.now(),
+                updatedAt = Instant.now()
+            ), "transfer").block()!!
 
         waitAssert {
             assertEquals(mongo.count(Query(), "transfer").block()!!, 3L)
@@ -147,7 +162,21 @@ class ListenTransfersTest : AbstractIntegrationTest() {
         val beneficiary = Address.apply(nextBytes(20))
         val transferReceipt = contract.transfer(beneficiary, value).withGas(BigInteger.valueOf(23000)).execute().verifyError()
 
-        val saved = mongo.save(LogEvent(Transfer(sender.from(), beneficiary, value), contract.address(), TransferEvent.id(), transferReceipt.transactionHash(), sender.from(), 0, LogEventStatus.PENDING, index = 0, minorLogIndex = 0, visible = true), "transfer").block()!!
+        val saved = mongo.save(
+            LogEvent(
+                Transfer(sender.from(), beneficiary, value),
+                contract.address(),
+                TransferEvent.id(),
+                transferReceipt.transactionHash(),
+                sender.from(),
+                0,
+                LogEventStatus.PENDING,
+                index = 0,
+                minorLogIndex = 0,
+                visible = true,
+                createdAt = Instant.now(),
+                updatedAt = Instant.now()
+            ), "transfer").block()!!
 
         waitAssert {
             val read = mongo.findById(saved.id, LogEvent::class.java, "transfer").block()!!
@@ -177,7 +206,21 @@ class ListenTransfersTest : AbstractIntegrationTest() {
 
         val nonce = ethereum.ethGetTransactionCount(sender.from(), "latest").block()!!.toLong()
         val fakeHash = Word(nextBytes(32))
-        val saved = mongo.save(LogEvent(Transfer(sender.from(), beneficiary, value), contract.address(), TransferEvent.id(), fakeHash, sender.from(), nonce, LogEventStatus.PENDING, index = 0, minorLogIndex = 0, visible = true), "transfer").block()!!
+        val saved = mongo.save(
+            LogEvent(
+                Transfer(sender.from(), beneficiary, value),
+                contract.address(),
+                TransferEvent.id(),
+                fakeHash,
+                sender.from(),
+                nonce,
+                LogEventStatus.PENDING,
+                index = 0,
+                minorLogIndex = 0,
+                visible = true,
+                createdAt = Instant.now(),
+                updatedAt = Instant.now()
+            ), "transfer").block()!!
 
         TestERC20.deploy(sender, "NAME", "NM").verifySuccess()
 

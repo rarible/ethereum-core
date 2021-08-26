@@ -15,6 +15,7 @@ import reactor.kotlin.core.publisher.toFlux
 import scalether.domain.response.Block
 import scalether.domain.response.Transaction
 import scalether.java.Lists
+import java.time.Instant
 
 @Service
 class PendingLogService(
@@ -54,7 +55,7 @@ class PendingLogService(
             logs.toFlux()
                 .flatMap { (col, log) ->
                     logEventRepository.findLogEvent(col, log.id)
-                        .map { it.copy(status = status, visible = false) }
+                        .map { it.copy(status = status, visible = false, updatedAt = Instant.now()) }
                         .flatMap { logEventRepository.save(col, it) }
                         .retryOptimisticLock()
                 }

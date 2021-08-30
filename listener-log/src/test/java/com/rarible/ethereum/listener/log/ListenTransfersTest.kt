@@ -34,6 +34,7 @@ import reactor.core.publisher.Mono
 import scalether.domain.Address
 import java.math.BigInteger
 import java.time.Instant
+import java.time.temporal.ChronoUnit
 
 @ExperimentalCoroutinesApi
 @EnableAutoConfiguration
@@ -49,6 +50,9 @@ class ListenTransfersTest : AbstractIntegrationTest() {
 
     @Autowired
     private lateinit var onOtherEventListener : OnLogEventListener
+
+    @Autowired
+    private lateinit var pendingLogsCheckJob: PendingLogsCheckJob
 
     @Test
     fun mintAndListen() {
@@ -119,8 +123,6 @@ class ListenTransfersTest : AbstractIntegrationTest() {
                 contract.address(),
                 TransferEvent.id(),
                 tx.hash(),
-                sender.from(),
-                tx.nonce().toLong(),
                 LogEventStatus.PENDING,
                 index = 0,
                 minorLogIndex = 0,
@@ -168,8 +170,6 @@ class ListenTransfersTest : AbstractIntegrationTest() {
                 contract.address(),
                 TransferEvent.id(),
                 transferReceipt.transactionHash(),
-                sender.from(),
-                0,
                 LogEventStatus.PENDING,
                 index = 0,
                 minorLogIndex = 0,
@@ -204,7 +204,6 @@ class ListenTransfersTest : AbstractIntegrationTest() {
 
         val beneficiary = Address.apply(nextBytes(20))
 
-        val nonce = ethereum.ethGetTransactionCount(sender.from(), "latest").block()!!.toLong()
         val fakeHash = Word(nextBytes(32))
         val saved = mongo.save(
             LogEvent(
@@ -212,17 +211,16 @@ class ListenTransfersTest : AbstractIntegrationTest() {
                 contract.address(),
                 TransferEvent.id(),
                 fakeHash,
-                sender.from(),
-                nonce,
                 LogEventStatus.PENDING,
                 index = 0,
                 minorLogIndex = 0,
                 visible = true,
-                createdAt = Instant.now(),
-                updatedAt = Instant.now()
+                createdAt = Instant.now().minus(10, ChronoUnit.MINUTES),
+                updatedAt = Instant.now().minus(10, ChronoUnit.MINUTES)
             ), "transfer").block()!!
 
         TestERC20.deploy(sender, "NAME", "NM").verifySuccess()
+        pendingLogsCheckJob.job()
 
         waitAssert {
             val read = mongo.findById(saved.id, LogEvent::class.java, "transfer").block()!!

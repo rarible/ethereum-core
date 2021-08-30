@@ -14,8 +14,6 @@ data class LogEvent(
     val address: Address,
     val topic: Word,
     val transactionHash: Word,
-    val from: Address? = null,
-    val nonce: Long? = null,
     val status: LogEventStatus,
     val blockHash: Word? = null,
     val blockNumber: Long? = null,

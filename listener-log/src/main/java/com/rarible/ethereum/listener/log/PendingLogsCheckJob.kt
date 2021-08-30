@@ -30,7 +30,7 @@ class PendingLogsCheckJob(
 ) {
     private val collections = descriptors.map { it.collection }.toSet()
 
-    @Scheduled(fixedRateString = "\${pendingLogsCheckJobInterval:${DateUtils.MILLIS_PER_HOUR}}", initialDelay = DateUtils.MILLIS_PER_MINUTE)
+    @Scheduled(fixedRateString = "\${pendingLogsCheckJobInterval:${DateUtils.MILLIS_PER_MINUTE * 10}}", initialDelay = DateUtils.MILLIS_PER_MINUTE)
     fun job() {
         collections.toFlux()
             .flatMap { collection ->

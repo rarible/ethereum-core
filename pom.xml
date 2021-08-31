@@ -4,7 +4,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>com.rarible.ethereum</groupId>
 	<artifactId>rarible-ethereum-parent</artifactId>
-	<version>1.0-SNAPSHOT</version>
+	<version>1.1-SNAPSHOT</version>
     <packaging>pom</packaging>
 
     <repositories>
@@ -43,73 +43,73 @@
             <dependency>
                 <groupId>com.rarible.ethereum</groupId>
                 <artifactId>rarible-ethereum-contracts-interfaces</artifactId>
-                <version>1.0-SNAPSHOT</version>
+                <version>1.1-SNAPSHOT</version>
             </dependency>
             <dependency>
                 <groupId>com.rarible.ethereum</groupId>
                 <artifactId>rarible-ethereum-contracts-test</artifactId>
-                <version>1.0-SNAPSHOT</version>
+                <version>1.1-SNAPSHOT</version>
                 <scope>test</scope>
             </dependency>
             <dependency>
                 <groupId>com.rarible.ethereum</groupId>
                 <artifactId>rarible-ethereum-common</artifactId>
-                <version>1.0-SNAPSHOT</version>
+                <version>1.1-SNAPSHOT</version>
             </dependency>
             <dependency>
                 <groupId>com.rarible.ethereum</groupId>
                 <artifactId>rarible-ethereum-sign</artifactId>
-                <version>1.0-SNAPSHOT</version>
+                <version>1.1-SNAPSHOT</version>
             </dependency>
             <dependency>
                 <groupId>com.rarible.ethereum</groupId>
                 <artifactId>rarible-ethereum-nft</artifactId>
-                <version>1.0-SNAPSHOT</version>
+                <version>1.1-SNAPSHOT</version>
             </dependency>
             <dependency>
                 <groupId>com.rarible.ethereum</groupId>
                 <artifactId>rarible-ethereum-converters</artifactId>
-                <version>1.0-SNAPSHOT</version>
+                <version>1.1-SNAPSHOT</version>
             </dependency>
             <dependency>
                 <groupId>com.rarible.ethereum</groupId>
                 <artifactId>rarible-ethereum-contract</artifactId>
-                <version>1.0-SNAPSHOT</version>
+                <version>1.1-SNAPSHOT</version>
             </dependency>
             <dependency>
                 <groupId>com.rarible.ethereum</groupId>
                 <artifactId>rarible-ethereum-listener-log-domain</artifactId>
-                <version>1.0-SNAPSHOT</version>
+                <version>1.1-SNAPSHOT</version>
             </dependency>
             <dependency>
                 <groupId>com.rarible.ethereum</groupId>
                 <artifactId>rarible-ethereum-listener-log-service</artifactId>
-                <version>1.0-SNAPSHOT</version>
+                <version>1.1-SNAPSHOT</version>
             </dependency>
             <dependency>
                 <groupId>com.rarible.ethereum</groupId>
                 <artifactId>rarible-ethereum-listener-log</artifactId>
-                <version>1.0-SNAPSHOT</version>
+                <version>1.1-SNAPSHOT</version>
             </dependency>
             <dependency>
                 <groupId>com.rarible.ethereum</groupId>
                 <artifactId>rarible-ethereum-domain</artifactId>
-                <version>1.0-SNAPSHOT</version>
+                <version>1.1-SNAPSHOT</version>
             </dependency>
             <dependency>
                 <groupId>com.rarible.ethereum</groupId>
                 <artifactId>rarible-ethereum-monitoring</artifactId>
-                <version>1.0-SNAPSHOT</version>
+                <version>1.1-SNAPSHOT</version>
             </dependency>
             <dependency>
                 <groupId>com.rarible.ethereum</groupId>
                 <artifactId>rarible-ethereum-block</artifactId>
-                <version>1.0-SNAPSHOT</version>
+                <version>1.1-SNAPSHOT</version>
             </dependency>
             <dependency>
                 <groupId>com.rarible.ethereum</groupId>
                 <artifactId>rarible-ethereum-starter</artifactId>
-                <version>1.0-SNAPSHOT</version>
+                <version>1.1-SNAPSHOT</version>
             </dependency>
             <dependency>
                 <groupId>net.java.dev.jna</groupId>

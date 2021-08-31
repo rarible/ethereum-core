@@ -37,15 +37,9 @@ class PendingLogService(
             return Flux.empty()
         }
         val byTxHash = logs.groupBy { (_, log) -> log.transactionHash }
-        val byFromNonce = logs.groupBy { (_, log) -> Pair(log.from, log.nonce) }
         return Flux.fromIterable(Lists.toJava(block.transactions()))
             .flatMap { tx ->
-                val first = byTxHash[tx.hash()] ?: emptyList()
-                val second = (byFromNonce[Pair(tx.from(), tx.nonce().toLong())] ?: emptyList()) - first
-                Flux.concat(
-                    markInactive(marker, LogEventStatus.INACTIVE, first),
-                    markInactive(marker, LogEventStatus.DROPPED, second)
-                )
+                markInactive(marker, LogEventStatus.INACTIVE, byTxHash[tx.hash()] ?: emptyList())
             }
     }
 

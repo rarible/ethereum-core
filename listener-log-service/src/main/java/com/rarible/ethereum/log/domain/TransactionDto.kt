@@ -7,6 +7,7 @@ import scalether.domain.Address
 data class TransactionDto(
     val hash: Word,
     val from: Address,
+    val nonce: Long,
     val to: Address?,
     val input: Binary
 )

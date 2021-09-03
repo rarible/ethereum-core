@@ -22,7 +22,7 @@ abstract class AbstractPendingTransactionService(
     suspend fun process(tx: TransactionDto): List<LogEvent> {
         val id = tx.input.slice(0, 4)
         val data = tx.input.slice(4, tx.input.length())
-        val logs = process(tx.hash, tx.from, tx.to, id, data)
+        val logs = process(tx.hash, tx.from, tx.nonce, tx.to, id, data)
             .map { saveOrReturn(it) }
             .toList()
 
@@ -42,6 +42,7 @@ abstract class AbstractPendingTransactionService(
     protected abstract suspend fun process(
         hash: Word,
         from: Address,
+        nonce: Long,
         to: Address?,
         id: Binary,
         data: Binary

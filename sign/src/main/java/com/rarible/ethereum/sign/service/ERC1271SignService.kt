@@ -27,7 +27,7 @@ class ERC1271SignService(
 
     @Throws(CheckSignatureException::class, InvalidSignatureException::class)
     suspend fun isSigner(signer: Address, hash: Word, signature: Binary): Boolean {
-        if (recover(hash, signature) == signer) {
+        if (signature.bytes().size == 65 && recover(hash, signature) == signer) {
             return true
         }
 

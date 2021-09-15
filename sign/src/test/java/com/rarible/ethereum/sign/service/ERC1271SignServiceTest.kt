@@ -76,8 +76,10 @@ internal class ERC1271SignServiceTest {
             .execute().verifySuccess()
 
         val hash = ByteArray(32)
-        val result = signService.isSigner(contract.address(), Word.apply(hash), signature)
-        assertThat(result).isTrue()
+        assertThat(signService.isSigner(contract.address(), Word.apply(hash), signature))
+            .isTrue()
+        assertThat(signService.isSigner(contract.address(), Word.apply(hash), Binary.empty()))
+            .isTrue()
     }
 
     @Test

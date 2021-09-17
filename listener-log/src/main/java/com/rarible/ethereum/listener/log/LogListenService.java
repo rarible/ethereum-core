@@ -45,6 +45,10 @@ public class LogListenService {
     private final List<LogEventListener<?>> listeners;
     private final Map<Word, LogEventListener<?>> listenersMap;
     private final long maxProcessTime;
+    private final long batchSize;
+    private final LogEventRepository logEventRepository;
+    private final PendingLogService pendingLogService;
+    private final List<OnLogEventListener> onLogEventListeners;
 
     public LogListenService(
         LogEventRepository logEventRepository,
@@ -66,27 +70,16 @@ public class LogListenService {
         this.ethereum = ethereum;
         this.logEventsListeners = logEventsListeners;
         this.blockListenService = blockListenService;
+        this.batchSize = batchSize;
+        this.logEventRepository = logEventRepository;
+        this.pendingLogService = pendingLogService;
+        this.onLogEventListeners = onLogEventListeners;
 
         logger.info("injected descriptors: {}", descriptors);
 
         this.listeners = descriptors.stream()
-            .map(descriptor -> {
-                List<OnLogEventListener> topicOnEventListeners = onLogEventListeners.stream()
-                        .filter(onEventListener -> onEventListener.getTopics().contains(descriptor.getTopic()) )
-                        .collect(toList());
-
-                return new LogEventListener<>(
-                        descriptor,
-                        topicOnEventListeners,
-                        pendingLogService,
-                        logEventRepository,
-                        ethereum,
-                        backoff,
-                        batchSize
-                    );
-                }
-            )
-            .collect(toList());
+                .map(this::createLogEventListener)
+                .collect(toList());
 
         this.listenersMap = listeners.stream()
                 .collect(Collectors.toMap(it -> it.getDescriptor().getTopic(), it -> it));
@@ -118,6 +111,11 @@ public class LogListenService {
 
     public Flux<LongRange> reindex(Word topic, long from, long to) {
         final LogEventListener<?> listener = getListenerByTopic(topic);
+        return listener.reindex(from, to);
+    }
+
+    public Flux<LongRange> reindexWithDescriptor(LogEventDescriptor<?> descriptor, long from, long to) {
+        final LogEventListener<?> listener = createLogEventListener(descriptor);
         return listener.reindex(from, to);
     }
 
@@ -159,5 +157,21 @@ public class LogListenService {
         return Flux.fromIterable(logEventsListeners != null ? logEventsListeners : emptyList())
             .flatMap(it -> it.postProcessLogs(logs))
             .then();
+    }
+
+    private LogEventListener<?> createLogEventListener(LogEventDescriptor<?> descriptor) {
+        final List<OnLogEventListener> topicOnEventListeners = onLogEventListeners.stream()
+                .filter(onEventListener -> onEventListener.getTopics().contains(descriptor.getTopic()) )
+                .collect(toList());
+
+        return new LogEventListener<>(
+                descriptor,
+                topicOnEventListeners,
+                pendingLogService,
+                logEventRepository,
+                ethereum,
+                backoff,
+                batchSize
+        );
     }
 }

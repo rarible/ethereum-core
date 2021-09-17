@@ -57,6 +57,11 @@
                             <type>MONO</type>
                         </contract>
                         <contract>
+                            <abi>src/main/abi/Ownable.json</abi>
+                            <packageName>com.rarible.contracts.ownable</packageName>
+                            <type>MONO</type>
+                        </contract>
+                        <contract>
                             <abi>src/main/abi/IERC1155.json</abi>
                             <packageName>com.rarible.contracts.erc1155</packageName>
                             <type>MONO</type>

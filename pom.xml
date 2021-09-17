@@ -1,10 +1,10 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
-    
+
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>com.rarible.ethereum</groupId>
 	<artifactId>rarible-ethereum-parent</artifactId>
-	<version>1.1-SNAPSHOT</version>
+	<version>${revision}</version>
     <packaging>pom</packaging>
 
     <repositories>
@@ -28,6 +28,7 @@
     </parent>
 
     <properties>
+        <revision>1.1.0</revision>
         <nexus.maven.public>http://nexus.rarible.int/repository/maven-public/</nexus.maven.public>
     </properties>
 
@@ -43,73 +44,73 @@
             <dependency>
                 <groupId>com.rarible.ethereum</groupId>
                 <artifactId>rarible-ethereum-contracts-interfaces</artifactId>
-                <version>1.1-SNAPSHOT</version>
+                <version>${revision}</version>
             </dependency>
             <dependency>
                 <groupId>com.rarible.ethereum</groupId>
                 <artifactId>rarible-ethereum-contracts-test</artifactId>
-                <version>1.1-SNAPSHOT</version>
+                <version>${revision}</version>
                 <scope>test</scope>
             </dependency>
             <dependency>
                 <groupId>com.rarible.ethereum</groupId>
                 <artifactId>rarible-ethereum-common</artifactId>
-                <version>1.1-SNAPSHOT</version>
+                <version>${revision}</version>
             </dependency>
             <dependency>
                 <groupId>com.rarible.ethereum</groupId>
                 <artifactId>rarible-ethereum-sign</artifactId>
-                <version>1.1-SNAPSHOT</version>
+                <version>${revision}</version>
             </dependency>
             <dependency>
                 <groupId>com.rarible.ethereum</groupId>
                 <artifactId>rarible-ethereum-nft</artifactId>
-                <version>1.1-SNAPSHOT</version>
+                <version>${revision}</version>
             </dependency>
             <dependency>
                 <groupId>com.rarible.ethereum</groupId>
                 <artifactId>rarible-ethereum-converters</artifactId>
-                <version>1.1-SNAPSHOT</version>
+                <version>${revision}</version>
             </dependency>
             <dependency>
                 <groupId>com.rarible.ethereum</groupId>
                 <artifactId>rarible-ethereum-contract</artifactId>
-                <version>1.1-SNAPSHOT</version>
+                <version>${revision}</version>
             </dependency>
             <dependency>
                 <groupId>com.rarible.ethereum</groupId>
                 <artifactId>rarible-ethereum-listener-log-domain</artifactId>
-                <version>1.1-SNAPSHOT</version>
+                <version>${revision}</version>
             </dependency>
             <dependency>
                 <groupId>com.rarible.ethereum</groupId>
                 <artifactId>rarible-ethereum-listener-log-service</artifactId>
-                <version>1.1-SNAPSHOT</version>
+                <version>${revision}</version>
             </dependency>
             <dependency>
                 <groupId>com.rarible.ethereum</groupId>
                 <artifactId>rarible-ethereum-listener-log</artifactId>
-                <version>1.1-SNAPSHOT</version>
+                <version>${revision}</version>
             </dependency>
             <dependency>
                 <groupId>com.rarible.ethereum</groupId>
                 <artifactId>rarible-ethereum-domain</artifactId>
-                <version>1.1-SNAPSHOT</version>
+                <version>${revision}</version>
             </dependency>
             <dependency>
                 <groupId>com.rarible.ethereum</groupId>
                 <artifactId>rarible-ethereum-monitoring</artifactId>
-                <version>1.1-SNAPSHOT</version>
+                <version>${revision}</version>
             </dependency>
             <dependency>
                 <groupId>com.rarible.ethereum</groupId>
                 <artifactId>rarible-ethereum-block</artifactId>
-                <version>1.1-SNAPSHOT</version>
+                <version>${revision}</version>
             </dependency>
             <dependency>
                 <groupId>com.rarible.ethereum</groupId>
                 <artifactId>rarible-ethereum-starter</artifactId>
-                <version>1.1-SNAPSHOT</version>
+                <version>${revision}</version>
             </dependency>
             <dependency>
                 <groupId>net.java.dev.jna</groupId>
@@ -145,6 +146,6 @@
         <module>monitoring</module>
         <module>test-coverage</module>
     </modules>
-    
+
 </project>
 

@@ -158,11 +158,6 @@ class LogEventListener<T : EventData>(
                 }
             }
             .flatMap {
-                Flux
-                    .concat(onLogEventListeners.map { listener -> listener.onLogEvent(it) })
-                    .then(Mono.just(it))
-            }
-            .flatMap {
                 Mono.just(it)
                     .flatMap { toSave ->
                         logger.info(marker, "saving $toSave to ${descriptor.collection}")
@@ -186,6 +181,11 @@ class LogEventListener<T : EventData>(
                                     logEventRepository.save(descriptor.collection, toSave)
                                 }
                             }
+                    }
+                    .flatMap { savedEvent ->
+                        Flux
+                            .concat(onLogEventListeners.map { listener -> listener.onLogEvent(savedEvent) })
+                            .then(Mono.just(savedEvent))
                     }
                     .retryOptimisticLock(3)
             }

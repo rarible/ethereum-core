@@ -32,22 +32,29 @@ class PendingLogsCheckJob(
 
     @Scheduled(fixedRateString = "\${pendingLogsCheckJobInterval:${DateUtils.MILLIS_PER_MINUTE * 10}}", initialDelay = DateUtils.MILLIS_PER_MINUTE)
     fun job() {
-        collections.toFlux()
-            .flatMap { collection ->
-                logEventRepository.findPendingLogs(collection)
-                    .filter { it.createdAt + SAFE_PENDING_BLOCK_PERIOD <= Instant.now() }
-                    .flatMap { processLog(collection, it) }
-            }
-            .collectList()
-            .flatMap { logsAndBlocks ->
-                val droppedLogs = logsAndBlocks.mapNotNull { it.first }
-                val newBlocks = logsAndBlocks.mapNotNull { it.second }.distinctBy { it.hash() }
-                Mono.`when`(
-                    onDroppedLogs(droppedLogs),
-                    onNewBlocks(newBlocks)
-                )
-            }
-            .block()
+        logger.info("Started logs processing job")
+        try {
+            collections.toFlux()
+                .flatMap { collection ->
+                    logEventRepository.findPendingLogs(collection)
+                        .filter { it.createdAt + SAFE_PENDING_BLOCK_PERIOD <= Instant.now() }
+                        .flatMap { processLog(collection, it) }
+                }
+                .collectList()
+                .flatMap { logsAndBlocks ->
+                    val droppedLogs = logsAndBlocks.mapNotNull { it.first }
+                    val newBlocks = logsAndBlocks.mapNotNull { it.second }.distinctBy { it.hash() }
+                    Mono.`when`(
+                        onDroppedLogs(droppedLogs),
+                        onNewBlocks(newBlocks)
+                    )
+                }
+                .block()
+        } catch (e: Throwable) {
+            logger.error("Failed to process pending logs", e)
+        } finally {
+            logger.info("Finished pending logs processing job")
+        }
     }
 
     private fun onDroppedLogs(droppedLogs: List<LogEvent>): Mono<Void> =

@@ -11,7 +11,7 @@ class ReindexBlocksCheckJob(
     private val reindexBlockService: ReindexBlockService
 ) {
     @Scheduled(
-        fixedRateString = "\${pendingBlocksCheckJobInterval:${DateUtils.MILLIS_PER_MINUTE}}",
+        fixedDelayString = "\${pendingBlocksCheckJobInterval:${DateUtils.MILLIS_PER_MINUTE}}",
         initialDelayString = "\${pendingBlocksCheckJobInterval:${DateUtils.MILLIS_PER_MINUTE}}"
     )
     fun job() {

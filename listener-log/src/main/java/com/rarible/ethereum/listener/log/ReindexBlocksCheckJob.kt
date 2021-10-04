@@ -11,7 +11,7 @@ class ReindexBlocksCheckJob(
     private val reindexBlockService: ReindexBlockService
 ) {
     @Scheduled(
-        fixedRateString = "\${pendingBlocksCheckJobInterval:${DateUtils.MILLIS_PER_MINUTE}}",
+        fixedDelayString = "\${pendingBlocksCheckJobInterval:${DateUtils.MILLIS_PER_MINUTE}}",
         initialDelayString = "\${pendingBlocksCheckJobInterval:${DateUtils.MILLIS_PER_MINUTE}}"
     )
     fun job() {
@@ -19,7 +19,7 @@ class ReindexBlocksCheckJob(
         try {
             reindexBlockService.indexPendingBlocks().block()
             logger.info("End reindex pending blocks")
-        } catch (e: Exception) {
+        } catch (e: Throwable) {
             logger.error("Error pending block reindex", e)
         }
     }

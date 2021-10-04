@@ -19,7 +19,7 @@ class ReindexBlocksCheckJob(
         try {
             reindexBlockService.indexPendingBlocks().block()
             logger.info("End reindex pending blocks")
-        } catch (e: Exception) {
+        } catch (e: Throwable) {
             logger.error("Error pending block reindex", e)
         }
     }

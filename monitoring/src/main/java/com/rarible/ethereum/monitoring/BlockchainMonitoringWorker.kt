@@ -8,7 +8,7 @@ import com.rarible.ethereum.listener.log.domain.BlockStatus
 import com.rarible.ethereum.listener.log.persist.BlockRepository
 import io.micrometer.core.instrument.Gauge
 import io.micrometer.core.instrument.MeterRegistry
-import kotlinx.coroutines.reactive.awaitFirst
+import kotlinx.coroutines.reactive.awaitFirstOrNull
 import kotlinx.coroutines.time.delay
 import java.time.Instant
 import kotlin.math.max
@@ -21,7 +21,7 @@ class BlockchainMonitoringWorker(
 ) : SequentialDaemonWorker(meterRegistry, properties) {
 
     @Volatile private var lastSeenBlockHead: BlockHead? = null
-    @Volatile private var erroBlocksCount: Long? = null
+    @Volatile private var errorBlocksCount: Long? = null
     @Volatile private var pendingBlocksCount: Long? = null
 
     init {
@@ -30,9 +30,9 @@ class BlockchainMonitoringWorker(
     }
 
     override suspend fun handle() {
-        lastSeenBlockHead = blockRepository.findFirstByIdDesc().awaitFirst()
-        erroBlocksCount = blockRepository.findByStatus(BlockStatus.ERROR).count().awaitFirst()
-        pendingBlocksCount = blockRepository.findByStatus(BlockStatus.PENDING).count().awaitFirst()
+        lastSeenBlockHead = blockRepository.findFirstByIdDesc().awaitFirstOrNull()
+        errorBlocksCount = blockRepository.findByStatus(BlockStatus.ERROR).count().awaitFirstOrNull()
+        pendingBlocksCount = blockRepository.findByStatus(BlockStatus.PENDING).count().awaitFirstOrNull()
 
         delay(pollingPeriod)
     }
@@ -44,7 +44,7 @@ class BlockchainMonitoringWorker(
     }
 
     private fun getErrorBlockCount(): Double {
-        return (erroBlocksCount ?: 0).toDouble()
+        return (errorBlocksCount ?: 0).toDouble()
     }
 
     private fun getPendingBlockCount(): Double {

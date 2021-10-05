@@ -30,13 +30,11 @@ class EthereumBlockchain(
     override fun getBlock(hash: Bytes): Mono<SimpleBlock> {
         return ethereum.ethGetBlockByHash(Word.apply(hash))
             .map { SimpleBlock(it) }
-            .onErrorResume { Mono.empty() }
     }
 
     override fun getBlock(number: Long): Mono<SimpleBlock> {
         return ethereum.ethGetBlockByNumber(BigInteger.valueOf(number))
             .map { SimpleBlock(it) }
-            .onErrorResume { Mono.empty() }
     }
 
     override fun getLastKnownBlock(): Mono<Long> {

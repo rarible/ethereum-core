@@ -25,11 +25,8 @@ class BlockRepository(
     fun findByStatus(status: BlockStatus): Flux<BlockHead> =
         mongo.find(Query(BlockHead::status isEqualTo status))
 
-    fun getLastBlock(): Mono<Long> {
-        return mongo.find(Query().with(Sort.by(Sort.Direction.DESC, "_id")).limit(1), BlockHead::class.java)
-            .next()
-            .map { it.id }
-    }
+    fun count(): Mono<Long> =
+        mongo.count(Query(), BlockHead::class.java)
 
     fun updateBlockStatus(number: Long, status: BlockStatus): Mono<Void> {
         return LoggingUtils.withMarker { marker ->

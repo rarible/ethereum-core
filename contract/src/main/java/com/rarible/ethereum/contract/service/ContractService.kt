@@ -13,8 +13,11 @@ import io.daonomic.rpc.domain.Binary
 import kotlinx.coroutines.reactive.awaitFirst
 import org.springframework.stereotype.Service
 import reactor.core.publisher.Mono
+import reactor.util.retry.Retry
 import scalether.domain.Address
 import scalether.transaction.MonoTransactionSender
+import java.io.IOException
+import java.time.Duration
 
 @Service
 class ContractService(
@@ -72,7 +75,12 @@ class ContractService(
 
     suspend fun <T> Mono<T>.tryAwaitMethodCall(): T? {
         return try {
-            awaitFirst()
+            retryWhen(
+                Retry.fixedDelay(5, Duration.ofMillis(100))
+                    .filter { it is IOException || it is RpcCodeException || it is java.lang.IllegalArgumentException }
+            ).awaitFirst()
+        } catch (ex: IOException) {
+            null
         } catch (ex: RpcCodeException) {
             null
         } catch (ex: IllegalArgumentException) {

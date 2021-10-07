@@ -12,5 +12,7 @@ data class EthereumProperties(
     val websocketUrl: String?,
     val requestTimeoutMs: Int = 10000,
     val readWriteTimeoutMs: Int = 10000,
-    val maxFrameSize: Int = 1024 * 1024
+    val maxFrameSize: Int = 1024 * 1024,
+    val retryMaxAttempts: Long = 5,
+    val retryBackoffDelay: Long = 100
 )

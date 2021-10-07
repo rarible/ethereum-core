@@ -45,6 +45,7 @@ public class LogListenService {
     private final List<LogEventListener<?>> listeners;
     private final Map<Word, LogEventListener<?>> listenersMap;
     private final long maxProcessTime;
+    private final long blockProcessingDelay;
     private final long batchSize;
     private final LogEventRepository logEventRepository;
     private final PendingLogService pendingLogService;
@@ -62,10 +63,12 @@ public class LogListenService {
         @Value("${ethereumBackoffMaxAttempts:5}") long maxAttempts,
         @Value("${ethereumBackoffMinBackoff:100}") long minBackoff,
         @Value("${ethereumMaxProcessTime:300000}") long maxProcessTime,
-        @Value("${ethereumBlockBatchSize:100}") long batchSize
+        @Value("${ethereumBlockBatchSize:100}") long batchSize,
+        @Value("${ethereumBlockProcessingDelay:5000}") long blockProcessingDelay
     ) {
         this.backoff = Retry.backoff(maxAttempts, Duration.ofMillis(minBackoff));
         this.maxProcessTime = maxProcessTime;
+        this.blockProcessingDelay = blockProcessingDelay;
         this.blockRepository = blockRepository;
         this.ethereum = ethereum;
         this.logEventsListeners = logEventsListeners;
@@ -93,6 +96,11 @@ public class LogListenService {
     public void init() {
         Mono.delay(Duration.ofMillis(1000))
             .thenMany(blockListenService.listen())
+            /*
+             *  We delay processing of blocks for a while to give Ethereum nodes time to synchronize transactions' traces.
+             *  This may not be enough, but at least minimizes number of block errors caused by unavailable traces.
+             */
+            .delayElements(Duration.ofMillis(blockProcessingDelay))
             .map(it -> new NewBlockEvent(it.getBlock().getNumber(), it.getBlock().getHash(), it.getBlock().getTimestamp(), it.getReverted() != null ? Word.apply(it.getReverted().getHash()) : null))
             .timeout(Duration.ofMinutes(5))
             .concatMap(this::onBlock)

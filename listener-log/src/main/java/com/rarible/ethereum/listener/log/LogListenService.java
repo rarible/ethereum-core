@@ -2,6 +2,7 @@ package com.rarible.ethereum.listener.log;
 
 import com.rarible.core.logging.LoggerContext;
 import com.rarible.core.logging.LoggingUtils;
+import com.rarible.ethereum.block.BlockEvent;
 import com.rarible.ethereum.block.BlockListenService;
 import com.rarible.ethereum.listener.log.block.SimpleBlock;
 import com.rarible.ethereum.listener.log.domain.BlockHead;
@@ -94,13 +95,13 @@ public class LogListenService {
 
     @PostConstruct
     public void init() {
-        Mono.delay(Duration.ofMillis(1000))
-            .thenMany(blockListenService.listen())
-            /*
-             *  We delay processing of blocks for a while to give Ethereum nodes time to synchronize transactions' traces.
-             *  This may not be enough, but at least minimizes number of block errors caused by unavailable traces.
-             */
-            .delayElements(Duration.ofMillis(blockProcessingDelay))
+        Flux<BlockEvent<SimpleBlock>> blocks =
+                Mono.delay(Duration.ofMillis(1000)).thenMany(blockListenService.listen());
+        /*
+         *  We delay processing of blocks for a while to give Ethereum nodes time to synchronize transactions' traces.
+         *  This may not be enough, but at least minimizes number of block errors caused by unavailable traces.
+         */
+        (blockProcessingDelay != 0 ? blocks.delayElements(Duration.ofMillis(blockProcessingDelay)) : blocks)
             .map(it -> new NewBlockEvent(it.getBlock().getNumber(), it.getBlock().getHash(), it.getBlock().getTimestamp(), it.getReverted() != null ? Word.apply(it.getReverted().getHash()) : null))
             .timeout(Duration.ofMinutes(5))
             .concatMap(this::onBlock)

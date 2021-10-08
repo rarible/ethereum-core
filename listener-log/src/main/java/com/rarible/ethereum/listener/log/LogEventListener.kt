@@ -160,7 +160,6 @@ class LogEventListener<T : EventData>(
             .flatMap {
                 Mono.just(it)
                     .flatMap { toSave ->
-                        logger.info(marker, "saving $toSave to ${descriptor.collection}")
                         logEventRepository.findVisibleByKey(descriptor.collection, toSave.transactionHash, toSave.topic, toSave.index, toSave.minorLogIndex)
                             .switchIfEmpty(logEventRepository.findByKey(descriptor.collection, toSave.transactionHash, toSave.blockHash!!, toSave.logIndex!!, toSave.minorLogIndex))
                             .toOptional()
@@ -170,14 +169,14 @@ class LogEventListener<T : EventData>(
                                     val withCorrectId = toSave.copy(id = found.id, version = found.version, updatedAt = Instant.now())
 
                                     if (equals(withCorrectId, found).not()) {
-                                        logger.info(marker, "Saving changed LogEvent $withCorrectId to ${descriptor.collection}")
+                                        logger.info(marker, "Saving changed LogEvent (${descriptor.collection}): $withCorrectId")
                                         logEventRepository.save(descriptor.collection, withCorrectId)
                                     } else {
-                                        logger.info(marker, "LogEvent didn't change: $withCorrectId")
+                                        logger.info(marker, "LogEvent didn't change (${descriptor.collection}): $withCorrectId")
                                         found.justOrEmpty()
                                     }
                                 } else {
-                                    logger.info(marker, "Saving new LogEvent $toSave")
+                                    logger.info(marker, "Saving new LogEvent (${descriptor.collection}): $toSave")
                                     logEventRepository.save(descriptor.collection, toSave)
                                 }
                             }

@@ -64,7 +64,7 @@ public class LogListenService {
         @Value("${ethereumBackoffMinBackoff:100}") long minBackoff,
         @Value("${ethereumMaxProcessTime:300000}") long maxProcessTime,
         @Value("${ethereumBlockBatchSize:100}") long batchSize,
-        @Value("${ethereumBlockProcessingDelay:5000}") long blockProcessingDelay
+        @Value("${ethereumBlockProcessingDelay:0}") long blockProcessingDelay
     ) {
         this.backoff = Retry.backoff(maxAttempts, Duration.ofMillis(minBackoff));
         this.maxProcessTime = maxProcessTime;

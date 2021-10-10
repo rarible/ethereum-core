@@ -14,6 +14,7 @@ import reactor.core.publisher.Mono
 import reactor.util.retry.Retry
 import scala.reflect.Manifest
 import scalether.core.MonoEthereum
+import java.io.IOException
 import java.time.Duration
 
 @Configuration
@@ -29,7 +30,7 @@ class EthereumAutoConfiguration(
     fun ethereum() = with(ethereumProperties) {
         val retry = Retry
             .backoff(retryMaxAttempts, Duration.ofMillis(retryBackoffDelay))
-            .filter { it is WebClientException }
+            .filter { it is WebClientException || it is IOException }
         val transport = object : WebClientTransport(
             httpUrl,
             MonoEthereum.mapper(),

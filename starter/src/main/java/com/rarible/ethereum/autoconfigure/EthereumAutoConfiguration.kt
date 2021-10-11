@@ -3,6 +3,7 @@ package com.rarible.ethereum.autoconfigure
 import io.daonomic.rpc.domain.Request
 import io.daonomic.rpc.domain.Response
 import io.daonomic.rpc.mono.WebClientTransport
+import io.netty.channel.ChannelException
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty
@@ -30,7 +31,7 @@ class EthereumAutoConfiguration(
     fun ethereum() = with(ethereumProperties) {
         val retry = Retry
             .backoff(retryMaxAttempts, Duration.ofMillis(retryBackoffDelay))
-            .filter { it is WebClientException || it is IOException }
+            .filter { it is WebClientException || it is IOException || it is ChannelException }
         val transport = object : WebClientTransport(
             httpUrl,
             MonoEthereum.mapper(),

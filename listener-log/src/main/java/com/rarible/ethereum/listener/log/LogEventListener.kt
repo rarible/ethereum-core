@@ -124,9 +124,6 @@ class LogEventListener<T : EventData>(
     }
 
     private fun processLogs(marker: Marker, block: Block<*>, logs: List<Log>): Flux<LogEvent> {
-        if (logs.isNotEmpty()) {
-            logger.info(marker, "processLogs ${logs.size} logs")
-        }
         val timestamp = block.timestamp().toLong()
         return logs.groupBy { it.transactionHash() }.values.toFlux()
             .flatMap { logsInTransaction -> logsInTransaction.sortedBy { log -> log.logIndex() }.withIndex().toFlux() }
@@ -134,7 +131,7 @@ class LogEventListener<T : EventData>(
     }
 
     private fun onLog(marker: Marker, index: Int, log: Log, timestamp: Long): Flux<LogEvent> {
-        logger.info(marker, "onLog $log")
+        logger.debug(marker, "onLog $log")
 
         return descriptor.convert(log, timestamp).toFlux()
             .collectList()
@@ -169,14 +166,14 @@ class LogEventListener<T : EventData>(
                                     val withCorrectId = toSave.copy(id = found.id, version = found.version, updatedAt = Instant.now())
 
                                     if (equals(withCorrectId, found).not()) {
-                                        logger.info(marker, "Saving changed LogEvent (${descriptor.collection}): $withCorrectId")
+                                        logger.debug(marker, "Saving changed LogEvent (${descriptor.collection}): $withCorrectId")
                                         logEventRepository.save(descriptor.collection, withCorrectId)
                                     } else {
-                                        logger.info(marker, "LogEvent didn't change (${descriptor.collection}): $withCorrectId")
+                                        logger.debug(marker, "LogEvent didn't change (${descriptor.collection}): $withCorrectId")
                                         found.justOrEmpty()
                                     }
                                 } else {
-                                    logger.info(marker, "Saving new LogEvent (${descriptor.collection}): $toSave")
+                                    logger.debug(marker, "Saving new LogEvent (${descriptor.collection}): $toSave")
                                     logEventRepository.save(descriptor.collection, toSave)
                                 }
                             }

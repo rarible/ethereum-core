@@ -10,6 +10,7 @@ import io.daonomic.rpc.domain.Word
 import org.apache.commons.lang3.time.DateUtils
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
+import org.springframework.beans.factory.annotation.Value
 import org.springframework.scheduling.annotation.Scheduled
 import org.springframework.stereotype.Service
 import reactor.core.publisher.Flux
@@ -26,12 +27,16 @@ class PendingLogsCheckJob(
     descriptors: List<LogEventDescriptor<*>>,
     private val ethereum: MonoEthereum,
     private val logListenService: LogListenService,
-    private val logEventsListeners: List<LogEventsListener>? = null
+    private val logEventsListeners: List<LogEventsListener>? = null,
+    @Value("\${pendingLogsProcessingEnabled:true}") private val pendingLogsProcessingEnabled: Boolean
 ) {
     private val collections = descriptors.map { it.collection }.toSet()
 
     @Scheduled(fixedRateString = "\${pendingLogsCheckJobInterval:${DateUtils.MILLIS_PER_MINUTE * 10}}", initialDelay = DateUtils.MILLIS_PER_MINUTE)
     fun job() {
+        if (!pendingLogsProcessingEnabled) {
+            return
+        }
         logger.info("Started logs processing job")
         try {
             collections.toFlux()

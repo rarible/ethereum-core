@@ -3,18 +3,23 @@ package com.rarible.ethereum.listener.log
 import org.apache.commons.lang3.time.DateUtils
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
+import org.springframework.beans.factory.annotation.Value
 import org.springframework.scheduling.annotation.Scheduled
 import org.springframework.stereotype.Service
 
 @Service
 class ReindexBlocksCheckJob(
-    private val reindexBlockService: ReindexBlockService
+    private val reindexBlockService: ReindexBlockService,
+    @Value("\${reindexBlocksJobEnabled:true}") private val reindexBlocksJobEnabled: Boolean
 ) {
     @Scheduled(
         fixedDelayString = "\${pendingBlocksCheckJobInterval:${DateUtils.MILLIS_PER_MINUTE}}",
         initialDelayString = "\${pendingBlocksCheckJobInterval:${DateUtils.MILLIS_PER_MINUTE}}"
     )
     fun job() {
+        if (!reindexBlocksJobEnabled) {
+            return
+        }
         logger.info("Started reindex pending blocks")
         try {
             reindexBlockService.indexPendingBlocks().block()

@@ -3,6 +3,7 @@ package com.rarible.ethereum.domain
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.module.kotlin.registerKotlinModule
 import org.assertj.core.api.Assertions.assertThat
+import org.assertj.core.api.Assertions.catchThrowableOfType
 import org.junit.jupiter.api.Test
 
 internal class EthUInt256Test {
@@ -37,6 +38,16 @@ internal class EthUInt256Test {
             .isEqualTo(SimpleData(EthUInt256.TEN))
         assertThat(mapper.readValue("{\"uint\":10}", SimpleData::class.java))
             .isEqualTo(SimpleData(EthUInt256.TEN))
+    }
+
+    @Test
+    fun `should throw IllegalArgumentException on wrong data`() {
+        catchThrowableOfType(
+            {
+                EthUInt256.of("wrong data")
+            },
+            IllegalArgumentException::class.java
+        )
     }
 }
 

@@ -63,9 +63,9 @@ data class EthUInt256(val value: BigInteger) : Comparable<EthUInt256>  {
     }
 
     companion object {
-        val ZERO = EthUInt256.of(0)
-        val ONE = EthUInt256.of(1)
-        val TEN = EthUInt256.of(10)
+        val ZERO = of(0)
+        val ONE = of(1)
+        val TEN = of(10)
 
         fun of(value: Long): EthUInt256 {
             return EthUInt256(BigInteger.valueOf(value))
@@ -76,12 +76,16 @@ data class EthUInt256(val value: BigInteger) : Comparable<EthUInt256>  {
         }
 
         fun of(value: String): EthUInt256 {
-            return if (value.startsWith("0x")) {
-                EthUInt256(Uint256Type.decode(Binary.apply(value), 0).value())
-            } else if (value.endsWith(".0")) {
-                EthUInt256(BigInteger(value.substring(0, value.length - 2), 10))
-            } else {
-                EthUInt256(BigInteger(value, 10))
+            return try {
+                if (value.startsWith("0x")) {
+                    EthUInt256(Uint256Type.decode(Binary.apply(value), 0).value())
+                } else if (value.endsWith(".0")) {
+                    EthUInt256(BigInteger(value.substring(0, value.length - 2), 10))
+                } else {
+                    EthUInt256(BigInteger(value, 10))
+                }
+            } catch (ex: Throwable) {
+                throw IllegalArgumentException("Can't parse value '$value'", ex)
             }
         }
 
@@ -97,8 +101,8 @@ data class EthUInt256(val value: BigInteger) : Comparable<EthUInt256>  {
     class EthUint256Deserializer : StdScalarDeserializer<EthUInt256>(EthUInt256::class.java) {
         override fun deserialize(parser: JsonParser, c: DeserializationContext): EthUInt256 {
             return when (parser.currentToken) {
-                JsonToken.VALUE_STRING -> EthUInt256.of(parser.text.trim())
-                JsonToken.VALUE_NUMBER_INT -> EthUInt256.of(parser.text.trim())
+                JsonToken.VALUE_STRING -> of(parser.text.trim())
+                JsonToken.VALUE_NUMBER_INT -> of(parser.text.trim())
                 else -> c.handleUnexpectedToken(_valueClass, parser) as EthUInt256
             }
         }

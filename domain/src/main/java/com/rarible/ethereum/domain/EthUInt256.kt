@@ -76,16 +76,12 @@ data class EthUInt256(val value: BigInteger) : Comparable<EthUInt256>  {
         }
 
         fun of(value: String): EthUInt256 {
-            return try {
-                if (value.startsWith("0x")) {
-                    EthUInt256(Uint256Type.decode(Binary.apply(value), 0).value())
-                } else if (value.endsWith(".0")) {
-                    EthUInt256(BigInteger(value.substring(0, value.length - 2), 10))
-                } else {
-                    EthUInt256(BigInteger(value, 10))
-                }
-            } catch (ex: Throwable) {
-                throw IllegalArgumentException("Can't parse value '$value'", ex)
+            return if (value.startsWith("0x")) {
+                EthUInt256(Uint256Type.decode(Binary.apply(value), 0).value())
+            } else if (value.endsWith(".0")) {
+                EthUInt256(BigInteger(value.substring(0, value.length - 2), 10))
+            } else {
+                EthUInt256(BigInteger(value, 10))
             }
         }
 

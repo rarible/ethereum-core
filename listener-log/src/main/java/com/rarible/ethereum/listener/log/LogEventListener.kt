@@ -1,5 +1,6 @@
 package com.rarible.ethereum.listener.log
 
+import com.rarible.core.apm.withSpan
 import com.rarible.core.common.justOrEmpty
 import com.rarible.core.common.retryOptimisticLock
 import com.rarible.core.common.toOptional
@@ -58,16 +59,17 @@ class LogEventListener<T : EventData>(
         }
         return Flux.concat(
             start,
-            ethereum.ethGetFullBlockByHash(event.hash)
+            ethereum.ethGetFullBlockByHash(event.hash).withSpan("getFullBlock")
                 .doOnError { th -> logger.warn("Unable to get block by hash: " + event.hash, th) }
                 .retryWhen(backoff)
                 .flatMapMany { block ->
                     Flux.concat(
-                        pendingLogService.markInactive(descriptor.collection, descriptor.topic, block),
+                        pendingLogService.markInactive(descriptor.collection, descriptor.topic, block)
+                            .withSpan("pending"),
                         onNewBlock(block)
                     )
                 }
-        )
+        ).withSpan("processTopicLogs", labels = listOf("topic" to topic.toString()))
     }
 
     private fun onNewBlock(block: Block<*>): Flux<LogEvent> {
@@ -78,7 +80,7 @@ class LogEventListener<T : EventData>(
                         .apply(TopicFilter.simple(descriptor.topic))
                         .address(*contracts.toTypedArray())
                         .blockHash(block.hash())
-                    ethereum.ethGetLogsJava(filter)
+                    ethereum.ethGetLogsJava(filter).withSpan("getLogs")
                         .doOnError { logger.warn(marker, "Unable to get logs for block ${block.hash()}", it) }
                         .retryWhen(backoff)
                 }
@@ -128,6 +130,7 @@ class LogEventListener<T : EventData>(
         return logs.groupBy { it.transactionHash() }.values.toFlux()
             .flatMap { logsInTransaction -> logsInTransaction.sortedBy { log -> log.logIndex() }.withIndex().toFlux() }
             .flatMap { (idx, log) -> onLog(marker, idx, log, timestamp) }
+            .withSpan("onLogs")
     }
 
     private fun onLog(marker: Marker, index: Int, log: Log, timestamp: Long): Flux<LogEvent> {

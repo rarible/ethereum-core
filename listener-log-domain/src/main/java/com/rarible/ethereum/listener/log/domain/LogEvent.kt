@@ -12,7 +12,7 @@ import java.time.Instant
 /**
  * Log event emitted by a smart contract and subject for business processing.
  * Such [LogEvent]s are filled with [data] created by [com.rarible.ethereum.listener.log.LogEventDescriptor]s.
- * They are saved to dedicated repositories, from which are queries and processed by upper level code (such as reducing services).
+ * They are saved to dedicated repositories, from which are queried and processed by upper level code (such as reducing services).
  */
 data class LogEvent(
     /**
@@ -32,7 +32,7 @@ data class LogEvent(
      */
     val transactionHash: Word,
     /**
-     * Status of the log event. Basically, only [LogEventStatus.CONFIRMED] log events impact business calculations.
+     * Status of the log event. Usually, only [LogEventStatus.CONFIRMED] log events impact business calculations.
      */
     val status: LogEventStatus,
     /**
@@ -45,18 +45,19 @@ data class LogEvent(
     val blockNumber: Long? = null,
     /**
      * Index of this log event inside the whole block.
+     * This is a native Ethereum value.
      */
     val logIndex: Int? = null,
     /**
      * Secondary index of this log event among all logs produced by `LogEventDescriptor.convert` for the same log
      * with exactly the same [blockNumber], [blockHash], [transactionHash], [logIndex] and [index].
-     * So this [minorLogIndex] is used to distinguish consuquent events.
+     * The [minorLogIndex] is used to distinguish consequent events.
      */
     val minorLogIndex: Int,
     /**
      * Index of this log event inside the transaction in which it was produced.
-     * It is different from [logIndex] is that the [logIndex] is per-block but [index] is per-transaction.
-     * Also note that [logIndex] is a commonly used index (defined in Ethereum spec), which the [index] is calculated by our code.
+     * It is different from [logIndex] in that the [logIndex] is per-block but [index] is per-transaction.
+     * Also note that [logIndex] is a commonly used index (defined in Ethereum spec), whereas the [index] is calculated by our code.
      */
     val index: Int,
     /**

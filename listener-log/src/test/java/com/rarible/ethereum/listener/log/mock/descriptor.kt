@@ -7,6 +7,7 @@ import org.springframework.stereotype.Component
 import reactor.core.publisher.Mono
 import scalether.domain.Address
 import scalether.domain.response.Log
+import scalether.domain.response.Transaction
 
 @Component
 class TransferEventDescriptor : LogEventDescriptor<Transfer> {
@@ -14,7 +15,7 @@ class TransferEventDescriptor : LogEventDescriptor<Transfer> {
     override val collection: String = "transfer"
     override val topic: Word = TransferEvent.id()
 
-    override fun convert(log: Log, timestamp: Long): Mono<Transfer> {
+    override fun convert(log: Log, transaction: Transaction, timestamp: Long): Mono<Transfer> {
         val scalether = TransferEvent.apply(log)
         return Mono.just(Transfer(
             from = scalether.from(),

@@ -28,7 +28,8 @@ data class LogEvent(
      */
     val topic: Word,
     /**
-     * Hash of the transaction inside block #[blockNumber].
+     * Hash of the transaction.
+     * Note that the transaction may be pending, in which case the [blockHash], [blockNumber] and [logIndex] are `null`.
      */
     val transactionHash: Word,
     /**
@@ -36,28 +37,28 @@ data class LogEvent(
      */
     val status: LogEventStatus,
     /**
-     * Hash of the block inside which this log event was produced.
+     * Hash of the block inside which this log event was produced, or `null` for pending logs.
      */
     val blockHash: Word? = null,
     /**
-     * Number of the block inside which this log event was produced.
+     * Number of the block inside which this log event was produced, or `null` for pending logs.
      */
     val blockNumber: Long? = null,
     /**
-     * Index of this log event inside the whole block.
+     * Index of this log event inside the whole block, or `null` for pending logs.
      * This is a native Ethereum value.
      */
     val logIndex: Int? = null,
     /**
      * Secondary index of this log event among all logs produced by `LogEventDescriptor.convert` for the same log
      * with exactly the same [blockNumber], [blockHash], [transactionHash], [logIndex] and [index].
-     * The [minorLogIndex] is used to distinguish consequent events.
+     * The [minorLogIndex] is used to distinguish consequent business events.
      */
     val minorLogIndex: Int,
     /**
-     * Index of this log event inside the transaction in which it was produced.
-     * It is different from [logIndex] in that the [logIndex] is per-block but [index] is per-transaction.
-     * Also note that [logIndex] is a commonly used index (defined in Ethereum spec), whereas the [index] is calculated by our code.
+     * 0-based index of this log event among logs of the same transaction and having the same topic and coming from the same set of listened addresses.
+     * It is different from [logIndex] in that the [logIndex] is per-block but [index] is per-transaction-per-topic-per-set-of-addresses.
+     * Note that [logIndex] is a commonly used index (defined in Ethereum spec), whereas the [index] is calculated by our code.
      */
     val index: Int,
     /**

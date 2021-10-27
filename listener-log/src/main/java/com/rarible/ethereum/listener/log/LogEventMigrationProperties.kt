@@ -5,5 +5,6 @@ import org.springframework.stereotype.Component
 
 @Component
 data class LogEventMigrationProperties(
-    @Value("\${createLogEventIndexContainingAddress:false}") val createLogEventIndexContainingAddress: Boolean
+    @Value("\${createLogEventIndexContainingAddress:false}") val createLogEventIndexContainingAddress: Boolean,
+    @Value("\${recalculateLogEventRaribleIndex:false}") val recalculateLogEventRaribleIndex: Boolean
 )

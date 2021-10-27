@@ -14,6 +14,7 @@ import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.context.annotation.PropertySource
 import org.springframework.context.annotation.PropertySources
+import org.springframework.data.mongodb.core.MongoTemplate
 import org.springframework.data.mongodb.core.ReactiveMongoOperations
 import org.springframework.test.context.ContextConfiguration
 import org.web3j.utils.Numeric
@@ -37,6 +38,8 @@ class AbstractIntegrationTest {
     protected lateinit var ethereum: MonoEthereum
     @Autowired
     protected lateinit var mongo: ReactiveMongoOperations
+    @Autowired
+    protected lateinit var mongoTemplate: MongoTemplate
 
     private fun Mono<Word>.waitReceipt(): TransactionReceipt {
         val value = this.block()

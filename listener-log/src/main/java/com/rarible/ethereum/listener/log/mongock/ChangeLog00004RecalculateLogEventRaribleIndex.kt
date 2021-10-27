@@ -38,6 +38,22 @@ class ChangeLog00004RecalculateLogEventRaribleIndex {
         }
     }
 
+    @ChangeSet(id = "copyFixedIndexToIndexField", order = "00002", runAlways = true, author = "Patrikeev")
+    fun copyFixedIndexToIndexField(
+        template: MongockTemplate,
+        @NonLockGuarded logEventMigrationProperties: LogEventMigrationProperties,
+        @NonLockGuarded holder: LogEventDescriptorHolder
+    ) {
+        if (!logEventMigrationProperties.copyFixedIndexToIndexField) {
+            logger.info("Skip copying 'fixedIndex' to 'index'")
+            return
+        }
+        holder.list.map { it.collection }.distinct().forEach {
+            logger.info("Copying 'fixedIndex' to 'index' field for $it")
+            copyFixedIndexToIndexField(template, it)
+        }
+    }
+
     fun recalculateLogEventRaribleIndex(template: MongockTemplate, collectionName: String) {
         val query = Query(LogEvent::visible isEqualTo true)
             .with(
@@ -68,6 +84,32 @@ class ChangeLog00004RecalculateLogEventRaribleIndex {
         }
         if (window.isNotEmpty()) {
             recalculateIndexInsideWindow(template, collectionName, window)
+        }
+    }
+
+    fun copyFixedIndexToIndexField(template: MongockTemplate, collectionName: String) {
+        val query = Query(LogEvent::visible isEqualTo true)
+        var updated = 0
+        var seen = 0
+        template.stream<LogEvent>(query, collectionName).use { iterator ->
+            seen++
+            for (logEvent in iterator) {
+                if (logEvent.fixedIndex != null && logEvent.index != logEvent.fixedIndex) {
+                    try {
+                        if (++updated % 5000 == 0) {
+                            logger.info("Updated $updated of total seen $seen log events")
+                        }
+                        template
+                            .update(LogEvent::class.java)
+                            .inCollection(collectionName)
+                            .matching(LogEvent::id isEqualTo logEvent.id)
+                            .apply(Update().set(LogEvent::index.name, logEvent.fixedIndex))
+                            .first()
+                    } catch (e: Exception) {
+                        logger.warn("Failed to update ${logEvent.id}: ${e.message}", e)
+                    }
+                }
+            }
         }
     }
 

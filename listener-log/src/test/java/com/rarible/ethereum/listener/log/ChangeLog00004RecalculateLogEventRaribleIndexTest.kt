@@ -78,6 +78,19 @@ class ChangeLog00004RecalculateLogEventRaribleIndexTest : AbstractIntegrationTes
         }
     }
 
+    @Test
+    internal fun `copy fixedIndex to index`() {
+        val event1 = randomLogEvent().copy(fixedIndex = 2)
+        val notChangedEvents = listOf(randomLogEvent())
+        saveLogs(event1)
+        saveLogs(*notChangedEvents.toTypedArray())
+        migration.copyFixedIndexToIndexField(mongockTemplate, collectionName)
+        assertThat(find(event1).index).isEqualTo(2)
+        for (event in notChangedEvents) {
+            assertThat(find(event).index).isEqualTo(event.index)
+        }
+    }
+
     private fun saveLogs(vararg logEvents: LogEvent) {
         logEvents.forEach {
             logEventRepository.save(collectionName, it).block()

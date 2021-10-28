@@ -55,7 +55,7 @@ class ChangeLog00001 {
                     .on("index", Sort.Direction.ASC)
                     .on("minorLogIndex", Sort.Direction.ASC)
                     .on("visible", Sort.Direction.ASC)
-                    .named("transactionHash_1_topic_1_address_1_index_1_minorLogIndex_1_visible_1")
+                    .named(NEW_VISIBLE_INDEX_NAME)
                     .background()
                     .unique()
                     .partial(PartialIndexFilter.of(Document("visible", true)))
@@ -106,5 +106,6 @@ class ChangeLog00001 {
 
     companion object {
         const val VISIBLE_INDEX_NAME = "transactionHash_1_topic_1_index_1_minorLogIndex_1_visible_1"
+        const val NEW_VISIBLE_INDEX_NAME = "transactionHash_1_topic_1_address_1_index_1_minorLogIndex_1_visible_1"
     }
 }

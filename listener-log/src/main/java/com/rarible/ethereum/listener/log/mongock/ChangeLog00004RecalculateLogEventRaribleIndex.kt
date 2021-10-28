@@ -54,6 +54,26 @@ class ChangeLog00004RecalculateLogEventRaribleIndex {
         }
     }
 
+    @ChangeSet(id = "removeOldMongoIndex", order = "00003", runAlways = true, author = "Patrikeev")
+    fun removeOldMongoIndex(
+        template: MongockTemplate,
+        @NonLockGuarded logEventMigrationProperties: LogEventMigrationProperties,
+        @NonLockGuarded holder: LogEventDescriptorHolder
+    ) {
+        if (!logEventMigrationProperties.removeOldMongoIndex) {
+            logger.info("Skip removing the old mongo index ${ChangeLog00001.VISIBLE_INDEX_NAME}")
+            return
+        }
+        holder.list.map { it.collection }.distinct().forEach {
+            logger.info("Removing Mongo index from $it: ${ChangeLog00001.VISIBLE_INDEX_NAME}")
+            try {
+                template.indexOps(it).dropIndex(ChangeLog00001.VISIBLE_INDEX_NAME)
+            } catch (e: Exception) {
+                logger.error("Failed to remove Mongo Index from $it: ${ChangeLog00001.VISIBLE_INDEX_NAME}", e)
+            }
+        }
+    }
+
     fun recalculateLogEventRaribleIndex(template: MongockTemplate, collectionName: String) {
         val query = Query(LogEvent::visible isEqualTo true)
             .with(

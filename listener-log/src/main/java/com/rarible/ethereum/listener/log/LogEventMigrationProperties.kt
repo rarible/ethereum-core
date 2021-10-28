@@ -7,5 +7,6 @@ import org.springframework.stereotype.Component
 data class LogEventMigrationProperties(
     @Value("\${createLogEventIndexContainingAddress:false}") val createLogEventIndexContainingAddress: Boolean,
     @Value("\${recalculateLogEventRaribleIndex:false}") val recalculateLogEventRaribleIndex: Boolean,
-    @Value("\${copyFixedIndexToIndexField:false}") val copyFixedIndexToIndexField: Boolean
+    @Value("\${copyFixedIndexToIndexField:false}") val copyFixedIndexToIndexField: Boolean,
+    @Value("\${removeOldMongoIndex:false}") val removeOldMongoIndex: Boolean
 )

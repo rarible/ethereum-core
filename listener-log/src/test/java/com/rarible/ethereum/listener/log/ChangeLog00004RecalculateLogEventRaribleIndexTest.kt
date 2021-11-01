@@ -14,11 +14,13 @@ import io.daonomic.rpc.domain.Word
 import org.assertj.core.api.Assertions.assertThat
 import org.bson.types.ObjectId
 import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import java.time.Instant
 import java.util.function.Supplier
 
+@Disabled
 class ChangeLog00004RecalculateLogEventRaribleIndexTest : AbstractIntegrationTest() {
     private val migration = ChangeLog00004RecalculateLogEventRaribleIndex()
 

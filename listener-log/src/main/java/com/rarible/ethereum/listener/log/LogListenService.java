@@ -1,6 +1,5 @@
 package com.rarible.ethereum.listener.log;
 
-import com.rarible.core.apm.JavaHelpers;
 import com.rarible.core.logging.LoggerContext;
 import com.rarible.core.logging.LoggingUtils;
 import com.rarible.ethereum.block.BlockEvent;
@@ -33,8 +32,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-import static com.rarible.core.apm.JavaHelpers.withSpan;
-import static java.util.Arrays.asList;
 import static java.util.Collections.emptyList;
 import static java.util.stream.Collectors.toList;
 
@@ -144,35 +141,24 @@ public class LogListenService {
     }
 
     public Mono<Void> onBlock(NewBlockEvent event) {
-        final Mono<Void> result = LoggingUtils.withMarker(marker -> {
-            logger.info(marker, "onBlockEvent {}", event);
-            return withSpan(
-                onBlockEvent(event).collectList(),
-                "processLogs", null, null, null, emptyList()
-            )
-                .flatMap(it -> postProcessLogs(it).thenReturn(BlockStatus.SUCCESS))
-                .timeout(Duration.ofMillis(maxProcessTime))
-                .onErrorResume(ex -> {
-                    logger.error(marker, "Unable to handle event " + event, ex);
-                    return Mono.just(BlockStatus.ERROR);
+        return LoggingUtils.withMarker(marker -> {
+                    logger.info(marker, "onBlockEvent {}", event);
+                    return onBlockEvent(event)
+                            .collectList()
+                            .flatMap(it -> postProcessLogs(it).thenReturn(BlockStatus.SUCCESS))
+                            .timeout(Duration.ofMillis(maxProcessTime))
+                            .onErrorResume(ex -> {
+                                logger.error(marker, "Unable to handle event " + event, ex);
+                                return Mono.just(BlockStatus.ERROR);
+                            })
+                            .flatMap(status -> blockRepository.updateBlockStatus(event.getNumber(), status))
+                            .then()
+                            .onErrorResume(ex -> {
+                                logger.error(marker, "Unable to save block status " + event, ex);
+                                return Mono.empty();
+                            });
                 })
-                .flatMap(status -> blockRepository.updateBlockStatus(event.getNumber(), status))
-                .then()
-                .onErrorResume(ex -> {
-                    logger.error(marker, "Unable to save block status " + event, ex);
-                    return Mono.empty();
-                });
-        });
-        return JavaHelpers.withTransaction(
-            result.subscriberContext(ctx -> LoggerContext.addToContext(ctx, event.getContextParams())),
-            "block",
-            asList(
-                new Pair<>("blockNumber", event.getNumber()),
-                new Pair<>("blockHash", event.getHash().toString())
-            ),
-            null,
-            null
-        );
+                .subscriberContext(ctx -> LoggerContext.addToContext(ctx, event.getContextParams()));
     }
 
     private Flux<LogEvent> onBlockEvent(NewBlockEvent event) {
@@ -181,10 +167,9 @@ public class LogListenService {
     }
 
     private Mono<Void> postProcessLogs(List<LogEvent> logs) {
-        final Mono<Void> result = Flux.fromIterable(logEventsListeners != null ? logEventsListeners : emptyList())
+        return Flux.fromIterable(logEventsListeners != null ? logEventsListeners : emptyList())
             .flatMap(it -> it.postProcessLogs(logs))
             .then();
-        return withSpan(result, "postProcess", null, null, null, emptyList());
     }
 
     private LogEventListener<?> createLogEventListener(LogEventDescriptor<?> descriptor) {

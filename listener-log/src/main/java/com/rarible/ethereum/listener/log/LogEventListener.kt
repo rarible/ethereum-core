@@ -1,6 +1,5 @@
 package com.rarible.ethereum.listener.log
 
-import com.rarible.core.apm.withSpan
 import com.rarible.core.common.justOrEmpty
 import com.rarible.core.common.retryOptimisticLock
 import com.rarible.core.common.toOptional
@@ -62,17 +61,16 @@ class LogEventListener<T : EventData>(
         }
         return Flux.concat(
             start,
-            ethereum.ethGetFullBlockByHash(event.hash).withSpan("getFullBlock")
+            ethereum.ethGetFullBlockByHash(event.hash)
                 .doOnError { th -> logger.warn("Unable to get block by hash: " + event.hash, th) }
                 .retryWhen(backoff)
                 .flatMapMany { block ->
                     Flux.concat(
-                        pendingLogService.markInactive(descriptor.collection, descriptor.topic, block)
-                            .withSpan("pending"),
+                        pendingLogService.markInactive(descriptor.collection, descriptor.topic, block),
                         onNewBlock(block)
                     )
                 }
-        ).withSpan("processTopicLogs", labels = listOf("topic" to topic.toString()))
+        )
     }
 
     private fun onNewBlock(block: Block<Transaction>): Flux<LogEvent> {
@@ -83,7 +81,7 @@ class LogEventListener<T : EventData>(
                         .apply(TopicFilter.simple(descriptor.topic))
                         .address(*contracts.toTypedArray())
                         .blockHash(block.hash())
-                    ethereum.ethGetLogsJava(filter).withSpan("getLogs")
+                    ethereum.ethGetLogsJava(filter)
                         .doOnError { logger.warn(marker, "Unable to get logs for block ${block.hash()}", it) }
                         .retryWhen(backoff)
                 }
@@ -152,7 +150,6 @@ class LogEventListener<T : EventData>(
                 val transaction = transactions[log.transactionHash()] ?: error("Can't find transaction for log $log")
                 onLog(marker, index, log, transaction, timestamp)
             }
-            .withSpan("onLogs")
     }
 
     private fun findTheSameLogEvent(toSave: LogEvent): Mono<LogEvent> {

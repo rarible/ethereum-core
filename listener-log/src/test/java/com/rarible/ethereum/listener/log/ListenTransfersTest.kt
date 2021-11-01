@@ -20,6 +20,7 @@ import org.apache.commons.lang3.RandomUtils
 import org.apache.commons.lang3.RandomUtils.nextBytes
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Assertions.*
+import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
@@ -46,13 +47,21 @@ class ListenTransfersTest : AbstractIntegrationTest() {
     private lateinit var onErc20TransferEventListener1: OnLogEventListener
 
     @Autowired
-    private lateinit var onErc20TransferEventListener2 : OnLogEventListener
+    private lateinit var onErc20TransferEventListener2: OnLogEventListener
 
     @Autowired
-    private lateinit var onOtherEventListener : OnLogEventListener
+    private lateinit var onOtherEventListener: OnLogEventListener
 
     @Autowired
     private lateinit var pendingLogsCheckJob: PendingLogsCheckJob
+
+    @BeforeEach
+    fun prepareMocks() {
+        clearMocks(onErc20TransferEventListener1, onErc20TransferEventListener2)
+        listOf(onErc20TransferEventListener1, onErc20TransferEventListener2).forEach {
+            every { it.onLogEvent(any()) } returns Mono.empty()
+        }
+    }
 
     @Test
     fun mintAndListen() {
@@ -61,30 +70,34 @@ class ListenTransfersTest : AbstractIntegrationTest() {
         val beneficiary = Address.apply(nextBytes(20))
         val value = BigInteger.valueOf(RandomUtils.nextLong(0, 1000000))
         val receipt = contract.mint(beneficiary, value).execute().verifySuccess()
-        assertEquals(contract.balanceOf(beneficiary).call().block()!!, value)
+        assertThat(contract.balanceOf(beneficiary).call().block()!!).isEqualTo(value)
 
         waitAssert {
             assertThat(mongo.count(Query(), "transfer").block()!!)
                 .isEqualTo(1L)
 
             val event = mongo.findOne<LogEvent>(Query(), "transfer").block()!!
-            assertEquals(event.status, LogEventStatus.CONFIRMED)
+            assertThat(event.status).isEqualTo(LogEventStatus.CONFIRMED)
             assertTrue(event.data is Transfer, "class is ${event.data.javaClass}")
             val t: Transfer = event.data as Transfer
-            assertEquals(t.from, Address.apply(ByteArray(20)))
-            assertEquals(t.to, beneficiary)
-            assertEquals(t.value, value)
+            assertThat(t.from).isEqualTo(Address.apply(ByteArray(20)))
+            assertThat(t.to).isEqualTo(beneficiary)
+            assertThat(t.value).isEqualTo(value)
 
-            verify(exactly = 1) { onErc20TransferEventListener1.onLogEvent(withArg {
-                assertEquals(it.id, event.id)
-                assertEquals(it.topic, event.topic)
-                assertEquals(it.data, event.data)
-            })}
-            verify(exactly = 1) { onErc20TransferEventListener2.onLogEvent(withArg {
-                assertEquals(it.id, event.id)
-                assertEquals(it.topic, event.topic)
-                assertEquals(it.data, event.data)
-            })}
+            verify(exactly = 1) {
+                onErc20TransferEventListener1.onLogEvent(withArg {
+                    assertThat(it.id).isEqualTo(event.id)
+                    assertThat(it.topic).isEqualTo(event.topic)
+                    assertThat(it.data).isEqualTo(event.data)
+                })
+            }
+            verify(exactly = 1) {
+                onErc20TransferEventListener2.onLogEvent(withArg {
+                    assertThat(it.id).isEqualTo(event.id)
+                    assertThat(it.topic).isEqualTo(event.topic)
+                    assertThat(it.data).isEqualTo(event.data)
+                })
+            }
             verify(exactly = 0) { onOtherEventListener.onLogEvent(any()) }
         }
 
@@ -95,22 +108,19 @@ class ListenTransfersTest : AbstractIntegrationTest() {
 
         waitAssert {
             val block = mongo.findById<BlockHead>(receipt.blockNumber().toLong()).block()!!
-            assertEquals(block.status, BlockStatus.SUCCESS)
+            assertThat(block.status).isEqualTo(BlockStatus.SUCCESS)
         }
     }
 
     @Test
     fun confirmPending() {
-        clearMocks(onErc20TransferEventListener1, onErc20TransferEventListener2)
-        prepareOnTransferLogEventListenerMocks(onErc20TransferEventListener1, onErc20TransferEventListener2)
-
         val contract = TestERC20.deployAndWait(sender, poller, "NAME", "NM").block()!!
         val value = BigInteger.valueOf(RandomUtils.nextLong(0, 1000000))
         contract.mint(sender.from(), value).execute().verifySuccess()
-        assertEquals(contract.balanceOf(sender.from()).call().block()!!, value)
+        assertThat(contract.balanceOf(sender.from()).call().block()!!).isEqualTo(value)
 
         waitAssert {
-            assertEquals(mongo.count(Query(), "transfer").block()!!, 1)
+            assertThat(mongo.count(Query(), "transfer").block()!!).isEqualTo(1)
         }
 
         val beneficiary = Address.apply(nextBytes(20))
@@ -129,40 +139,40 @@ class ListenTransfersTest : AbstractIntegrationTest() {
                 visible = true,
                 createdAt = Instant.now(),
                 updatedAt = Instant.now()
-            ), "transfer").block()!!
+            ), "transfer"
+        ).block()!!
 
         waitAssert {
-            assertEquals(mongo.count(Query(), "transfer").block()!!, 3L)
-            val confirmed = mongo.findOne(Query(Criteria.where("_id").ne(saved.id)), LogEvent::class.java, "transfer").block()!!
-            assertEquals(confirmed.status, LogEventStatus.CONFIRMED)
+            assertThat(mongo.count(Query(), "transfer").block()!!).isEqualTo(3L)
+            val confirmed =
+                mongo.findOne(Query(Criteria.where("_id").ne(saved.id)), LogEvent::class.java, "transfer").block()!!
+            assertThat(confirmed.status).isEqualTo(LogEventStatus.CONFIRMED)
             assertNotNull(confirmed.blockHash)
             assertNotNull(confirmed.blockNumber)
             assertNotNull(confirmed.logIndex)
         }
         val inactive = mongo.findById(saved.id, LogEvent::class.java, "transfer").block()
-        assertEquals(inactive.status, LogEventStatus.INACTIVE)
+        assertThat(inactive.status).isEqualTo(LogEventStatus.INACTIVE)
 
         val block = mongo.findById(tx.blockNumber().toLong(), BlockHead::class.java).block()!!
-        assertEquals(block.status, BlockStatus.SUCCESS)
+        assertThat(block.status).isEqualTo(BlockStatus.SUCCESS)
     }
 
     @Test
     fun revertPending() {
-        clearMocks(onErc20TransferEventListener1, onErc20TransferEventListener2)
-        prepareOnTransferLogEventListenerMocks(onErc20TransferEventListener1, onErc20TransferEventListener2)
-
         val contract = TestERC20.deployAndWait(sender, poller, "NAME", "NM").block()!!
 
         val value = BigInteger.valueOf(RandomUtils.nextLong(0, 1000000))
         contract.mint(sender.from(), value).execute().verifySuccess()
-        assertEquals(contract.balanceOf(sender.from()).call().block()!!, value)
+        assertThat(contract.balanceOf(sender.from()).call().block()!!).isEqualTo(value)
 
         waitAssert {
-            assertEquals(mongo.count(Query(), "transfer").block()!!, 1)
+            assertThat(mongo.count(Query(), "transfer").block()!!).isEqualTo(1)
         }
 
         val beneficiary = Address.apply(nextBytes(20))
-        val transferReceipt = contract.transfer(beneficiary, value).withGas(BigInteger.valueOf(23000)).execute().verifyError()
+        val transferReceipt =
+            contract.transfer(beneficiary, value).withGas(BigInteger.valueOf(23000)).execute().verifyError()
 
         val saved = mongo.save(
             LogEvent(
@@ -176,30 +186,28 @@ class ListenTransfersTest : AbstractIntegrationTest() {
                 visible = true,
                 createdAt = Instant.now(),
                 updatedAt = Instant.now()
-            ), "transfer").block()!!
+            ), "transfer"
+        ).block()!!
 
         waitAssert {
             val read = mongo.findById(saved.id, LogEvent::class.java, "transfer").block()!!
-            assertEquals(read.status, LogEventStatus.INACTIVE)
+            assertThat(read.status).isEqualTo(LogEventStatus.INACTIVE)
             assertNull(read.blockNumber)
             assertNull(read.logIndex)
-            assertEquals(mongo.count(Query(), "transfer").block()!!, 2L)
+            assertThat(mongo.count(Query(), "transfer").block()!!).isEqualTo(2L)
         }
     }
 
     @Test
     fun revertCancelled() {
-        clearMocks(onErc20TransferEventListener1, onErc20TransferEventListener2)
-        prepareOnTransferLogEventListenerMocks(onErc20TransferEventListener1, onErc20TransferEventListener2)
-
         val contract = TestERC20.deployAndWait(sender, poller, "NAME", "NM").block()!!
 
         val value = BigInteger.valueOf(RandomUtils.nextLong(0, 1000000))
         contract.mint(sender.from(), value).execute().verifySuccess()
-        assertEquals(contract.balanceOf(sender.from()).call().block()!!, value)
+        assertThat(contract.balanceOf(sender.from()).call().block()!!).isEqualTo(value)
 
         waitAssert {
-            assertEquals(mongo.count(Query(), "transfer").block()!!, 1)
+            assertThat(mongo.count(Query(), "transfer").block()!!).isEqualTo(1)
         }
 
         val beneficiary = Address.apply(nextBytes(20))
@@ -217,14 +225,15 @@ class ListenTransfersTest : AbstractIntegrationTest() {
                 visible = true,
                 createdAt = Instant.now().minus(10, ChronoUnit.MINUTES),
                 updatedAt = Instant.now().minus(10, ChronoUnit.MINUTES)
-            ), "transfer").block()!!
+            ), "transfer"
+        ).block()!!
 
         TestERC20.deploy(sender, "NAME", "NM").verifySuccess()
         pendingLogsCheckJob.job()
 
         waitAssert {
             val read = mongo.findById(saved.id, LogEvent::class.java, "transfer").block()!!
-            assertEquals(read.status, LogEventStatus.DROPPED)
+            assertThat(read.status).isEqualTo(LogEventStatus.DROPPED)
             assertNull(read.blockNumber)
             assertNull(read.logIndex)
         }
@@ -232,9 +241,6 @@ class ListenTransfersTest : AbstractIntegrationTest() {
 
     @Test
     fun reindex() {
-        clearMocks(onErc20TransferEventListener1, onErc20TransferEventListener2)
-        prepareOnTransferLogEventListenerMocks(onErc20TransferEventListener1, onErc20TransferEventListener2)
-
         val number = ethereum.ethBlockNumber().block()!!.toLong()
 
         val contract = TestERC20.deployAndWait(sender, poller, "NAME", "NM").block()!!
@@ -242,7 +248,7 @@ class ListenTransfersTest : AbstractIntegrationTest() {
         val beneficiary = Address.apply(nextBytes(20))
         val value = BigInteger.valueOf(RandomUtils.nextLong(0, 1000000))
         val receipt = contract.mint(beneficiary, value).execute().verifySuccess()
-        assertEquals(contract.balanceOf(beneficiary).call().block()!!, value)
+        assertThat(contract.balanceOf(beneficiary).call().block()!!).isEqualTo(value)
 
         waitAssert {
             assertThat(mongo.count(Query(), "transfer").block()!!)
@@ -256,7 +262,7 @@ class ListenTransfersTest : AbstractIntegrationTest() {
 
         waitAssert {
             val block = mongo.findById<BlockHead>(receipt.blockNumber().toLong()).block()!!
-            assertEquals(block.status, BlockStatus.SUCCESS)
+            assertThat(block.status).isEqualTo(BlockStatus.SUCCESS)
         }
 
         val numberEnd = ethereum.ethBlockNumber().block()!!.toLong()
@@ -285,12 +291,6 @@ class ListenTransfersTest : AbstractIntegrationTest() {
 
         assertThat(mongo.find<LogEvent>(Query(), "transfer").collectList().block())
             .hasSize(transfers.size)
-    }
-
-    private fun prepareOnTransferLogEventListenerMocks(vararg listeners: OnLogEventListener) {
-        listeners.forEach {
-            every { it.onLogEvent(any()) } returns Mono.empty()
-        }
     }
 
     companion object {

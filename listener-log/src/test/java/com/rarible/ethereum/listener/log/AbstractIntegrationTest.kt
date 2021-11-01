@@ -16,6 +16,7 @@ import org.springframework.context.annotation.PropertySource
 import org.springframework.context.annotation.PropertySources
 import org.springframework.data.mongodb.core.MongoTemplate
 import org.springframework.data.mongodb.core.ReactiveMongoOperations
+import org.springframework.test.context.ActiveProfiles
 import org.springframework.test.context.ContextConfiguration
 import org.web3j.utils.Numeric
 import reactor.core.publisher.Mono
@@ -29,6 +30,7 @@ import java.math.BigInteger
 @MongoCleanup
 @SpringBootTest
 @ContextConfiguration(classes = [TestLogConfiguration::class, EthereumConfigurationIntr::class])
+@ActiveProfiles("integration")
 class AbstractIntegrationTest {
     @Autowired
     protected lateinit var sender: MonoTransactionSender

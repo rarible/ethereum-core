@@ -65,6 +65,10 @@ data class LogEvent(
      * Whether this log event should be considered for processing.
      */
     val visible: Boolean = true,
+
+    // TODO: temporary field used for re-calculation of the 'index' [RPN-1279]. Remove after the migrations are run.
+    val fixedIndex: Int? = null,
+
     @Id
     override val id: ObjectId = ObjectId.get(),
     @Version

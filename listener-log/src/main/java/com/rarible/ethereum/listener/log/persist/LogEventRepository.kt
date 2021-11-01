@@ -15,6 +15,7 @@ import org.springframework.data.mongodb.core.query.isEqualTo
 import org.springframework.stereotype.Component
 import reactor.core.publisher.Flux
 import reactor.core.publisher.Mono
+import scalether.domain.Address
 
 @Component
 class LogEventRepository(
@@ -53,6 +54,23 @@ class LogEventRepository(
             LogEvent::minorLogIndex isEqualTo minorLogIndex
         )
         return mongo.findOne(Query(c), LogEvent::class.java, collection)
+    }
+
+    fun findVisibleByNewKey(
+        collection: String,
+        transactionHash: Word,
+        topic: Word,
+        address: Address,
+        index: Int,
+        minorLogIndex: Int
+    ): Mono<LogEvent> {
+        val c = Criteria.where("transactionHash").`is`(transactionHash)
+            .and("topic").`is`(topic)
+            .and("address").`is`(address)
+            .and("index").`is`(index)
+            .and("minorLogIndex").`is`(minorLogIndex)
+            .and("visible").`is`(true)
+        return mongo.findOne(Query.query(c).withHint(ChangeLog00001.NEW_VISIBLE_INDEX_NAME), LogEvent::class.java, collection)
     }
 
     fun save(collection: String, event: LogEvent): Mono<LogEvent> {

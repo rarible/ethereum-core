@@ -13,6 +13,7 @@ import org.springframework.data.mongodb.core.query.Query
 import org.springframework.data.mongodb.core.query.Update
 import org.springframework.data.mongodb.core.query.isEqualTo
 import org.springframework.data.mongodb.core.stream
+import java.time.Duration
 
 @ChangeLog(order = "00004")
 class ChangeLog00004RecalculateLogEventRaribleIndex {
@@ -83,6 +84,7 @@ class ChangeLog00004RecalculateLogEventRaribleIndex {
                     Sort.Order.asc(LogEvent::address.name)
                 )
             ).withHint(ChangeLog00001.NEW_VISIBLE_INDEX_NAME)
+            .maxTime(Duration.ofDays(2))
             .also {
                 it.fields().exclude("data")
             }
@@ -112,6 +114,8 @@ class ChangeLog00004RecalculateLogEventRaribleIndex {
 
     fun copyFixedIndexToIndexField(template: MongockTemplate, collectionName: String) {
         val query = Query(LogEvent::visible isEqualTo true)
+            .maxTime(Duration.ofDays(2))
+        query.fields().exclude("data")
         var updated = 0
         var seen = 0
         template.stream<LogEvent>(query, collectionName).use { iterator ->
@@ -126,7 +130,10 @@ class ChangeLog00004RecalculateLogEventRaribleIndex {
                             .update(LogEvent::class.java)
                             .inCollection(collectionName)
                             .matching(LogEvent::id isEqualTo logEvent.id)
-                            .apply(Update().set(LogEvent::index.name, logEvent.fixedIndex))
+                            .apply(Update()
+                                .set(LogEvent::index.name, logEvent.fixedIndex)
+                                .set(LogEvent::oldIndex.name, logEvent.index)
+                            )
                             .first()
                     } catch (e: Exception) {
                         logger.warn("Failed to update ${logEvent.id}: ${e.message}", e)

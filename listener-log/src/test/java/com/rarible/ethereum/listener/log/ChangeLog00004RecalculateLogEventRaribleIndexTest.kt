@@ -103,8 +103,19 @@ class ChangeLog00004RecalculateLogEventRaribleIndexTest : AbstractIntegrationTes
         val notChangedEvents = listOf(randomLogEvent())
         saveLogs(event1)
         saveLogs(*notChangedEvents.toTypedArray())
+        run {
+            val brokenEvent = randomLogEvent()
+            saveLogs(brokenEvent)
+            mongockTemplate.update<LogEvent>()
+                .inCollection(collectionName)
+                .matching(LogEvent::id isEqualTo brokenEvent.id)
+                .apply(Update().set("data._class", "unknown class"))
+                .first()
+        }
         migration.copyFixedIndexToIndexField(mongockTemplate, collectionName)
-        assertThat(find(event1).index).isEqualTo(2)
+        val fixedLog = find(event1)
+        assertThat(fixedLog.index).isEqualTo(2)
+        assertThat(fixedLog.oldIndex).isEqualTo(event1.index)
         for (event in notChangedEvents) {
             assertThat(find(event).index).isEqualTo(event.index)
         }

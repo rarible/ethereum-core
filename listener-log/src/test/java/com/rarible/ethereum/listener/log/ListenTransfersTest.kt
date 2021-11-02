@@ -37,8 +37,7 @@ import java.math.BigInteger
 import java.time.Instant
 import java.time.temporal.ChronoUnit
 
-@ExperimentalCoroutinesApi
-@EnableAutoConfiguration
+@IntegrationTest
 class ListenTransfersTest : AbstractIntegrationTest() {
     @Autowired
     private lateinit var taskService: TaskService

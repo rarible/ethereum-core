@@ -1,23 +1,16 @@
 package com.rarible.ethereum.listener.log
 
-import com.rarible.core.test.ext.EthereumTest
-import com.rarible.core.test.ext.MongoCleanup
-import com.rarible.core.test.ext.MongoTest
-import com.rarible.ethereum.listener.log.mock.TestLogConfiguration
 import io.daonomic.rpc.domain.Word
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Value
-import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.context.annotation.PropertySource
 import org.springframework.context.annotation.PropertySources
 import org.springframework.data.mongodb.core.MongoTemplate
 import org.springframework.data.mongodb.core.ReactiveMongoOperations
-import org.springframework.test.context.ActiveProfiles
-import org.springframework.test.context.ContextConfiguration
 import org.web3j.utils.Numeric
 import reactor.core.publisher.Mono
 import scalether.core.MonoEthereum
@@ -25,13 +18,7 @@ import scalether.domain.response.TransactionReceipt
 import scalether.transaction.*
 import java.math.BigInteger
 
-@EthereumTest
-@MongoTest
-@MongoCleanup
-@SpringBootTest
-@ContextConfiguration(classes = [TestLogConfiguration::class, EthereumConfigurationIntr::class])
-@ActiveProfiles("integration")
-class AbstractIntegrationTest {
+abstract class AbstractIntegrationTest {
     @Autowired
     protected lateinit var sender: MonoTransactionSender
     @Autowired
@@ -64,7 +51,10 @@ class AbstractIntegrationTest {
 
 @Configuration
 @PropertySources(
-    PropertySource(value = ["classpath:/ethereum.properties", "classpath:/ethereum-test.properties"], ignoreResourceNotFound = true)
+    PropertySource(
+        value = ["classpath:/ethereum.properties", "classpath:/ethereum-test.properties"],
+        ignoreResourceNotFound = true
+    )
 )
 class EthereumConfigurationIntr {
     @Value("\${ethereumPrivateKey}")

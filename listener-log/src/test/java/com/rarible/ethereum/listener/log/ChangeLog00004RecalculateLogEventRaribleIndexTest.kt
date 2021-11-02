@@ -21,6 +21,7 @@ import java.time.Instant
 import java.util.function.Supplier
 
 @Disabled
+@IntegrationTest
 class ChangeLog00004RecalculateLogEventRaribleIndexTest : AbstractIntegrationTest() {
     private val migration = ChangeLog00004RecalculateLogEventRaribleIndex()
 

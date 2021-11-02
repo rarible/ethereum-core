@@ -1,3 +1,4 @@
 logging:
   level:
     com.rarible.ethereum.listener: DEBUG
+    org.springframework.test.context.cache: DEBUG

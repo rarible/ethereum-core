@@ -12,6 +12,7 @@ import com.rarible.ethereum.listener.log.domain.LogEventStatus
 import com.rarible.ethereum.listener.log.domain.NewBlockEvent
 import com.rarible.ethereum.listener.log.persist.LogEventRepository
 import io.daonomic.rpc.domain.Word
+import kotlinx.coroutines.flow.asFlow
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.slf4j.Marker
@@ -20,6 +21,7 @@ import reactor.core.publisher.Mono
 import reactor.kotlin.core.publisher.toFlux
 import reactor.util.retry.RetryBackoffSpec
 import scalether.core.MonoEthereum
+import scalether.domain.Address
 import scalether.domain.request.LogFilter
 import scalether.domain.request.TopicFilter
 import scalether.domain.response.Block
@@ -128,25 +130,36 @@ class LogEventListener<T : EventData>(
 
     private fun processLogs(marker: Marker, block: Block<*>, logs: List<Log>): Flux<LogEvent> {
         val timestamp = block.timestamp().toLong()
-        val indexedLogs = if (logEventMigrationProperties.useNewIndex) {
-            logs
-                .groupBy { it.transactionHash() to it.address() }.values
-                .flatMap { logsGroupedByTransactionAndAddress ->
-                    logsGroupedByTransactionAndAddress.sortedBy { log -> log.logIndex() }.withIndex()
-                }.toFlux()
-        } else {
-            logs
-                .groupBy { it.transactionHash() }.values.toFlux()
-                .flatMap { logsInTransaction ->
-                    logsInTransaction.sortedBy { log -> log.logIndex() }.withIndex().toFlux()
-                }
-        }
 
-        return indexedLogs
-            .flatMap { (index, log) ->
-                onLog(marker, index, log, timestamp)
+        val raribleIndexes = hashMapOf<Triple<Word, Address, BigInteger>, Int>()
+        val newRaribleIndexes = hashMapOf<Triple<Word, Address, BigInteger>, Int>()
+        fun Log.getKey() = Triple(transactionHash(), address(), logIndex())
+
+        logs
+            .groupBy { it.transactionHash() }.values
+            .flatMap { logsInTransaction ->
+                logsInTransaction.sortedBy { log -> log.logIndex() }.withIndex()
+            }.forEach { (index, log) ->
+                raribleIndexes[log.getKey()] = index
             }
-            .withSpan("onLogs")
+
+        logs
+            .groupBy { it.transactionHash() to it.address() }.values
+            .flatMap { logsGroupedByTransactionAndAddress ->
+                logsGroupedByTransactionAndAddress.sortedBy { log -> log.logIndex() }.withIndex()
+            }.forEach { (index, log) ->
+                newRaribleIndexes[log.getKey()] = index
+            }
+
+        return logs.toFlux().flatMap { log ->
+            val newIndex = newRaribleIndexes.getValue(log.getKey())
+            val index = if (logEventMigrationProperties.useNewIndex) {
+                newIndex
+            } else {
+                raribleIndexes.getValue(log.getKey())
+            }
+            onLog(marker, index, newIndex, log, timestamp)
+        }.withSpan("onLogs")
     }
 
     private fun findTheSameLogEvent(toSave: LogEvent): Mono<LogEvent> {
@@ -165,7 +178,7 @@ class LogEventListener<T : EventData>(
         }
     }
 
-    private fun onLog(marker: Marker, index: Int, log: Log, timestamp: Long): Flux<LogEvent> {
+    private fun onLog(marker: Marker, index: Int, fixedIndex: Int, log: Log, timestamp: Long): Flux<LogEvent> {
         logger.debug(marker, "onLog $log")
 
         return descriptor.convert(log, timestamp).toFlux()
@@ -183,6 +196,7 @@ class LogEventListener<T : EventData>(
                         logIndex = log.logIndex().toInt(),
                         minorLogIndex = minorLogIndex,
                         index = index,
+                        fixedIndex = fixedIndex,
                         visible = true,
                         createdAt = Instant.now(),
                         updatedAt = Instant.now()

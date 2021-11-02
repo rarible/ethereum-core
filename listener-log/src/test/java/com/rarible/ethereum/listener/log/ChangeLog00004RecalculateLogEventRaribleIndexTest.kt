@@ -8,19 +8,21 @@ import com.rarible.core.test.data.randomWord
 import com.rarible.ethereum.listener.log.domain.EventData
 import com.rarible.ethereum.listener.log.domain.LogEvent
 import com.rarible.ethereum.listener.log.domain.LogEventStatus
+import com.rarible.ethereum.listener.log.mongock.ChangeLog00001
 import com.rarible.ethereum.listener.log.mongock.ChangeLog00004RecalculateLogEventRaribleIndex
 import com.rarible.ethereum.listener.log.persist.LogEventRepository
 import io.daonomic.rpc.domain.Word
 import org.assertj.core.api.Assertions.assertThat
 import org.bson.types.ObjectId
 import org.junit.jupiter.api.BeforeEach
-import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.data.mongodb.core.query.Update
+import org.springframework.data.mongodb.core.query.isEqualTo
+import org.springframework.data.mongodb.core.update
 import java.time.Instant
 import java.util.function.Supplier
 
-@Disabled
 @IntegrationTest
 class ChangeLog00004RecalculateLogEventRaribleIndexTest : AbstractIntegrationTest() {
     private val migration = ChangeLog00004RecalculateLogEventRaribleIndex()
@@ -44,6 +46,10 @@ class ChangeLog00004RecalculateLogEventRaribleIndexTest : AbstractIntegrationTes
 
     @Test
     internal fun `recalculate indexes`() {
+        // Make sure the database contains the new rarible index, otherwise "bad hint" error is thrown
+        ChangeLog00001().createLogEventIndexContainingAddress(mongockTemplate, collectionName)
+        Thread.sleep(1000)
+
         val event1 = randomLogEvent()
         val event2 = event1.copy(
             address = randomAddress(), // Different address.
@@ -61,6 +67,16 @@ class ChangeLog00004RecalculateLogEventRaribleIndexTest : AbstractIntegrationTes
         )
         saveLogs(event1, event2, event3)
         saveLogs(*notChangedEvents.toTypedArray())
+
+        run {
+            val brokenEvent = randomLogEvent()
+            saveLogs(brokenEvent)
+            mongockTemplate.update<LogEvent>()
+                .inCollection(collectionName)
+                .matching(LogEvent::id isEqualTo brokenEvent.id)
+                .apply(Update().set("data._class", "unknown class"))
+                .first()
+        }
 
         assertThat(find(event1).index).isEqualTo(0)
         assertThat(find(event2).index).isEqualTo(1)

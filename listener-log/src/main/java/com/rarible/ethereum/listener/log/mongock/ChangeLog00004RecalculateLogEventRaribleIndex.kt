@@ -83,6 +83,9 @@ class ChangeLog00004RecalculateLogEventRaribleIndex {
                     Sort.Order.asc(LogEvent::address.name)
                 )
             ).withHint(ChangeLog00001.NEW_VISIBLE_INDEX_NAME)
+            .also {
+                it.fields().exclude("data")
+            }
 
         // LogEvent-s having the same <transactionHash, topic, address>
         val window = arrayListOf<LogEvent>()

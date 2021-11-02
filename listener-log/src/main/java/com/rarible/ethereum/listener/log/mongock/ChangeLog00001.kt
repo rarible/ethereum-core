@@ -46,21 +46,25 @@ class ChangeLog00001 {
         }
         val collections = holder.list.map { it.collection }.toSet()
         collections.forEach {
-            val indexOps = template.indexOps(it)
-            indexOps.ensureIndex(
-                Index()
-                    .on("transactionHash", Sort.Direction.ASC)
-                    .on("topic", Sort.Direction.ASC)
-                    .on("address", Sort.Direction.ASC)
-                    .on("index", Sort.Direction.ASC)
-                    .on("minorLogIndex", Sort.Direction.ASC)
-                    .on("visible", Sort.Direction.ASC)
-                    .named(NEW_VISIBLE_INDEX_NAME)
-                    .background()
-                    .unique()
-                    .partial(PartialIndexFilter.of(Document("visible", true)))
-            )
+            createLogEventIndexContainingAddress(template, it)
         }
+    }
+
+    fun createLogEventIndexContainingAddress(template: MongockTemplate, collectionName: String) {
+        val indexOps = template.indexOps(collectionName)
+        indexOps.ensureIndex(
+            Index()
+                .on("transactionHash", Sort.Direction.ASC)
+                .on("topic", Sort.Direction.ASC)
+                .on("address", Sort.Direction.ASC)
+                .on("index", Sort.Direction.ASC)
+                .on("minorLogIndex", Sort.Direction.ASC)
+                .on("visible", Sort.Direction.ASC)
+                .named(NEW_VISIBLE_INDEX_NAME)
+                .background()
+                .unique()
+                .partial(PartialIndexFilter.of(Document("visible", true)))
+        )
     }
 
     private fun createInitialIndices(template: MongockTemplate, collection: String) {

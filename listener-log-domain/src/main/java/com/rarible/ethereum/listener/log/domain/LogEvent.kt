@@ -18,7 +18,7 @@ data class LogEvent(
     /**
      * Arbitrary business data associated with this log event. This is produced by `LogEventDescriptor`.
      */
-    val data: EventData,
+    val data: EventData = object : EventData {}, // TODO: default value is used to allow projection of the LogEvent's fields to exclude the 'data'
     /**
      * Address of the smart contract that produced this log event.
      */

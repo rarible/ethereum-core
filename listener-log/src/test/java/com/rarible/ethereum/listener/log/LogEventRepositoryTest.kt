@@ -14,6 +14,7 @@ import scalether.domain.Address
 import java.time.Instant
 import java.util.concurrent.ThreadLocalRandom
 
+@IntegrationTest
 class LogEventRepositoryTest : AbstractIntegrationTest() {
     private lateinit var logEventRepository: LogEventRepository
 

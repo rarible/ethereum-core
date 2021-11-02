@@ -34,7 +34,7 @@ class ERC1271SignService(
         val erc1271 = IERC1271(signer, sender)
 
         return try {
-            logger.info("calling isValidSignature using signer $signer hash is $hash signature is $signature")
+            logger.info("Calling isValidSignature using signer $signer hash is $hash signature is $signature")
             val result = erc1271.isValidSignature(hash.bytes(), signature.bytes()).call().awaitFirst()
             Binary.apply(result) == MAGIC_VALUE
         } catch (ex: RpcCodeException) {
@@ -50,8 +50,10 @@ class ERC1271SignService(
 
     @Throws(InvalidSignatureException::class)
     fun recover(hash: Word, signature: Binary): Address {
-        require(signature.bytes().size == 65) {
-            "Invalid signature size ${signature.bytes().size}, should be 65 bytes"
+        if (signature.bytes().size != 65) {
+            throw InvalidSignatureException(
+                "Invalid signature [${signature.prefixed()}] size ${signature.bytes().size}, should be 65 bytes"
+            )
         }
         return try {
             val (v, h) = fixVAndHash(signature.bytes()[64], hash)
@@ -62,7 +64,9 @@ class ERC1271SignService(
             val publicKey = Sign.signedMessageHashToKey(h.bytes(), Sign.SignatureData(v, r, s))
             Address.apply(Keys.getAddress(publicKey))
         } catch (ex: Exception) {
-            throw InvalidSignatureException("Invalid signature structure", ex)
+            throw InvalidSignatureException(
+                "Invalid structure of signature [${signature.prefixed()}] - ${ex.message}", ex
+            )
         }
     }
 

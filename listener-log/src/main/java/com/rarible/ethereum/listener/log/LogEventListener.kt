@@ -24,8 +24,6 @@ import scalether.domain.request.LogFilter
 import scalether.domain.request.TopicFilter
 import scalether.domain.response.Block
 import scalether.domain.response.Log
-import scalether.domain.response.Transaction
-import scalether.java.Lists
 import scalether.util.Hex
 import java.math.BigInteger
 import java.time.Instant
@@ -75,7 +73,7 @@ class LogEventListener<T : EventData>(
         ).withSpan("processTopicLogs", labels = listOf("topic" to topic.toString()))
     }
 
-    private fun onNewBlock(block: Block<Transaction>): Flux<LogEvent> {
+    private fun onNewBlock(block: Block<*>): Flux<LogEvent> {
         return LoggingUtils.withMarkerFlux { marker ->
             descriptor.getAddresses()
                 .flatMap { contracts ->
@@ -123,16 +121,13 @@ class LogEventListener<T : EventData>(
     private fun reindexBlock(logs: BlockLogs): Flux<LogEvent> {
         return LoggingUtils.withMarkerFlux { marker ->
             logger.info(marker, "reindex. processing block ${logs.blockHash} logs: ${logs.logs.size}")
-            ethereum
-                .ethGetFullBlockByHash(logs.blockHash)
+            ethereum.ethGetBlockByHash(logs.blockHash)
                 .flatMapMany { block -> processLogs(marker, block, logs.logs) }
         }.loggerContext(mapOf("blockHash" to "${logs.blockHash}"))
     }
 
-    private fun processLogs(marker: Marker, block: Block<Transaction>, logs: List<Log>): Flux<LogEvent> {
+    private fun processLogs(marker: Marker, block: Block<*>, logs: List<Log>): Flux<LogEvent> {
         val timestamp = block.timestamp().toLong()
-        val transactions = Lists.toJava(block.transactions()).associateBy { transaction -> transaction.hash() }
-
         val indexedLogs = if (logEventMigrationProperties.useNewIndex) {
             logs
                 .groupBy { it.transactionHash() to it.address() }.values
@@ -149,8 +144,7 @@ class LogEventListener<T : EventData>(
 
         return indexedLogs
             .flatMap { (index, log) ->
-                val transaction = transactions[log.transactionHash()] ?: error("Can't find transaction for log $log")
-                onLog(marker, index, log, transaction, timestamp)
+                onLog(marker, index, log, timestamp)
             }
             .withSpan("onLogs")
     }
@@ -171,10 +165,10 @@ class LogEventListener<T : EventData>(
         }
     }
 
-    private fun onLog(marker: Marker, index: Int, log: Log, transaction: Transaction, timestamp: Long): Flux<LogEvent> {
+    private fun onLog(marker: Marker, index: Int, log: Log, timestamp: Long): Flux<LogEvent> {
         logger.debug(marker, "onLog $log")
 
-        return descriptor.convert(log, transaction, timestamp).toFlux()
+        return descriptor.convert(log, timestamp).toFlux()
             .collectList()
             .flatMapIterable { dataCollection ->
                 dataCollection.mapIndexed { minorLogIndex, data ->

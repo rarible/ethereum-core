@@ -4,14 +4,12 @@ import com.github.cloudyrock.mongock.driver.api.lock.guard.invoker.LockGuardInvo
 import com.github.cloudyrock.mongock.driver.api.lock.guard.invoker.VoidSupplier
 import com.github.cloudyrock.mongock.driver.mongodb.springdata.v3.decorator.impl.MongockTemplate
 import com.rarible.core.test.data.randomAddress
-import com.rarible.core.test.data.randomWord
-import com.rarible.ethereum.listener.log.domain.EventData
 import com.rarible.ethereum.listener.log.domain.LogEvent
-import com.rarible.ethereum.listener.log.domain.LogEventStatus
+import com.rarible.ethereum.listener.log.mock.randomLogEvent
+import com.rarible.ethereum.listener.log.mock.randomWordd
 import com.rarible.ethereum.listener.log.mongock.ChangeLog00001
 import com.rarible.ethereum.listener.log.mongock.ChangeLog00004RecalculateLogEventRaribleIndex
 import com.rarible.ethereum.listener.log.persist.LogEventRepository
-import io.daonomic.rpc.domain.Word
 import org.assertj.core.api.Assertions.assertThat
 import org.bson.types.ObjectId
 import org.junit.jupiter.api.BeforeEach
@@ -20,7 +18,6 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.data.mongodb.core.query.Update
 import org.springframework.data.mongodb.core.query.isEqualTo
 import org.springframework.data.mongodb.core.update
-import java.time.Instant
 import java.util.function.Supplier
 
 @IntegrationTest
@@ -133,26 +130,4 @@ class ChangeLog00004RecalculateLogEventRaribleIndexTest : AbstractIntegrationTes
 
     private fun find(logEvent: LogEvent): LogEvent =
         logEventRepository.findLogEvent(collectionName, logEvent.id).block()!!
-
-    private fun randomLogEvent() =
-        LogEvent(
-            blockNumber = 0,
-            blockHash = randomWordd(),
-            transactionHash = randomWordd(),
-            address = randomAddress(),
-            topic = randomWordd(),
-
-            logIndex = 0,
-            index = 0,
-            minorLogIndex = 0,
-
-            status = LogEventStatus.CONFIRMED,
-
-            data = object : EventData {},
-            visible = true,
-            createdAt = Instant.now(),
-            updatedAt = Instant.now()
-        )
-
-    private fun randomWordd() = Word.apply(randomWord())
 }

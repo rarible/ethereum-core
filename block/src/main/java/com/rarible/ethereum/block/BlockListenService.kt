@@ -89,6 +89,9 @@ class BlockListenService<B : Block>(
             .doOnSubscribe {
                 logger.info(marker, "checkNewBlock ${b.blockNumber} ${b.blockHash}")
             }
+            .doOnError {
+                logger.error(marker, "checkNewBlock failed ${b.blockNumber} ${b.blockHash}", it)
+            }
             .doOnTerminate {
                 logger.info(marker, "checkNewBlock completed ${b.blockNumber} ${b.blockHash}")
             }

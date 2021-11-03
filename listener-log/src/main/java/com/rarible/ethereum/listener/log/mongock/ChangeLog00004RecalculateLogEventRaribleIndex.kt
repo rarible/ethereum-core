@@ -23,7 +23,29 @@ class ChangeLog00004RecalculateLogEventRaribleIndex {
     private var seenLogs = 0
     private var recalculated = 0
 
-    @ChangeSet(id = "recalculateLogEventRaribleIndex", order = "00001", runAlways = true, author = "Patrikeev")
+    @ChangeSet(id = "removeOldMongoIndex", order = "00001", runAlways = true, author = "Patrikeev")
+    fun removeOldMongoIndex(
+        template: MongockTemplate,
+        @NonLockGuarded logEventMigrationProperties: LogEventMigrationProperties,
+        @NonLockGuarded holder: LogEventDescriptorHolder
+    ) {
+        if (!logEventMigrationProperties.removeOldMongoIndex) {
+            logger.info("Skip removing the old mongo index ${ChangeLog00001.VISIBLE_INDEX_NAME}")
+            return
+        }
+        check(logEventMigrationProperties.copyFixedIndexToIndexField)
+        check(logEventMigrationProperties.useNewIndex)
+        holder.list.map { it.collection }.distinct().forEach {
+            logger.info("Removing Mongo index from $it: ${ChangeLog00001.VISIBLE_INDEX_NAME}")
+            try {
+                template.indexOps(it).dropIndex(ChangeLog00001.VISIBLE_INDEX_NAME)
+            } catch (e: Exception) {
+                logger.error("Failed to remove Mongo Index from $it: ${ChangeLog00001.VISIBLE_INDEX_NAME}", e)
+            }
+        }
+    }
+
+    @ChangeSet(id = "recalculateLogEventRaribleIndex", order = "00002", runAlways = true, author = "Patrikeev")
     fun recalculateLogEventRaribleIndex(
         template: MongockTemplate,
         @NonLockGuarded logEventMigrationProperties: LogEventMigrationProperties,
@@ -39,7 +61,7 @@ class ChangeLog00004RecalculateLogEventRaribleIndex {
         }
     }
 
-    @ChangeSet(id = "copyFixedIndexToIndexField", order = "00002", runAlways = true, author = "Patrikeev")
+    @ChangeSet(id = "copyFixedIndexToIndexField", order = "00003", runAlways = true, author = "Patrikeev")
     fun copyFixedIndexToIndexField(
         template: MongockTemplate,
         @NonLockGuarded logEventMigrationProperties: LogEventMigrationProperties,
@@ -52,26 +74,6 @@ class ChangeLog00004RecalculateLogEventRaribleIndex {
         holder.list.map { it.collection }.distinct().forEach {
             logger.info("Copying 'fixedIndex' to 'index' field for $it")
             copyFixedIndexToIndexField(template, it)
-        }
-    }
-
-    @ChangeSet(id = "removeOldMongoIndex", order = "00003", runAlways = true, author = "Patrikeev")
-    fun removeOldMongoIndex(
-        template: MongockTemplate,
-        @NonLockGuarded logEventMigrationProperties: LogEventMigrationProperties,
-        @NonLockGuarded holder: LogEventDescriptorHolder
-    ) {
-        if (!logEventMigrationProperties.removeOldMongoIndex) {
-            logger.info("Skip removing the old mongo index ${ChangeLog00001.VISIBLE_INDEX_NAME}")
-            return
-        }
-        holder.list.map { it.collection }.distinct().forEach {
-            logger.info("Removing Mongo index from $it: ${ChangeLog00001.VISIBLE_INDEX_NAME}")
-            try {
-                template.indexOps(it).dropIndex(ChangeLog00001.VISIBLE_INDEX_NAME)
-            } catch (e: Exception) {
-                logger.error("Failed to remove Mongo Index from $it: ${ChangeLog00001.VISIBLE_INDEX_NAME}", e)
-            }
         }
     }
 

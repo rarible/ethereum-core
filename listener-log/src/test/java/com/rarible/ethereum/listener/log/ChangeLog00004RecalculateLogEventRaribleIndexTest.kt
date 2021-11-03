@@ -8,6 +8,8 @@ import com.rarible.core.test.data.randomWord
 import com.rarible.ethereum.listener.log.domain.EventData
 import com.rarible.ethereum.listener.log.domain.LogEvent
 import com.rarible.ethereum.listener.log.domain.LogEventStatus
+import com.rarible.ethereum.listener.log.mock.randomLogEvent
+import com.rarible.ethereum.listener.log.mock.randomWordd
 import com.rarible.ethereum.listener.log.mongock.ChangeLog00004RecalculateLogEventRaribleIndex
 import com.rarible.ethereum.listener.log.persist.LogEventRepository
 import io.daonomic.rpc.domain.Word
@@ -102,26 +104,4 @@ class ChangeLog00004RecalculateLogEventRaribleIndexTest : AbstractIntegrationTes
 
     private fun find(logEvent: LogEvent): LogEvent =
         logEventRepository.findLogEvent(collectionName, logEvent.id).block()!!
-
-    private fun randomLogEvent() =
-        LogEvent(
-            blockNumber = 0,
-            blockHash = randomWordd(),
-            transactionHash = randomWordd(),
-            address = randomAddress(),
-            topic = randomWordd(),
-
-            logIndex = 0,
-            index = 0,
-            minorLogIndex = 0,
-
-            status = LogEventStatus.CONFIRMED,
-
-            data = object : EventData {},
-            visible = true,
-            createdAt = Instant.now(),
-            updatedAt = Instant.now()
-        )
-
-    private fun randomWordd() = Word.apply(randomWord())
 }

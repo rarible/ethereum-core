@@ -99,6 +99,10 @@ class ChangeLog00004RecalculateLogEventRaribleIndexTest : AbstractIntegrationTes
 
     @Test
     internal fun `copy fixedIndex to index`() {
+        // Make sure the database contains the new rarible index, otherwise "bad hint" error is thrown
+        ChangeLog00001().createLogEventIndexContainingAddress(mongockTemplate, collectionName)
+        Thread.sleep(1000)
+
         val event1 = randomLogEvent().copy(fixedIndex = 2)
         val notChangedEvents = listOf(randomLogEvent())
         saveLogs(event1)

@@ -113,7 +113,7 @@ public class LogListenService {
             .retryWhen(
                 Retry.backoff(Long.MAX_VALUE, Duration.ofMillis(300))
                     .maxBackoff(Duration.ofMillis(2000))
-                    .doAfterRetry(s -> logger.warn("retrying {}", s))
+                    .doAfterRetry(s -> logger.warn("retrying connection to the node (attempt = {})", s))
             )
             .subscribe(
                 n -> {

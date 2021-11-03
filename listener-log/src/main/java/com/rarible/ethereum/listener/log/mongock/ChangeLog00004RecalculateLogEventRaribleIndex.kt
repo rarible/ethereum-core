@@ -119,14 +119,15 @@ class ChangeLog00004RecalculateLogEventRaribleIndex {
             .maxTime(Duration.ofDays(2))
         query.fields().exclude("data")
         var updated = 0
+        var failed = 0
         var seen = 0
         template.stream<LogEvent>(query, collectionName).use { iterator ->
-            seen++
             for (logEvent in iterator) {
+                seen++
                 if (logEvent.fixedIndex != null && logEvent.index != logEvent.fixedIndex) {
                     try {
                         if (++updated % 5000 == 0) {
-                            logger.info("Updated $updated of total seen $seen log events")
+                            logger.info("Updated $updated (seen = $seen, seen failed = $failed)")
                         }
                         template
                             .update(LogEvent::class.java)
@@ -138,6 +139,7 @@ class ChangeLog00004RecalculateLogEventRaribleIndex {
                             )
                             .first()
                     } catch (e: Exception) {
+                        failed++
                         logger.warn("Failed to update ${logEvent.id}: ${e.message}", e)
                     }
                 }

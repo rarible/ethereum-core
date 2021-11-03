@@ -115,9 +115,20 @@ class ChangeLog00004RecalculateLogEventRaribleIndex {
     }
 
     fun copyFixedIndexToIndexField(template: MongockTemplate, collectionName: String) {
+        @Suppress("DuplicatedCode")
         val query = Query(LogEvent::visible isEqualTo true)
+            .with(
+                Sort.by(
+                    Sort.Order.asc(LogEvent::transactionHash.name),
+                    Sort.Order.asc(LogEvent::topic.name),
+                    Sort.Order.asc(LogEvent::address.name),
+                    Sort.Order.asc(LogEvent::index.name)
+                )
+            ).withHint(ChangeLog00001.NEW_VISIBLE_INDEX_NAME)
             .maxTime(Duration.ofDays(2))
-        query.fields().exclude("data")
+            .also {
+                it.fields().exclude("data")
+            }
         var updated = 0
         var failed = 0
         var seen = 0

@@ -2,18 +2,18 @@ package com.rarible.ethereum.listener.log
 
 import com.rarible.contracts.test.erc20.TestERC20
 import com.rarible.contracts.test.erc20.TransferEvent
+import com.rarible.core.common.nowMillis
 import com.rarible.core.task.Task
 import com.rarible.core.task.TaskService
 import com.rarible.core.task.TaskStatus
+import com.rarible.core.test.data.randomLong
 import com.rarible.core.test.wait.BlockingWait.waitAssert
-import com.rarible.ethereum.listener.log.domain.BlockHead
-import com.rarible.ethereum.listener.log.domain.BlockStatus
-import com.rarible.ethereum.listener.log.domain.LogEvent
-import com.rarible.ethereum.listener.log.domain.LogEventStatus
+import com.rarible.core.test.wait.BlockingWait.waitFor
+import com.rarible.ethereum.listener.log.domain.*
 import com.rarible.ethereum.listener.log.mock.Transfer
+import com.rarible.ethereum.listener.log.mock.randomWordd
 import io.daonomic.rpc.domain.Word
 import io.mockk.*
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.toList
 import kotlinx.coroutines.runBlocking
 import org.apache.commons.lang3.RandomUtils
@@ -25,7 +25,6 @@ import org.junit.jupiter.api.Test
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.boot.autoconfigure.EnableAutoConfiguration
 import org.springframework.data.mongodb.core.*
 import org.springframework.data.mongodb.core.query.Criteria
 import org.springframework.data.mongodb.core.query.Query
@@ -53,6 +52,9 @@ class ListenTransfersTest : AbstractIntegrationTest() {
 
     @Autowired
     private lateinit var pendingLogsCheckJob: PendingLogsCheckJob
+
+    @Autowired
+    private lateinit var logListenService: LogListenService
 
     @BeforeEach
     fun prepareMocks() {
@@ -235,6 +237,31 @@ class ListenTransfersTest : AbstractIntegrationTest() {
             assertThat(read.status).isEqualTo(LogEventStatus.DROPPED)
             assertNull(read.blockNumber)
             assertNull(read.logIndex)
+        }
+    }
+
+    @Test
+    fun revertConfirmed() {
+        val contract = TestERC20.deployAndWait(sender, poller, "NAME", "NM").block()!!
+        val value = randomLong(1, 100000).toBigInteger()
+        val transactionReceipt = contract.mint(sender.from(), value).execute().verifySuccess()
+        val mintLogEvent = waitFor {
+            mongo.findAll<LogEvent>("transfer").collectList().block()!!.single()
+        }!!
+        val blockNumber = transactionReceipt.blockNumber()
+        val blockHash = transactionReceipt.blockHash()
+        // Revert the block.
+        logListenService.onBlock(
+            NewBlockEvent(
+                number = blockNumber.toLong(),
+                hash = randomWordd(),
+                timestamp = nowMillis().epochSecond,
+                reverted = blockHash
+            )
+        ).block()
+        waitAssert {
+            val updatedLogEvent = mongo.findById(mintLogEvent.id, LogEvent::class.java, "transfer").block()!!
+            assertThat(updatedLogEvent.status).isEqualTo(LogEventStatus.REVERTED)
         }
     }
 

@@ -51,16 +51,24 @@ class LogEventListener<T : EventData>(
     }
 
     fun onBlockEvent(event: NewBlockEvent): Flux<LogEvent> {
-        val start: Flux<LogEvent> = if (event.reverted != null) {
-            logEventRepository
-                .findAndDelete(collection, event.hash, topic, LogEventStatus.REVERTED)
-                .thenMany(logEventRepository.findAndRevert(collection, topic, event.reverted!!))
+        val deleteReverted = logEventRepository.findAndDelete(
+            collection = collection,
+            blockHash = event.hash,
+            topic = topic,
+            status = LogEventStatus.REVERTED
+        )
+        val revert = if (event.reverted != null) {
+            logEventRepository.findAndRevert(
+                collection = collection,
+                blockHash = event.reverted!!,
+                topic = topic
+            )
         } else {
-            logEventRepository.findAndDelete(collection, event.hash, topic, LogEventStatus.REVERTED)
-                .thenMany(Flux.empty())
+            Flux.empty()
         }
         return Flux.concat(
-            start,
+            deleteReverted,
+            revert,
             ethereum.ethGetFullBlockByHash(event.hash)
                 .doOnError { th -> logger.warn("Unable to get block by hash: " + event.hash, th) }
                 .retryWhen(backoff)

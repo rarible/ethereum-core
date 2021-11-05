@@ -4,7 +4,6 @@ import com.github.cloudyrock.mongock.ChangeLog
 import com.github.cloudyrock.mongock.ChangeSet
 import com.github.cloudyrock.mongock.driver.mongodb.springdata.v3.decorator.impl.MongockTemplate
 import com.rarible.ethereum.listener.log.LogEventDescriptorHolder
-import com.rarible.ethereum.listener.log.LogEventMigrationProperties
 import io.changock.migration.api.annotations.NonLockGuarded
 import org.bson.Document
 import org.slf4j.LoggerFactory

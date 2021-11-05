@@ -9,5 +9,7 @@ data class LogEventMigrationProperties(
     @Value("\${recalculateLogEventRaribleIndex:false}") val recalculateLogEventRaribleIndex: Boolean,
     @Value("\${copyFixedIndexToIndexField:false}") val copyFixedIndexToIndexField: Boolean,
     @Value("\${useNewMongoIndex:false}") val useNewIndex: Boolean,
-    @Value("\${removeOldMongoIndex:false}") val removeOldMongoIndex: Boolean
+    @Value("\${removeOldMongoIndex:false}") val removeOldMongoIndex: Boolean,
+
+    @Value("\${markLogsRevertedForRevertedBlocks:false}") val markLogsRevertedForRevertedBlocks: Boolean
 )

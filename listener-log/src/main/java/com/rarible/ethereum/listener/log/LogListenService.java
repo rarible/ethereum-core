@@ -13,7 +13,6 @@ import com.rarible.ethereum.listener.log.persist.BlockRepository;
 import com.rarible.ethereum.listener.log.persist.LogEventRepository;
 import com.rarible.ethereum.log.LogEventsListener;
 import io.daonomic.rpc.domain.Word;
-import kotlin.Pair;
 import kotlin.ranges.LongRange;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -52,7 +51,6 @@ public class LogListenService {
     private final LogEventRepository logEventRepository;
     private final PendingLogService pendingLogService;
     private final List<OnLogEventListener> onLogEventListeners;
-    private final LogEventMigrationProperties logEventMigrationProperties;
 
     public LogListenService(
         LogEventRepository logEventRepository,
@@ -63,7 +61,6 @@ public class LogListenService {
         List<OnLogEventListener> onLogEventListeners,
         PendingLogService pendingLogService,
         BlockListenService<SimpleBlock> blockListenService,
-        LogEventMigrationProperties logEventMigrationProperties,
         @Value("${ethereumBackoffMaxAttempts:5}") long maxAttempts,
         @Value("${ethereumBackoffMinBackoff:100}") long minBackoff,
         @Value("${ethereumMaxProcessTime:300000}") long maxProcessTime,
@@ -81,7 +78,6 @@ public class LogListenService {
         this.logEventRepository = logEventRepository;
         this.pendingLogService = pendingLogService;
         this.onLogEventListeners = onLogEventListeners;
-        this.logEventMigrationProperties = logEventMigrationProperties;
 
         logger.info("injected descriptors: {}", descriptors);
 
@@ -181,7 +177,6 @@ public class LogListenService {
                 descriptor,
                 topicOnEventListeners,
                 pendingLogService,
-                logEventMigrationProperties,
                 logEventRepository,
                 ethereum,
                 backoff,

@@ -29,37 +29,6 @@ class LogEventRepository(
         collection: String,
         transactionHash: Word,
         topic: Word,
-        index: Int,
-        minorLogIndex: Int
-    ): Mono<LogEvent> {
-        val c = Criteria.where("transactionHash").`is`(transactionHash)
-            .and("topic").`is`(topic)
-            .and("index").`is`(index)
-            .and("minorLogIndex").`is`(minorLogIndex)
-            .and("visible").`is`(true)
-        return mongo.findOne(Query.query(c).withHint(ChangeLog00001.VISIBLE_INDEX_NAME), LogEvent::class.java, collection)
-    }
-
-    fun findByKey(
-        collection: String,
-        transactionHash: Word,
-        blockHash: Word,
-        logIndex: Int,
-        minorLogIndex: Int
-    ): Mono<LogEvent> {
-        val c = Criteria().andOperator(
-            LogEvent::transactionHash isEqualTo transactionHash,
-            LogEvent::blockHash isEqualTo blockHash,
-            LogEvent::logIndex isEqualTo logIndex,
-            LogEvent::minorLogIndex isEqualTo minorLogIndex
-        )
-        return mongo.findOne(Query(c), LogEvent::class.java, collection)
-    }
-
-    fun findVisibleByNewKey(
-        collection: String,
-        transactionHash: Word,
-        topic: Word,
         address: Address,
         index: Int,
         minorLogIndex: Int
@@ -70,7 +39,7 @@ class LogEventRepository(
             .and("index").`is`(index)
             .and("minorLogIndex").`is`(minorLogIndex)
             .and("visible").`is`(true)
-        return mongo.findOne(Query.query(c).withHint(ChangeLog00001.NEW_VISIBLE_INDEX_NAME), LogEvent::class.java, collection)
+        return mongo.findOne(Query.query(c).withHint(ChangeLog00001.VISIBLE_INDEX_NAME), LogEvent::class.java, collection)
     }
 
     fun save(collection: String, event: LogEvent): Mono<LogEvent> {

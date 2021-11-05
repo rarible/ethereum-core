@@ -33,7 +33,6 @@ class LogEventListener<T : EventData>(
     val descriptor: LogEventDescriptor<T>,
     private val onLogEventListeners: List<OnLogEventListener>,
     private val pendingLogService: PendingLogService,
-    private val logEventMigrationProperties: LogEventMigrationProperties,
     private val logEventRepository: LogEventRepository,
     private val ethereum: MonoEthereum,
     private val backoff: RetryBackoffSpec,
@@ -139,19 +138,11 @@ class LogEventListener<T : EventData>(
         val timestamp = block.timestamp().toLong()
         val transactions = Lists.toJava(block.transactions()).associateBy { transaction -> transaction.hash() }
 
-        val indexedLogs = if (logEventMigrationProperties.useNewIndex) {
-            logs
-                .groupBy { it.transactionHash() to it.address() }.values
-                .flatMap { logsGroupedByTransactionAndAddress ->
-                    logsGroupedByTransactionAndAddress.sortedBy { log -> log.logIndex() }.withIndex()
-                }.toFlux()
-        } else {
-            logs
-                .groupBy { it.transactionHash() }.values.toFlux()
-                .flatMap { logsInTransaction ->
-                    logsInTransaction.sortedBy { log -> log.logIndex() }.withIndex().toFlux()
-                }
-        }
+        val indexedLogs = logs
+            .groupBy { it.transactionHash() to it.address() }.values
+            .flatMap { logsGroupedByTransactionAndAddress ->
+                logsGroupedByTransactionAndAddress.sortedBy { log -> log.logIndex() }.withIndex()
+            }.toFlux()
 
         return indexedLogs
             .flatMap { (index, log) ->
@@ -160,21 +151,15 @@ class LogEventListener<T : EventData>(
             }
     }
 
-    private fun findTheSameLogEvent(toSave: LogEvent): Mono<LogEvent> {
-        return if (logEventMigrationProperties.useNewIndex) {
-            logEventRepository.findVisibleByNewKey(
-                collection = descriptor.collection,
-                transactionHash = toSave.transactionHash,
-                topic = toSave.topic,
-                address = toSave.address,
-                index = toSave.index,
-                minorLogIndex = toSave.minorLogIndex
-            )
-        } else {
-            return logEventRepository.findVisibleByKey(descriptor.collection, toSave.transactionHash, toSave.topic, toSave.index, toSave.minorLogIndex)
-                .switchIfEmpty(logEventRepository.findByKey(descriptor.collection, toSave.transactionHash, toSave.blockHash!!, toSave.logIndex!!, toSave.minorLogIndex))
-        }
-    }
+    private fun findTheSameLogEvent(toSave: LogEvent): Mono<LogEvent> =
+        logEventRepository.findVisibleByKey(
+            collection = descriptor.collection,
+            transactionHash = toSave.transactionHash,
+            topic = toSave.topic,
+            address = toSave.address,
+            index = toSave.index,
+            minorLogIndex = toSave.minorLogIndex
+        )
 
     private fun onLog(marker: Marker, index: Int, log: Log, transaction: Transaction, timestamp: Long): Flux<LogEvent> {
         logger.debug(marker, "onLog $log")

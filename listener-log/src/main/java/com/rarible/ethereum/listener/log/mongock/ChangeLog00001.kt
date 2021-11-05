@@ -28,38 +28,23 @@ class ChangeLog00001 {
         }
     }
 
-    @ChangeSet(id = "ensureInitialIndexes", order = "00001", author = "eugene")
+    @ChangeSet(id = "ensureInitialIndexes", order = "00001", author = "eugene", runAlways = true)
     fun ensureInitialIndexes(template: MongockTemplate, @NonLockGuarded holder: LogEventDescriptorHolder) {
         val collections = holder.list.map { it.collection }.toSet()
         collections.forEach { createInitialIndices(template, it) }
     }
 
-    @ChangeSet(id = "createLogEventIndexContainingAddress", order = "00002", runAlways = true, author = "Patrikeev")
-    fun createLogEventIndexContainingAddress(
-        template: MongockTemplate,
-        @NonLockGuarded logEventMigrationProperties: LogEventMigrationProperties,
-        @NonLockGuarded holder: LogEventDescriptorHolder
-    ) {
-        if (!logEventMigrationProperties.createLogEventIndexContainingAddress) {
-            logger.info("Skip creation of the new log event index containing address")
-            return
-        }
-        val collections = holder.list.map { it.collection }.toSet()
-        collections.forEach {
-            val indexOps = template.indexOps(it)
-            indexOps.ensureIndex(
-                Index()
-                    .on("transactionHash", Sort.Direction.ASC)
-                    .on("topic", Sort.Direction.ASC)
-                    .on("address", Sort.Direction.ASC)
-                    .on("index", Sort.Direction.ASC)
-                    .on("minorLogIndex", Sort.Direction.ASC)
-                    .on("visible", Sort.Direction.ASC)
-                    .named(NEW_VISIBLE_INDEX_NAME)
-                    .background()
-                    .unique()
-                    .partial(PartialIndexFilter.of(Document("visible", true)))
-            )
+    @ChangeSet(id = "removeOldLogEventPrimaryMongoIndex", order = "00002", runAlways = true, author = "Patrikeev")
+    fun removeOldLogEventPrimaryMongoIndex(template: MongockTemplate, @NonLockGuarded holder: LogEventDescriptorHolder) {
+        // This index is replaced with the new index (containing 'address' field).
+        val oldIndexName = "transactionHash_1_topic_1_index_1_minorLogIndex_1_visible_1"
+        holder.list.map { it.collection }.distinct().forEach {
+            logger.info("Removing Mongo index from $it: $oldIndexName")
+            try {
+                template.indexOps(it).dropIndex(oldIndexName)
+            } catch (e: Exception) {
+                logger.error("Failed to remove Mongo Index from $it: $oldIndexName", e)
+            }
         }
     }
 
@@ -69,6 +54,7 @@ class ChangeLog00001 {
             Index()
                 .on("transactionHash", Sort.Direction.ASC)
                 .on("topic", Sort.Direction.ASC)
+                .on("address", Sort.Direction.ASC)
                 .on("index", Sort.Direction.ASC)
                 .on("minorLogIndex", Sort.Direction.ASC)
                 .on("visible", Sort.Direction.ASC)
@@ -105,7 +91,6 @@ class ChangeLog00001 {
     }
 
     companion object {
-        const val VISIBLE_INDEX_NAME = "transactionHash_1_topic_1_index_1_minorLogIndex_1_visible_1"
-        const val NEW_VISIBLE_INDEX_NAME = "transactionHash_1_topic_1_address_1_index_1_minorLogIndex_1_visible_1"
+        const val VISIBLE_INDEX_NAME = "transactionHash_1_topic_1_address_1_index_1_minorLogIndex_1_visible_1"
     }
 }

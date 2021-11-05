@@ -1,5 +1,6 @@
 package com.rarible.ethereum.listener.log
 
+import com.rarible.core.test.data.randomAddress
 import com.rarible.ethereum.listener.log.domain.LogEventStatus
 import com.rarible.ethereum.listener.log.mock.randomLogEvent
 import com.rarible.ethereum.listener.log.mock.randomWordd
@@ -72,7 +73,7 @@ class LogEventRepositoryTest : AbstractIntegrationTest() {
     }
 
     @Test
-    fun `should find log by index and minorLogIndex`() {
+    fun `should find visible log`() {
         val collection = "transfer"
 
         val transactionHash = ByteArray(32).let {
@@ -80,20 +81,33 @@ class LogEventRepositoryTest : AbstractIntegrationTest() {
             Word.apply(it)
         }
         val topic = Word.apply(RandomUtils.nextBytes(32))
-        val eventLog1 = randomLogEvent(topic).copy(transactionHash = transactionHash, index = 0, minorLogIndex = 1)
-        val eventLog2 = randomLogEvent(topic).copy(transactionHash = transactionHash, index = 1, minorLogIndex = 2)
+        val address = randomAddress()
+        val eventLog1 = randomLogEvent(topic).copy(transactionHash = transactionHash, address = address, index = 0, minorLogIndex = 1)
+        val eventLog2 = randomLogEvent(topic).copy(transactionHash = transactionHash, address = address, index = 1, minorLogIndex = 2)
+        val eventLog3 = randomLogEvent(topic).copy(transactionHash = transactionHash, address = randomAddress(), index = 1, minorLogIndex = 2)
 
         logEventRepository.save(collection, eventLog1).block()
         logEventRepository.save(collection, eventLog2).block()
+        logEventRepository.save(collection, eventLog3).block()
 
-        val savedEventLog1 =
-            logEventRepository.findVisibleByKey(collection, transactionHash, topic, index = 0, minorLogIndex = 1)
-                .block()!!
+        val savedEventLog1 = logEventRepository.findVisibleByKey(
+            collection = collection,
+            transactionHash = transactionHash,
+            address = address,
+            topic = topic,
+            index = 0,
+            minorLogIndex = 1
+        ).block()!!
         assertThat(savedEventLog1.id).isEqualTo(eventLog1.id)
 
-        val savedEventLog2 =
-            logEventRepository.findVisibleByKey(collection, transactionHash, topic, index = 1, minorLogIndex = 2)
-                .block()!!
+        val savedEventLog2 = logEventRepository.findVisibleByKey(
+            collection = collection,
+            transactionHash = transactionHash,
+            topic = topic,
+            address = address,
+            index = 1,
+            minorLogIndex = 2
+        ).block()!!
         assertThat(savedEventLog2.id).isEqualTo(eventLog2.id)
     }
 

@@ -15,6 +15,7 @@ import org.springframework.data.mongodb.core.query.Query
 import org.springframework.data.mongodb.core.query.Update
 import org.springframework.data.mongodb.core.query.isEqualTo
 import org.springframework.data.mongodb.core.stream
+import java.time.Duration
 
 @ChangeLog(order = "00005")
 class ChangeLog00005MarkLogsRevertedForRevertedBlocks {
@@ -39,6 +40,10 @@ class ChangeLog00005MarkLogsRevertedForRevertedBlocks {
 
     fun markLogsRevertedForRevertedBlocks(template: MongockTemplate, collectionName: String) {
         val query = Query(LogEvent::visible isEqualTo true)
+            .maxTime(Duration.ofDays(2))
+            .also {
+                it.fields().exclude("data")
+            }
         var failed = 0
         var seen = 0
         template.stream<LogEvent>(query, collectionName).use { iterator ->

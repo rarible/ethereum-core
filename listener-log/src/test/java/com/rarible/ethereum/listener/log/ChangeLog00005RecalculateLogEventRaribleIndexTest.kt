@@ -8,7 +8,7 @@ import com.rarible.ethereum.listener.log.domain.LogEvent
 import com.rarible.ethereum.listener.log.mock.randomLogEvent
 import com.rarible.ethereum.listener.log.mock.randomWordd
 import com.rarible.ethereum.listener.log.mongock.ChangeLog00001
-import com.rarible.ethereum.listener.log.mongock.ChangeLog00004RecalculateLogEventRaribleIndex
+import com.rarible.ethereum.listener.log.mongock.ChangeLog00005RecalculateLogEventRaribleIndex
 import com.rarible.ethereum.listener.log.persist.LogEventRepository
 import org.assertj.core.api.Assertions.assertThat
 import org.bson.types.ObjectId
@@ -21,8 +21,8 @@ import org.springframework.data.mongodb.core.update
 import java.util.function.Supplier
 
 @IntegrationTest
-class ChangeLog00004RecalculateLogEventRaribleIndexTest : AbstractIntegrationTest() {
-    private val migration = ChangeLog00004RecalculateLogEventRaribleIndex()
+class ChangeLog00005RecalculateLogEventRaribleIndexTest : AbstractIntegrationTest() {
+    private val migration = ChangeLog00005RecalculateLogEventRaribleIndex()
 
     private lateinit var mongockTemplate: MongockTemplate
 

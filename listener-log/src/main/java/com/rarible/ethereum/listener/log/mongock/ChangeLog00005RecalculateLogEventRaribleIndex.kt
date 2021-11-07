@@ -15,10 +15,10 @@ import org.springframework.data.mongodb.core.query.isEqualTo
 import org.springframework.data.mongodb.core.stream
 import java.time.Duration
 
-@ChangeLog(order = "00004")
-class ChangeLog00004RecalculateLogEventRaribleIndex {
+@ChangeLog(order = "00005")
+class ChangeLog00005RecalculateLogEventRaribleIndex {
 
-    private val logger = LoggerFactory.getLogger(ChangeLog00004RecalculateLogEventRaribleIndex::class.java)
+    private val logger = LoggerFactory.getLogger(ChangeLog00005RecalculateLogEventRaribleIndex::class.java)
 
     private var seenLogs = 0
     private var recalculated = 0

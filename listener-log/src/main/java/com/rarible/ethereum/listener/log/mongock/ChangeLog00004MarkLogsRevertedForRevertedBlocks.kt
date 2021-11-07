@@ -7,7 +7,6 @@ import com.rarible.ethereum.listener.log.LogEventDescriptorHolder
 import com.rarible.ethereum.listener.log.LogEventMigrationProperties
 import com.rarible.ethereum.listener.log.domain.BlockHead
 import com.rarible.ethereum.listener.log.domain.LogEvent
-import com.rarible.ethereum.listener.log.domain.LogEventStatus
 import io.changock.migration.api.annotations.NonLockGuarded
 import io.daonomic.rpc.domain.Word
 import org.slf4j.LoggerFactory
@@ -17,10 +16,10 @@ import org.springframework.data.mongodb.core.query.isEqualTo
 import org.springframework.data.mongodb.core.stream
 import java.time.Duration
 
-@ChangeLog(order = "00005")
-class ChangeLog00005MarkLogsRevertedForRevertedBlocks {
+@ChangeLog(order = "00004")
+class ChangeLog00004MarkLogsRevertedForRevertedBlocks {
 
-    private val logger = LoggerFactory.getLogger(ChangeLog00005MarkLogsRevertedForRevertedBlocks::class.java)
+    private val logger = LoggerFactory.getLogger(ChangeLog00004MarkLogsRevertedForRevertedBlocks::class.java)
 
     @ChangeSet(id = "markLogsRevertedForRevertedBlocks", order = "00001", runAlways = true, author = "Patrikeev")
     fun recalculateLogEventRaribleIndex(

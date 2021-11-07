@@ -3,23 +3,20 @@ package com.rarible.ethereum.listener.log
 import com.github.cloudyrock.mongock.driver.api.lock.guard.invoker.LockGuardInvoker
 import com.github.cloudyrock.mongock.driver.api.lock.guard.invoker.VoidSupplier
 import com.github.cloudyrock.mongock.driver.mongodb.springdata.v3.decorator.impl.MongockTemplate
-import com.rarible.core.test.data.randomAddress
 import com.rarible.ethereum.listener.log.domain.*
 import com.rarible.ethereum.listener.log.mock.randomLogEvent
 import com.rarible.ethereum.listener.log.mock.randomWordd
-import com.rarible.ethereum.listener.log.mongock.ChangeLog00004RecalculateLogEventRaribleIndex
-import com.rarible.ethereum.listener.log.mongock.ChangeLog00005MarkLogsRevertedForRevertedBlocks
+import com.rarible.ethereum.listener.log.mongock.ChangeLog00004MarkLogsRevertedForRevertedBlocks
 import com.rarible.ethereum.listener.log.persist.LogEventRepository
 import org.assertj.core.api.Assertions.assertThat
 import org.bson.types.ObjectId
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.data.mongodb.core.findById
 import java.util.function.Supplier
 
 @IntegrationTest
-class ChangeLog00005MarkLogsRevertedForRevertedBlocksTest : AbstractIntegrationTest() {
+class ChangeLog00004MarkLogsRevertedForRevertedBlocksTest : AbstractIntegrationTest() {
     private lateinit var mongockTemplate: MongockTemplate
 
     @Autowired
@@ -48,7 +45,7 @@ class ChangeLog00005MarkLogsRevertedForRevertedBlocksTest : AbstractIntegrationT
         val revertedLog = randomLogEvent().copy(blockNumber = block1Id, blockHash = block1RevertedHash)
         saveLogs(correctLog, revertedLog)
 
-        ChangeLog00005MarkLogsRevertedForRevertedBlocks().markLogsRevertedForRevertedBlocks(mongockTemplate, collectionName)
+        ChangeLog00004MarkLogsRevertedForRevertedBlocks().markLogsRevertedForRevertedBlocks(mongockTemplate, collectionName)
 
         val documents = mongockTemplate.getCollection(collectionName).find().toList()
         assertThat(documents.find { it["_id"] as ObjectId == correctLog.id }!!["mustBeReverted"]).isNull()

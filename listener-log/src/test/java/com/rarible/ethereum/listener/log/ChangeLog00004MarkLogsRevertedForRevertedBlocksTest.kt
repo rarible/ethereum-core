@@ -49,7 +49,10 @@ class ChangeLog00004MarkLogsRevertedForRevertedBlocksTest : AbstractIntegrationT
 
         val documents = mongockTemplate.getCollection(collectionName).find().toList()
         assertThat(documents.find { it["_id"] as ObjectId == correctLog.id }!!["mustBeReverted"]).isNull()
-        assertThat(documents.find { it["_id"] as ObjectId == revertedLog.id }!!["mustBeReverted"] as? Boolean).isTrue()
+        val migratedRevertedLog = documents.find { it["_id"] as ObjectId == revertedLog.id }!!
+        assertThat(migratedRevertedLog["mustBeReverted"] as? Boolean).isTrue()
+        assertThat(migratedRevertedLog["status"] as? String).isEqualTo(LogEventStatus.REVERTED.name)
+        assertThat(migratedRevertedLog["visible"] as? Boolean).isEqualTo(false)
     }
 
     private fun saveLogs(vararg logEvents: LogEvent) {

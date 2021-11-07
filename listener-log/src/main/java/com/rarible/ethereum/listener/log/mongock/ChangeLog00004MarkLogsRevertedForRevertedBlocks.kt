@@ -7,6 +7,7 @@ import com.rarible.ethereum.listener.log.LogEventDescriptorHolder
 import com.rarible.ethereum.listener.log.LogEventMigrationProperties
 import com.rarible.ethereum.listener.log.domain.BlockHead
 import com.rarible.ethereum.listener.log.domain.LogEvent
+import com.rarible.ethereum.listener.log.domain.LogEventStatus
 import io.changock.migration.api.annotations.NonLockGuarded
 import io.daonomic.rpc.domain.Word
 import org.slf4j.LoggerFactory
@@ -64,7 +65,11 @@ class ChangeLog00004MarkLogsRevertedForRevertedBlocks {
                             .update(LogEvent::class.java)
                             .inCollection(collectionName)
                             .matching(LogEvent::id isEqualTo logEvent.id)
-                            .apply(Update().set("mustBeReverted", true))
+                            .apply(Update()
+                                .set("mustBeReverted", true)
+                                .set(LogEvent::visible.name, false)
+                                .set(LogEvent::status.name, LogEventStatus.REVERTED)
+                            )
                             .first()
                     } catch (e: Exception) {
                         failed++

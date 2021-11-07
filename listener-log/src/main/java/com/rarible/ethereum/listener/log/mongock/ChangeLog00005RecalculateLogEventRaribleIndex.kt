@@ -72,7 +72,6 @@ class ChangeLog00005RecalculateLogEventRaribleIndex {
             return
         }
         holder.list.map { it.collection }.distinct().forEach {
-            logger.info("Copying 'fixedIndex' to 'index' field for $it")
             copyFixedIndexToIndexField(template, it)
         }
     }
@@ -115,6 +114,7 @@ class ChangeLog00005RecalculateLogEventRaribleIndex {
     }
 
     fun copyFixedIndexToIndexField(template: MongockTemplate, collectionName: String) {
+        logger.info("Copying 'fixedIndex' to 'index' field for $collectionName")
         @Suppress("DuplicatedCode")
         val query = Query(LogEvent::visible isEqualTo true)
             .with(
@@ -134,7 +134,9 @@ class ChangeLog00005RecalculateLogEventRaribleIndex {
         var seen = 0
         template.stream<LogEvent>(query, collectionName).use { iterator ->
             for (logEvent in iterator) {
-                seen++
+                if (++seen % 100000 == 0) {
+                    logger.info("Seen $seen log events")
+                }
                 if (logEvent.fixedIndex != null && logEvent.index != logEvent.fixedIndex) {
                     try {
                         if (++updated % 5000 == 0) {
@@ -156,6 +158,7 @@ class ChangeLog00005RecalculateLogEventRaribleIndex {
                 }
             }
         }
+        logger.info("Finished copying 'fixedIndex' to 'index' field for $collectionName")
     }
 
     private fun recalculateIndexInsideWindow(

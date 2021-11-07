@@ -33,12 +33,12 @@ class ChangeLog00004MarkLogsRevertedForRevertedBlocks {
             return
         }
         holder.list.map { it.collection }.distinct().forEach {
-            logger.info("Marking logs REVERTED for reverted blocks in $it")
             markLogsRevertedForRevertedBlocks(template, it)
         }
     }
 
     fun markLogsRevertedForRevertedBlocks(template: MongockTemplate, collectionName: String) {
+        logger.info("Marking logs REVERTED for reverted blocks in $collectionName")
         val query = Query(LogEvent::visible isEqualTo true)
             .maxTime(Duration.ofDays(2))
             .also {
@@ -48,7 +48,9 @@ class ChangeLog00004MarkLogsRevertedForRevertedBlocks {
         var seen = 0
         template.stream<LogEvent>(query, collectionName).use { iterator ->
             for (logEvent in iterator) {
-                seen++
+                if (++seen % 100000 == 0) {
+                    logger.info("Seen $seen log events")
+                }
                 if (logEvent.blockNumber == null) {
                     logger.error("Unknown blockNumber for ${logEvent.id}")
                     continue
@@ -78,6 +80,7 @@ class ChangeLog00004MarkLogsRevertedForRevertedBlocks {
                 }
             }
         }
+        logger.info("Finished marking logs REVERTED for reverted blocks in $collectionName")
     }
 
     private val correctBlockHashes = object : LinkedHashMap<Long, Word>(10, 0.75f) {

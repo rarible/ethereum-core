@@ -58,17 +58,21 @@ class BlockListenService<B : Block>(
             }
     }
 
-    private fun checkAndEmitBlockEvents(marker: Marker, b: B): Flux<BlockEvent<B>> {
-        return checkNewBlock(marker, b).expandDeep {
-            blockchain.getBlock(it.block.blockNumber - 1)
-                .flatMap { prev -> checkNewBlock(marker, prev) }
+    private fun checkAndEmitBlockEvents(marker: Marker, b: B): Flux<BlockEvent<B>> =
+        checkNewBlock(marker, b, false).expandDeep {
+            if (it.block.blockNumber == 0L) {
+                Mono.empty<BlockEvent<B>>()
+            } else {
+                blockchain.getBlock(it.block.blockNumber - 1)
+                    .flatMap { prev -> checkNewBlock(marker, prev, true) }
+            }
         }
-    }
 
-    private fun checkNewBlock(marker: Marker, b: B): Mono<BlockEvent<B>> {
+    private fun checkNewBlock(marker: Marker, b: B, emptyOnUnknownHash: Boolean): Mono<BlockEvent<B>> {
         return state.getBlockHash(b.blockNumber).toOptional()
             .flatMap { knownHash ->
                 when {
+                    !knownHash.isPresent && emptyOnUnknownHash -> Mono.empty()
                     !knownHash.isPresent -> {
                         logger.info(marker, "block ${b.blockNumber} ${b.blockHash} not found. is new block")
                         Mono.just(BlockEvent(b))

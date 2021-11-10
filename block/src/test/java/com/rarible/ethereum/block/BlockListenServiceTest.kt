@@ -3,6 +3,9 @@ package com.rarible.ethereum.block
 import io.daonomic.rpc.domain.Binary
 import io.daonomic.rpc.domain.BinaryFactory
 import io.daonomic.rpc.domain.Bytes
+import io.daonomic.rpc.domain.Word
+import io.daonomic.rpc.domain.WordFactory
+import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 import reactor.core.publisher.Flux
 import reactor.core.publisher.Mono
@@ -67,6 +70,35 @@ class BlockListenServiceTest {
     }
 
     @Test
+    fun reorgStackOverflow() {
+        val root = WordFactory.create()
+        val testNumber = 10000
+        val hashes1 = listOf(root) + (1..testNumber).map { WordFactory.create() }
+        val hashes2 = listOf(root) + (1..testNumber).map { WordFactory.create() }
+
+        val blocks = hashes2.zipWithNext().withIndex().flatMap { (idx, pair) ->
+            if (idx == 0) {
+                listOf(
+                    TestBlock(0, pair.first.toBinary(), WordFactory.create().toBinary()),
+                    TestBlock(1, pair.second.toBinary(), pair.first.toBinary())
+                )
+            } else {
+                listOf(TestBlock(idx.toLong() + 1, pair.second.toBinary(), pair.first.toBinary()))
+            }
+        }
+
+        val state = TestState.create(hashes1)
+        val blockchain =
+            TestBlockchain(blocks, Flux.just(blocks.last()))
+
+        val service = BlockListenService(state, blockchain)
+        val result = service.listen().collectList().block()!!
+        assertEquals(result.size, testNumber)
+        assertEquals(result.first().block.blockNumber, 1)
+        assertEquals(result.last().block.blockNumber, testNumber.toLong())
+    }
+
+    @Test
     fun startNoState() {
         val testBlock = TestBlock(1, BinaryFactory.create(32), BinaryFactory.create(32))
         val state = TestState()
@@ -110,6 +142,16 @@ class TestState(
         blocks[block.blockNumber] = block.blockHash
         return Mono.empty()
     }
+
+    companion object {
+        fun create(hashes: List<Word>): TestState {
+            val map = hashes.withIndex().associateBy(
+                { it.index.toLong() },
+                { it.value as Bytes }
+            )
+            return TestState(map)
+        }
+    }
 }
 
 class TestBlockchain(
@@ -117,18 +159,18 @@ class TestBlockchain(
     private val events: Flux<TestBlock>
 ) : Blockchain<TestBlock> {
 
-    private val byNumber = blocks.map { it.blockNumber to it }.toMap()
-    private val byHash = blocks.map {it.blockHash as Bytes to it}.toMap()
+    private val byNumber = blocks.associateBy { it.blockNumber }
+    private val byHash = blocks.associateBy { it.blockHash as Bytes }
     private val lastKnown = blocks.map { it.blockNumber }.max()
 
     override fun getLastKnownBlock(): Mono<Long> =
         Mono.justOrEmpty(lastKnown)
 
     override fun getBlock(hash: Bytes): Mono<TestBlock> =
-        Mono.just(byHash.getValue(hash))
+        byHash[hash].let { Mono.justOrEmpty(it) }
 
     override fun getBlock(number: Long): Mono<TestBlock> =
-        Mono.just(byNumber.getValue(number))
+        byNumber[number].let { Mono.justOrEmpty(it) }
 
     override fun listenNewBlocks(): Flux<TestBlock> = events
 }

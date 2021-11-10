@@ -6,6 +6,7 @@ import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.slf4j.Marker
 import reactor.core.publisher.Flux
+import reactor.core.publisher.Mono
 
 interface Block {
     val blockNumber: Long
@@ -49,40 +50,36 @@ class BlockListenService<B : Block>(
      */
     private fun insertOrUpdateBlock(marker: Marker, b: B): Flux<BlockEvent<B>> {
         logger.info(marker, "insertOrUpdateBlock $b")
-        return Flux.concat(
-            state.getBlockHash(b.blockNumber - 1).toOptional()
-                .flatMapMany { parentBlockHash ->
-                    when {
-                        //do nothing if parent hash not found (just started listening to blocks)
-                        !parentBlockHash.isPresent -> Flux.empty()
-                        //do nothing if parent hash is the same
-                        parentBlockHash.get() == b.parentBlockHash -> Flux.empty()
-                        //fetch parent block and save it if parent block hash changed
-                        else -> blockchain.getBlock(b.blockNumber - 1)
-                            .flatMapMany { insertOrUpdateBlock(marker, it) }
-                    }
-                },
-            checkNewBlock(marker, b)
-        )
+        return checkAndEmitBlockEvents(marker, b)
+            .collectList()
+            .flatMapMany { Flux.fromIterable(it.reversed()) }
+            .concatMap {
+                state.saveKnownBlock(it.block).thenReturn(it)
+            }
     }
 
-    private fun checkNewBlock(marker: Marker, b: B): Flux<BlockEvent<B>> {
+    private fun checkAndEmitBlockEvents(marker: Marker, b: B): Flux<BlockEvent<B>> {
+        return checkNewBlock(marker, b).expandDeep {
+            blockchain.getBlock(it.block.blockNumber - 1)
+                .flatMap { prev -> checkNewBlock(marker, prev) }
+        }
+    }
+
+    private fun checkNewBlock(marker: Marker, b: B): Mono<BlockEvent<B>> {
         return state.getBlockHash(b.blockNumber).toOptional()
-            .flatMapMany { knownHash ->
+            .flatMap { knownHash ->
                 when {
                     !knownHash.isPresent -> {
                         logger.info(marker, "block ${b.blockNumber} ${b.blockHash} not found. is new block")
-                        state.saveKnownBlock(b)
-                            .thenReturn(BlockEvent(b))
+                        Mono.just(BlockEvent(b))
                     }
                     knownHash.isPresent && knownHash.get() != b.blockHash -> {
                         logger.info(marker, "block ${b.blockNumber} ${b.blockHash} found. hash differs")
-                        state.saveKnownBlock(b)
-                            .thenReturn(BlockEvent(b, BlockInfo(knownHash.get(), b.blockNumber)))
+                        Mono.just(BlockEvent(b, BlockInfo(knownHash.get(), b.blockNumber)))
                     }
                     else -> {
                         logger.info(marker, "block ${b.blockNumber} ${b.blockHash} found. hash is the same")
-                        Flux.empty<BlockEvent<B>>()
+                        Mono.empty<BlockEvent<B>>()
                     }
                 }
             }

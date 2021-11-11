@@ -52,7 +52,7 @@ class BlockListenService<B : Block>(
         logger.info(marker, "insertOrUpdateBlock $b")
         return checkAndEmitBlockEvents(marker, b)
             .collectList()
-            .flatMapMany { Flux.fromIterable(it.reversed()) }
+            .flatMapMany { Flux.fromIterable(it.asReversed()) }
             .concatMap {
                 state.saveKnownBlock(it.block).thenReturn(it)
             }

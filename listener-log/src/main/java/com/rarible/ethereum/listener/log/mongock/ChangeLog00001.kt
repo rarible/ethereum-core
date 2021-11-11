@@ -33,7 +33,7 @@ class ChangeLog00001 {
         collections.forEach { createInitialIndices(template, it) }
     }
 
-    @ChangeSet(id = "removeOldLogEventPrimaryMongoIndex", order = "00002", runAlways = true, author = "Patrikeev")
+    @ChangeSet(id = "removeOldLogEventPrimaryMongoIndex", order = "00002", author = "Patrikeev")
     fun removeOldLogEventPrimaryMongoIndex(template: MongockTemplate, @NonLockGuarded holder: LogEventDescriptorHolder) {
         // This index is replaced with the new index (containing 'address' field).
         val oldIndexName = "transactionHash_1_topic_1_index_1_minorLogIndex_1_visible_1"

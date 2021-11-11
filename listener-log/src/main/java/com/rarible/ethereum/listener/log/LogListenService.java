@@ -51,6 +51,7 @@ public class LogListenService {
     private final Map<Word, LogEventListener<?>> listenersMap;
     private final long maxProcessTime;
     private final long blockProcessingDelay;
+    private final long blockListeningDelay;
     private final long batchSize;
     private final LogEventRepository logEventRepository;
     private final PendingLogService pendingLogService;
@@ -69,11 +70,13 @@ public class LogListenService {
         @Value("${ethereumBackoffMinBackoff:100}") long minBackoff,
         @Value("${ethereumMaxProcessTime:300000}") long maxProcessTime,
         @Value("${ethereumBlockBatchSize:100}") long batchSize,
+        @Value("${ethereumBlockListeningDelay:300000}") long blockListeningDelay,
         @Value("${ethereumBlockProcessingDelay:0}") long blockProcessingDelay
     ) {
         this.backoff = Retry.backoff(maxAttempts, Duration.ofMillis(minBackoff));
         this.maxProcessTime = maxProcessTime;
         this.blockProcessingDelay = blockProcessingDelay;
+        this.blockListeningDelay = blockListeningDelay;
         this.blockRepository = blockRepository;
         this.ethereum = ethereum;
         this.logEventsListeners = logEventsListeners;
@@ -107,7 +110,7 @@ public class LogListenService {
          */
         (blockProcessingDelay != 0 ? blocks.delayElements(Duration.ofMillis(blockProcessingDelay)) : blocks)
             .map(it -> new NewBlockEvent(it.getBlock().getNumber(), it.getBlock().getHash(), it.getBlock().getTimestamp(), it.getReverted() != null ? Word.apply(it.getReverted().getHash()) : null))
-            .timeout(Duration.ofMinutes(5))
+            .timeout(Duration.ofMillis(blockListeningDelay))
             .concatMap(this::onBlock)
             .then(Mono.<Void>error(new IllegalStateException("disconnected")))
             .retryWhen(

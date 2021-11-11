@@ -3,6 +3,7 @@ package com.rarible.ethereum.contract.service
 import com.rarible.contracts.erc165.IERC165
 import com.rarible.contracts.erc20.IERC20
 import com.rarible.contracts.erc721.IERC721
+import com.rarible.core.common.optimisticLock
 import com.rarible.core.contract.model.Contract
 import com.rarible.core.contract.model.Erc1155Token
 import com.rarible.core.contract.model.Erc20Token
@@ -21,16 +22,16 @@ class ContractService(
     private val contractRepository: ContractRepository,
     private val sender: MonoTransactionSender
 ) {
-    suspend fun get(address: Address): Contract {
-        val found = contractRepository.findById(address)
-
-        return if (found != null) {
-            found
-        } else {
-            val fetched = fetch(address)
-            contractRepository.save(fetched)
+    suspend fun get(address: Address): Contract =
+        optimisticLock {
+            val found = contractRepository.findById(address)
+            if (found != null) {
+                found
+            } else {
+                val fetched = fetch(address)
+                contractRepository.save(fetched)
+            }
         }
-    }
 
     suspend fun fetch(address: Address): Contract {
         val erc165 = IERC165(address, sender)

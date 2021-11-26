@@ -133,7 +133,7 @@ class TestState(
     val blocks: MutableMap<Long, Bytes> = blocks.toMutableMap()
 
     override fun getLastKnownBlock(): Mono<Long> =
-        Mono.justOrEmpty(blocks.keys.max())
+        Mono.justOrEmpty(blocks.keys.maxOrNull())
 
     override fun getBlockHash(number: Long): Mono<Bytes> =
         blocks[number]?.let { Mono.just(it) } ?: Mono.empty()
@@ -161,7 +161,7 @@ class TestBlockchain(
 
     private val byNumber = blocks.associateBy { it.blockNumber }
     private val byHash = blocks.associateBy { it.blockHash as Bytes }
-    private val lastKnown = blocks.map { it.blockNumber }.max()
+    private val lastKnown = blocks.map { it.blockNumber }.maxOrNull()
 
     override fun getLastKnownBlock(): Mono<Long> =
         Mono.justOrEmpty(lastKnown)

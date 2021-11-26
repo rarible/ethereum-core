@@ -168,6 +168,7 @@ class LogEventListener<T : EventData>(
         logger.debug(marker, "onLog $log")
 
         return descriptor.convert(log, transaction, timestamp).toFlux()
+            .doOnError { logger.error(marker, "failed to convert logs from $log", it) }
             .collectList()
             .flatMapIterable { dataCollection ->
                 dataCollection.mapIndexed { minorLogIndex, data ->

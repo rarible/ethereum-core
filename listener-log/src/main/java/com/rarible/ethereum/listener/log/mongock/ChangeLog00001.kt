@@ -42,7 +42,7 @@ class ChangeLog00001 {
             try {
                 template.indexOps(it).dropIndex(oldIndexName)
             } catch (e: Exception) {
-                logger.error("Failed to remove Mongo Index from $it: $oldIndexName", e)
+                logger.info("Did not remove Mongo Index from $it: $oldIndexName")
             }
         }
     }

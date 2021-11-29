@@ -12,10 +12,13 @@ import com.rarible.ethereum.contract.repository.ContractRepository
 import io.daonomic.rpc.RpcCodeException
 import io.daonomic.rpc.domain.Binary
 import kotlinx.coroutines.reactive.awaitFirst
+import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 import reactor.core.publisher.Mono
 import scalether.domain.Address
 import scalether.transaction.MonoTransactionSender
+import java.math.BigInteger
+import kotlin.math.log
 
 @Service
 class ContractService(
@@ -61,8 +64,24 @@ class ContractService(
                     id = address,
                     name = erc20.name().tryAwaitMethodCall(),
                     symbol = erc20.symbol().tryAwaitMethodCall(),
-                    decimals = erc20.decimals().tryAwaitMethodCall()?.intValueExact()
+                    decimals = erc20.decimals().tryAwaitMethodCall()?.let { parseDecimals(address, it) }
                 )
+            }
+        }
+    }
+
+    private fun parseDecimals(contract: Address, decimals: BigInteger): Int? {
+        return when {
+            decimals < BigInteger.ZERO -> {
+                logger.warn("Contract $contract has negative decimals: $decimals")
+                null
+            }
+            decimals > BigInteger.valueOf(Int.MAX_VALUE.toLong()) -> {
+                logger.warn("Contract $contract has infinite decimals: $decimals")
+                null
+            }
+            else -> {
+                decimals.intValueExact()
             }
         }
     }
@@ -84,6 +103,7 @@ class ContractService(
     }
 
     companion object {
+        private val logger = LoggerFactory.getLogger(ContractService::class.java)
         val ERC721: Binary = Binary.apply("0x80ac58cd")
         val ERC721_DEPRECATED1: Binary = Binary.apply("0xd31b620d")
         val ERC721_DEPRECATED2: Binary = Binary.apply("0x80ac58cd")

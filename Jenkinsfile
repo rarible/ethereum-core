@@ -1,3 +1,3 @@
-@Library('shared-library') _
+@Library('shared-library@v21.11.30-1') _
 
-buildLibrary('nexus-ext-ci')
+buildLibrary(['credentialsId': 'nexus-ext-ci'])

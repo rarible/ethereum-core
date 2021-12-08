@@ -5,7 +5,6 @@ import com.rarible.ethereum.listener.log.domain.LogEvent
 import com.rarible.ethereum.listener.log.domain.LogEventStatus
 import com.rarible.ethereum.listener.log.mongock.ChangeLog00001
 import io.daonomic.rpc.domain.Word
-import org.bson.types.ObjectId
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.data.mongodb.core.ReactiveMongoOperations
@@ -50,7 +49,7 @@ class LogEventRepository(
         return mongo.find(Query(Criteria.where("status").`is`(LogEventStatus.PENDING)), LogEvent::class.java, collection)
     }
 
-    fun findLogEvent(collection: String, id: ObjectId): Mono<LogEvent> {
+    fun findLogEvent(collection: String, id: String): Mono<LogEvent> {
         return mongo.findById(id, LogEvent::class.java, collection)
     }
 

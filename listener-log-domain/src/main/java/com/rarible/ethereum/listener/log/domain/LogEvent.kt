@@ -67,13 +67,13 @@ data class LogEvent(
     val visible: Boolean = true,
 
     @Id
-    override val id: ObjectId = ObjectId.get(),
+    override val id: String = ObjectId.get().toString(),
     @Version
     val version: Long? = null,
 
     val createdAt: Instant = Instant.EPOCH,
     val updatedAt: Instant = Instant.EPOCH
-) : Identifiable<ObjectId>
+) : Identifiable<String>
 
 @JsonTypeInfo(use = JsonTypeInfo.Id.CLASS, property = "@class")
 interface EventData

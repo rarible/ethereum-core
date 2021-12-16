@@ -131,9 +131,9 @@ class InsertMissingBlocksTaskHandlerTest {
             .toMutableMap()
 
         every { blockRepository.findFirstByIdAsc() } returns
-                this.knownBlocks.keys.min()?.let { this.knownBlocks[it] }.justOrEmpty()
+                this.knownBlocks.keys.minOrNull()?.let { this.knownBlocks[it] }.justOrEmpty()
         every { blockRepository.findFirstByIdDesc() } returns
-                this.knownBlocks.keys.max()?.let { this.knownBlocks[it] }.justOrEmpty()
+                this.knownBlocks.keys.maxOrNull()?.let { this.knownBlocks[it] }.justOrEmpty()
         coEvery { blockRepository.findById(any()) } answers {
             val blockNumber = firstArg<Long>()
             this@InsertMissingBlocksTaskHandlerTest.knownBlocks[blockNumber]
@@ -172,7 +172,7 @@ private class SimpleBlockchain(
 
     private val byNumber = blocks.associateBy { it.blockNumber }
     private val byHash = blocks.associateBy { it.blockHash }
-    private val lastKnown = blocks.map { it.blockNumber }.max()
+    private val lastKnown = blocks.map { it.blockNumber }.maxOrNull()
 
     override fun getLastKnownBlock(): Mono<Long> =
         Mono.justOrEmpty(lastKnown)

@@ -50,6 +50,10 @@ data class LogEvent(
      */
     val logIndex: Int? = null,
     /**
+     * Sender of the transaction.
+     */
+    val from: Address? = null,
+    /**
      * Secondary index of this log event among all logs produced by `LogEventDescriptor.convert` for the same log
      * with exactly the same [blockNumber], [blockHash], [transactionHash], [logIndex] and [index].
      * The [minorLogIndex] is used to distinguish consequent business events.
@@ -72,7 +76,7 @@ data class LogEvent(
     val version: Long? = null,
 
     val createdAt: Instant = Instant.EPOCH,
-    val updatedAt: Instant = Instant.EPOCH
+    val updatedAt: Instant = createdAt
 ) : Identifiable<ObjectId>
 
 @JsonTypeInfo(use = JsonTypeInfo.Id.CLASS, property = "@class")

@@ -180,6 +180,7 @@ class LogEventListener<T : EventData>(
                         status = LogEventStatus.CONFIRMED,
                         blockHash = log.blockHash(),
                         blockNumber = log.blockNumber().toLong(),
+                        from = transaction.from(),
                         logIndex = log.logIndex().toInt(),
                         minorLogIndex = minorLogIndex,
                         index = index,

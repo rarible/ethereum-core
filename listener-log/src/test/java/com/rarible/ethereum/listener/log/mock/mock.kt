@@ -18,6 +18,7 @@ fun randomLogEvent(topic: Word = randomWordd()): LogEvent =
         address = randomAddress(),
         topic = topic,
 
+        from = randomAddress(),
         logIndex = 0,
         index = 0,
         minorLogIndex = 0,
@@ -26,6 +27,5 @@ fun randomLogEvent(topic: Word = randomWordd()): LogEvent =
 
         data = object : EventData {},
         visible = true,
-        createdAt = Instant.now(),
-        updatedAt = Instant.now()
+        createdAt = Instant.now()
     )

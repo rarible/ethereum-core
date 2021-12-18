@@ -130,16 +130,16 @@ class ListenTransfersTest : AbstractIntegrationTest() {
 
         val saved = mongo.save(
             LogEvent(
-                Transfer(sender.from(), beneficiary, value),
-                contract.address(),
-                TransferEvent.id(),
-                tx.hash(),
-                LogEventStatus.PENDING,
+                data = Transfer(sender.from(), beneficiary, value),
+                address = contract.address(),
+                topic = TransferEvent.id(),
+                transactionHash = tx.hash(),
+                status = LogEventStatus.PENDING,
+                from = sender.from(),
                 index = 0,
                 minorLogIndex = 0,
                 visible = true,
-                createdAt = Instant.now(),
-                updatedAt = Instant.now()
+                createdAt = Instant.now()
             ), "transfer"
         ).block()!!
 
@@ -177,16 +177,16 @@ class ListenTransfersTest : AbstractIntegrationTest() {
 
         val saved = mongo.save(
             LogEvent(
-                Transfer(sender.from(), beneficiary, value),
-                contract.address(),
-                TransferEvent.id(),
-                transferReceipt.transactionHash(),
-                LogEventStatus.PENDING,
+                data = Transfer(sender.from(), beneficiary, value),
+                address = contract.address(),
+                topic = TransferEvent.id(),
+                transactionHash = transferReceipt.transactionHash(),
+                status = LogEventStatus.PENDING,
+                from = sender.from(),
                 index = 0,
                 minorLogIndex = 0,
                 visible = true,
-                createdAt = Instant.now(),
-                updatedAt = Instant.now()
+                createdAt = Instant.now()
             ), "transfer"
         ).block()!!
 
@@ -216,16 +216,16 @@ class ListenTransfersTest : AbstractIntegrationTest() {
         val fakeHash = Word(nextBytes(32))
         val saved = mongo.save(
             LogEvent(
-                Transfer(sender.from(), beneficiary, value),
-                contract.address(),
-                TransferEvent.id(),
-                fakeHash,
-                LogEventStatus.PENDING,
+                data = Transfer(sender.from(), beneficiary, value),
+                address = contract.address(),
+                topic = TransferEvent.id(),
+                transactionHash = fakeHash,
+                status = LogEventStatus.PENDING,
+                from = sender.from(),
                 index = 0,
                 minorLogIndex = 0,
                 visible = true,
-                createdAt = Instant.now().minus(10, ChronoUnit.MINUTES),
-                updatedAt = Instant.now().minus(10, ChronoUnit.MINUTES)
+                createdAt = Instant.now().minus(10, ChronoUnit.MINUTES)
             ), "transfer"
         ).block()!!
 

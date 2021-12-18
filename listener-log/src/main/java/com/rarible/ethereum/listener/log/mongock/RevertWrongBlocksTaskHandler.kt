@@ -33,6 +33,7 @@ class RevertWrongBlocksTaskHandler(
             val lastBlockId = blockRepository.findFirstByIdDesc().awaitFirstOrNull()?.id ?: return@flow
             val startBlockId = from ?: firstBlockId
             for (blockNumber in startBlockId..lastBlockId) {
+                emit(blockNumber)
                 val block = blockRepository.findById(blockNumber)
                 if (block == null) {
                     logger.warn("Missing block #$blockNumber")

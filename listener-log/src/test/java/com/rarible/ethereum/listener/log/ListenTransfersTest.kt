@@ -2,16 +2,17 @@ package com.rarible.ethereum.listener.log
 
 import com.rarible.contracts.test.erc20.TestERC20
 import com.rarible.contracts.test.erc20.TransferEvent
-import com.rarible.core.common.nowMillis
 import com.rarible.core.task.Task
 import com.rarible.core.task.TaskService
 import com.rarible.core.task.TaskStatus
+import com.rarible.core.test.data.randomAddress
 import com.rarible.core.test.data.randomLong
 import com.rarible.core.test.wait.BlockingWait.waitAssert
 import com.rarible.core.test.wait.BlockingWait.waitFor
 import com.rarible.ethereum.listener.log.domain.*
 import com.rarible.ethereum.listener.log.mock.Transfer
 import com.rarible.ethereum.listener.log.mock.randomWordd
+import io.daonomic.rpc.domain.Binary
 import io.daonomic.rpc.domain.Word
 import io.mockk.*
 import kotlinx.coroutines.flow.toList
@@ -31,7 +32,11 @@ import org.springframework.data.mongodb.core.query.Query
 import org.springframework.data.mongodb.core.query.Update
 import org.springframework.data.mongodb.core.query.lt
 import reactor.core.publisher.Mono
+import reactor.kotlin.core.publisher.toMono
 import scalether.domain.Address
+import scalether.domain.response.Block
+import scalether.domain.response.Transaction
+import scalether.java.Lists
 import java.math.BigInteger
 import java.time.Instant
 import java.time.temporal.ChronoUnit
@@ -250,15 +255,36 @@ class ListenTransfersTest : AbstractIntegrationTest() {
         }!!
         val blockNumber = transactionReceipt.blockNumber()
         val blockHash = transactionReceipt.blockHash()
-        // Revert the block.
-        logListenService.onBlock(
-            NewBlockEvent(
-                number = blockNumber.toLong(),
-                hash = randomWordd(),
-                timestamp = nowMillis().epochSecond,
-                reverted = blockHash
-            )
-        ).block()
+
+        val revertedBlockHash = randomWordd()
+        @Suppress("ReactiveStreamsUnusedPublisher")
+        every { ethereum.ethGetFullBlockByHash(revertedBlockHash) } returns Block(
+            blockNumber,
+            revertedBlockHash,
+            randomWordd(),
+            "",
+            "",
+            "",
+            "",
+            "",
+            randomAddress(),
+            BigInteger.ZERO,
+            BigInteger.ZERO,
+            Binary.empty(),
+            BigInteger.ZERO,
+            BigInteger.ZERO,
+            BigInteger.ZERO,
+            Lists.toScala(emptyList<Transaction>()),
+            Instant.EPOCH.epochSecond.toBigInteger()
+        ).toMono()
+
+        val replacingBlock = NewBlockEvent(
+            number = blockNumber.toLong(),
+            hash = revertedBlockHash,
+            timestamp = Instant.EPOCH.epochSecond,
+            reverted = blockHash
+        )
+        logListenService.onBlock(replacingBlock).block()
         waitAssert {
             val updatedLogEvent = mongo.findById(mintLogEvent.id, LogEvent::class.java, "transfer").block()!!
             assertThat(updatedLogEvent.status).isEqualTo(LogEventStatus.REVERTED)

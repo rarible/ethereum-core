@@ -1,6 +1,9 @@
 package com.rarible.ethereum.listener.log
 
+import com.rarible.ethereum.autoconfigure.EthereumAutoConfiguration
+import com.rarible.ethereum.autoconfigure.EthereumProperties
 import io.daonomic.rpc.domain.Word
+import io.mockk.spyk
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.springframework.beans.factory.annotation.Autowired
@@ -66,9 +69,15 @@ class EthereumConfigurationIntr {
         MonoSimpleNonceProvider(ethereum),
         Numeric.toBigInt(privateKey),
         BigInteger.valueOf(8000000),
-        MonoGasPriceProvider { Mono.just(BigInteger.ZERO) }
+        { Mono.just(BigInteger.ZERO) }
     )
 
     @Bean
     fun poller(ethereum: MonoEthereum) = MonoTransactionPoller(ethereum)
+
+    @Bean
+    fun testEthereum(ethereumProperties: EthereumProperties): MonoEthereum {
+        val ethereum = EthereumAutoConfiguration(ethereumProperties).ethereum()
+        return spyk(ethereum)
+    }
 }

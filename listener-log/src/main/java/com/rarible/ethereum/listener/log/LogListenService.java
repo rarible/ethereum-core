@@ -1,5 +1,6 @@
 package com.rarible.ethereum.listener.log;
 
+import com.rarible.core.apm.ApmUtilsKt;
 import com.rarible.core.apm.JavaHelpers;
 import com.rarible.core.logging.LoggerContext;
 import com.rarible.core.logging.LoggingUtils;
@@ -29,6 +30,7 @@ import scalether.core.MonoEthereum;
 import javax.annotation.PostConstruct;
 import java.math.BigInteger;
 import java.time.Duration;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -176,8 +178,14 @@ public class LogListenService {
     }
 
     private Flux<LogEvent> onBlockEvent(NewBlockEvent event) {
-        return Flux.fromIterable(listeners)
-            .flatMap(it -> it.onBlockEvent(event));
+        return withSpan(
+                ethereum.ethGetFullBlockByHash(event.getHash()),
+                "getFullBlock", null, null, null,
+                Collections.emptyList()
+        )
+        .doOnError(throwable -> logger.warn("Unable to get block by hash: " + event.getHash(), throwable))
+        .retryWhen(backoff)
+        .flatMapMany(block -> Flux.fromIterable(listeners).flatMap(listener -> listener.onBlockEvent(event, block)));
     }
 
     private Mono<Void> postProcessLogs(List<LogEvent> logs) {

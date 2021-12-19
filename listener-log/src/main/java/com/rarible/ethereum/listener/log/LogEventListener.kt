@@ -50,7 +50,7 @@ class LogEventListener<T : EventData>(
         )
     }
 
-    fun onBlockEvent(event: NewBlockEvent): Flux<LogEvent> {
+    fun onBlockEvent(event: NewBlockEvent, fullBlock: Block<Transaction>): Flux<LogEvent> {
         val deleteReverted = logEventRepository.findAndDelete(
             collection = collection,
             blockHash = event.hash,
@@ -69,16 +69,8 @@ class LogEventListener<T : EventData>(
         return Flux.concat(
             deleteReverted,
             revert,
-            ethereum.ethGetFullBlockByHash(event.hash).withSpan("getFullBlock")
-                .doOnError { th -> logger.warn("Unable to get block by hash: " + event.hash, th) }
-                .retryWhen(backoff)
-                .flatMapMany { block ->
-                    Flux.concat(
-                        pendingLogService.markInactive(descriptor.collection, descriptor.topic, block)
-                            .withSpan("pending"),
-                        onNewBlock(block)
-                    )
-                }
+            pendingLogService.markInactive(descriptor.collection, descriptor.topic, fullBlock).withSpan("pending"),
+            onNewBlock(fullBlock)
         ).withSpan("processTopicLogs", labels = listOf("topic" to topic.toString()))
     }
 

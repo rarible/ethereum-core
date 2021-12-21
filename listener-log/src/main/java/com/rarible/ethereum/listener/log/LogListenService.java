@@ -1,6 +1,5 @@
 package com.rarible.ethereum.listener.log;
 
-import com.rarible.core.apm.ApmUtilsKt;
 import com.rarible.core.apm.JavaHelpers;
 import com.rarible.core.logging.LoggerContext;
 import com.rarible.core.logging.LoggingUtils;
@@ -54,6 +53,7 @@ public class LogListenService {
     private final long maxProcessTime;
     private final long blockProcessingDelay;
     private final long blockListeningDelay;
+    private final long stopListeningBlock;
     private final long batchSize;
     private final LogEventRepository logEventRepository;
     private final PendingLogService pendingLogService;
@@ -73,12 +73,14 @@ public class LogListenService {
         @Value("${ethereumMaxProcessTime:300000}") long maxProcessTime,
         @Value("${ethereumBlockBatchSize:100}") long batchSize,
         @Value("${ethereumBlockListeningDelay:300000}") long blockListeningDelay,
-        @Value("${ethereumBlockProcessingDelay:0}") long blockProcessingDelay
+        @Value("${ethereumBlockProcessingDelay:0}") long blockProcessingDelay,
+        @Value("${ethereumStopListeningBlock:9223372036854775807}") long stopListeningBlock
     ) {
         this.backoff = Retry.backoff(maxAttempts, Duration.ofMillis(minBackoff));
         this.maxProcessTime = maxProcessTime;
         this.blockProcessingDelay = blockProcessingDelay;
         this.blockListeningDelay = blockListeningDelay;
+        this.stopListeningBlock = stopListeningBlock;
         this.blockRepository = blockRepository;
         this.ethereum = ethereum;
         this.logEventsListeners = logEventsListeners;
@@ -104,8 +106,8 @@ public class LogListenService {
 
     @PostConstruct
     public void init() {
-        Flux<BlockEvent<SimpleBlock>> blocks =
-                Mono.delay(Duration.ofMillis(1000)).thenMany(blockListenService.listen());
+        Flux<BlockEvent<SimpleBlock>> blocks = Mono.delay(Duration.ofMillis(1000))
+                .thenMany(blockListenService.listen());
         /*
          *  We delay processing of blocks for a while to give Ethereum nodes time to synchronize transactions' traces.
          *  This may not be enough, but at least minimizes number of block errors caused by unavailable traces.
@@ -113,7 +115,14 @@ public class LogListenService {
         (blockProcessingDelay != 0 ? blocks.delayElements(Duration.ofMillis(blockProcessingDelay)) : blocks)
             .map(it -> new NewBlockEvent(it.getBlock().getNumber(), it.getBlock().getHash(), it.getBlock().getTimestamp(), it.getReverted() != null ? Word.apply(it.getReverted().getHash()) : null))
             .timeout(Duration.ofMillis(blockListeningDelay))
-            .concatMap(this::onBlock)
+            .concatMap(it -> {
+                if (it.getNumber() >= stopListeningBlock) {
+                    logger.info("New block {} is greater or equal then stop block {}, skip handling", it.getNumber(), stopListeningBlock);
+                    return Mono.empty();
+                } else  {
+                    return this.onBlock(it);
+                }
+            })
             .then(Mono.<Void>error(new IllegalStateException("disconnected")))
             .retryWhen(
                 Retry.backoff(Long.MAX_VALUE, Duration.ofMillis(300))

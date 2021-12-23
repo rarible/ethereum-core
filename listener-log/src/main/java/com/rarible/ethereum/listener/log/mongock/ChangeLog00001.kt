@@ -37,12 +37,15 @@ class ChangeLog00001 {
     fun removeOldLogEventPrimaryMongoIndex(template: MongockTemplate, @NonLockGuarded holder: LogEventDescriptorHolder) {
         // This index is replaced with the new index (containing 'address' field).
         val oldIndexName = "transactionHash_1_topic_1_index_1_minorLogIndex_1_visible_1"
-        holder.list.map { it.collection }.distinct().forEach {
-            logger.info("Removing Mongo index from $it: $oldIndexName")
+        holder.list.map { it.collection }.distinct().forEach { collection ->
+            if (template.indexOps(collection).indexInfo.any { it.name == oldIndexName }) {
+                return@forEach
+            }
+            logger.info("Removing Mongo index from $collection: $oldIndexName")
             try {
-                template.indexOps(it).dropIndex(oldIndexName)
+                template.indexOps(collection).dropIndex(oldIndexName)
             } catch (e: Exception) {
-                logger.info("Did not remove Mongo Index from $it: $oldIndexName")
+                logger.info("Did not remove Mongo Index from $collection: $oldIndexName")
             }
         }
     }

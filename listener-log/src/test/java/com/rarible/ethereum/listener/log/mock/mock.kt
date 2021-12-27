@@ -23,6 +23,8 @@ fun randomLogEvent(topic: Word = randomWordd()): LogEvent =
         index = 0,
         minorLogIndex = 0,
 
+        blockTimestamp = Instant.now().epochSecond,
+
         status = LogEventStatus.CONFIRMED,
 
         data = object : EventData {},

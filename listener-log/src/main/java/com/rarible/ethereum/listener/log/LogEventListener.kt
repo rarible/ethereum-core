@@ -177,8 +177,8 @@ class LogEventListener<T : EventData>(
                         minorLogIndex = minorLogIndex,
                         index = index,
                         visible = true,
-                        createdAt = Instant.now(),
-                        updatedAt = Instant.now()
+                        blockTimestamp = Instant.now().epochSecond,
+                        createdAt = Instant.now()
                     )
                 }
             }

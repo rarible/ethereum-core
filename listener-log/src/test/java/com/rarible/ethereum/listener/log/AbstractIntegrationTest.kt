@@ -4,6 +4,7 @@ import com.rarible.ethereum.autoconfigure.EthereumAutoConfiguration
 import com.rarible.ethereum.autoconfigure.EthereumProperties
 import io.daonomic.rpc.domain.Word
 import io.mockk.spyk
+import kotlinx.coroutines.reactive.awaitFirst
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.springframework.beans.factory.annotation.Autowired
@@ -20,6 +21,7 @@ import scalether.core.MonoEthereum
 import scalether.domain.response.TransactionReceipt
 import scalether.transaction.*
 import java.math.BigInteger
+import java.time.Instant
 
 abstract class AbstractIntegrationTest {
     @Autowired
@@ -32,6 +34,9 @@ abstract class AbstractIntegrationTest {
     protected lateinit var mongo: ReactiveMongoOperations
     @Autowired
     protected lateinit var mongoTemplate: MongoTemplate
+
+    protected fun TransactionReceipt.getTimestamp(): Instant =
+        Instant.ofEpochSecond(ethereum.ethGetFullBlockByHash(blockHash()).map { it.timestamp() }.block()!!.toLong())
 
     private fun Mono<Word>.waitReceipt(): TransactionReceipt {
         val value = this.block()

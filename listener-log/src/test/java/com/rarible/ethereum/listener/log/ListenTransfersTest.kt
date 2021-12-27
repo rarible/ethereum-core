@@ -84,6 +84,7 @@ class ListenTransfersTest : AbstractIntegrationTest() {
 
             val event = mongo.findOne<LogEvent>(Query(), "transfer").block()!!
             assertThat(event.status).isEqualTo(LogEventStatus.CONFIRMED)
+            assertThat(event.blockTimestamp).isEqualTo(receipt.getTimestamp().epochSecond)
             assertTrue(event.data is Transfer, "class is ${event.data.javaClass}")
             val t: Transfer = event.data as Transfer
             assertThat(t.from).isEqualTo(Address.apply(ByteArray(20)))
@@ -144,7 +145,8 @@ class ListenTransfersTest : AbstractIntegrationTest() {
                 index = 0,
                 minorLogIndex = 0,
                 visible = true,
-                createdAt = Instant.now()
+                createdAt = Instant.now(),
+                blockTimestamp = Instant.now().epochSecond
             ), "transfer"
         ).block()!!
 
@@ -230,7 +232,8 @@ class ListenTransfersTest : AbstractIntegrationTest() {
                 index = 0,
                 minorLogIndex = 0,
                 visible = true,
-                createdAt = Instant.now().minus(10, ChronoUnit.MINUTES)
+                createdAt = Instant.now().minus(10, ChronoUnit.MINUTES),
+                blockTimestamp = Instant.now().epochSecond - 10
             ), "transfer"
         ).block()!!
 

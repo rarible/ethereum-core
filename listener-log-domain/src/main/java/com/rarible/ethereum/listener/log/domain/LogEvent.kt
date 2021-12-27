@@ -51,8 +51,16 @@ data class LogEvent(
     val logIndex: Int? = null,
     /**
      * Sender of the transaction.
+     *
+     * This field is nullable until all log events are updated in the database.
      */
     val from: Address? = null,
+    /**
+     * Timestamp of the block to which this log event belongs.
+     *
+     * This field is nullable until all log events are updated in the database.
+     */
+    val blockTimestamp: Long? = null,
     /**
      * Secondary index of this log event among all logs produced by `LogEventDescriptor.convert` for the same log
      * with exactly the same [blockNumber], [blockHash], [transactionHash], [logIndex] and [index].

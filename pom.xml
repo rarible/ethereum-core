@@ -4,7 +4,7 @@
     <parent>
         <groupId>com.rarible</groupId>
         <artifactId>rarible-parent-pom</artifactId>
-        <version>2.0.1</version>
+        <version>2.0.4</version>
     </parent>
 
     <modelVersion>4.0.0</modelVersion>
@@ -33,7 +33,7 @@
     </distributionManagement>
 
     <properties>
-        <revision>1.4.7</revision>
+        <revision>1.4.8</revision>
         <rarible-core.version>2.0.13</rarible-core.version>
     </properties>
 

@@ -12,6 +12,7 @@ import org.springframework.data.mongodb.core.ReactiveMongoOperations
 import org.springframework.data.mongodb.core.query.Criteria
 import org.springframework.data.mongodb.core.query.Query
 import org.springframework.data.mongodb.core.query.isEqualTo
+import org.springframework.data.mongodb.core.query.ne
 import org.springframework.stereotype.Component
 import reactor.core.publisher.Flux
 import reactor.core.publisher.Mono
@@ -54,12 +55,11 @@ class LogEventRepository(
         return mongo.findById(id, LogEvent::class.java, collection)
     }
 
-    fun findAndRevert(collection: String, blockHash: Word, topic: Word): Flux<LogEvent> {
-        val blockHashCriteria = Criteria.where(LogEvent::blockHash.name).isEqualTo(blockHash)
-        val topicCriteria = Criteria.where(LogEvent::topic.name).isEqualTo(topic)
+    fun findAndRevert(collection: String, blockNumber: Long, blockHash: Word, topic: Word): Flux<LogEvent> {
         val query = Query().apply {
-            addCriteria(blockHashCriteria)
-            addCriteria(topicCriteria)
+            addCriteria(LogEvent::blockNumber isEqualTo blockNumber)
+            addCriteria(LogEvent::topic isEqualTo topic)
+            addCriteria(LogEvent::blockHash ne blockHash)
         }
         return LoggingUtils.withMarkerFlux { marker ->
             mongo.find(query, LogEvent::class.java, collection)

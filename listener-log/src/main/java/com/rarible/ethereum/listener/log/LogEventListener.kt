@@ -57,15 +57,12 @@ class LogEventListener<T : EventData>(
             topic = topic,
             status = LogEventStatus.REVERTED
         )
-        val revert = if (event.reverted != null) {
-            logEventRepository.findAndRevert(
-                collection = collection,
-                blockHash = event.reverted!!,
-                topic = topic
-            )
-        } else {
-            Flux.empty()
-        }
+        val revert = logEventRepository.findAndRevert(
+            collection = collection,
+            blockNumber = event.number,
+            blockHash = event.hash,
+            topic = topic
+        )
         return Flux.concat(
             deleteReverted,
             revert,

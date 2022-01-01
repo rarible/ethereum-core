@@ -10,9 +10,7 @@ import org.springframework.data.domain.Sort
 import org.springframework.data.mongodb.core.ReactiveMongoOperations
 import org.springframework.data.mongodb.core.find
 import org.springframework.data.mongodb.core.findOne
-import org.springframework.data.mongodb.core.query.Query
-import org.springframework.data.mongodb.core.query.Update
-import org.springframework.data.mongodb.core.query.isEqualTo
+import org.springframework.data.mongodb.core.query.*
 import org.springframework.stereotype.Service
 import reactor.core.publisher.Flux
 import reactor.core.publisher.Mono
@@ -21,6 +19,19 @@ import reactor.core.publisher.Mono
 class BlockRepository(
     mongo: ReactiveMongoOperations
 ) : AbstractMongoRepository<BlockHead, Long>(mongo, BlockHead::class.java) {
+
+    /**
+     * Finds all [BlockHead]'s sorted by number desc
+     */
+    fun findBlocks(from: Long?, to: Long?): Flux<BlockHead> {
+        val query = Query().apply {
+            from?.apply { addCriteria(BlockHead::id gte this) }
+            to?.apply { addCriteria(BlockHead::id lt this) }
+            with(Sort.by(Sort.Direction.DESC, "_id"))
+        }
+        return mongo.find(query, BlockHead::class.java)
+    }
+
 
     fun findByStatus(status: BlockStatus): Flux<BlockHead> =
         mongo.find(Query(BlockHead::status isEqualTo status))

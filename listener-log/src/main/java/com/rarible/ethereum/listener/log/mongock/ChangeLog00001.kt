@@ -90,6 +90,14 @@ class ChangeLog00001 {
                 .named("blockHash")
                 .background()
         )
+
+        indexOps.ensureIndex(
+            Index()
+                .on("blockNumber", Sort.Direction.ASC)
+                .on("topic", Sort.Direction.ASC)
+                .named("blockNumber_1_topic_1")
+                .background()
+        )
     }
 
     companion object {

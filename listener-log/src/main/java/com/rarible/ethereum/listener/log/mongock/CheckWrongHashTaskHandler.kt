@@ -34,7 +34,7 @@ class CheckWrongHashTaskHandler(
         logger.info("Checking if block saved with incorrect block hash: ${block.id}")
         val bb = ethereum.ethGetBlockByNumber(block.id.toBigInteger()).awaitFirst()
         if (bb.hash() != block.hash) {
-            logger.info("Block has incorrect hash in the db: ${block.id}")
+            logger.info("Block has incorrect hash in the db: ${block.id}, old hash: ${block.hash}, new hash: ${bb.hash()}")
             blockRepository.save(block.copy(status = BlockStatus.ERROR, hash = bb.hash(), timestamp = bb.timestamp().toLong()))
         }
     }

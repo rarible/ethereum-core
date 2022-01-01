@@ -1,6 +1,7 @@
 package com.rarible.ethereum.listener.log
 
 import com.rarible.core.test.data.randomAddress
+import com.rarible.core.test.data.randomLong
 import com.rarible.ethereum.listener.log.domain.LogEventStatus
 import com.rarible.ethereum.listener.log.mock.randomLogEvent
 import com.rarible.ethereum.listener.log.mock.randomWordd
@@ -25,16 +26,17 @@ class LogEventRepositoryTest : AbstractIntegrationTest() {
     fun `should find and revert log`() {
         val collection = "transfer"
 
+        val blockNumber = randomLong()
         val targetBlockHash = randomWordd()
         val topic = randomWordd()
         val confirmedEventLog =
-            randomLogEvent(topic).copy(blockHash = targetBlockHash, status = LogEventStatus.CONFIRMED)
-        val inactiveEventLog = randomLogEvent(topic).copy(blockHash = targetBlockHash, status = LogEventStatus.INACTIVE)
+            randomLogEvent(topic).copy(blockHash = targetBlockHash, status = LogEventStatus.CONFIRMED, blockNumber = blockNumber)
+        val inactiveEventLog = randomLogEvent(topic).copy(blockHash = targetBlockHash, status = LogEventStatus.INACTIVE, blockNumber = blockNumber)
 
         logEventRepository.save(collection, confirmedEventLog).block()
         logEventRepository.save(collection, inactiveEventLog).block()
 
-        val revertedEvents = logEventRepository.findAndRevert(collection, targetBlockHash, topic).collectList().block()!!
+        val revertedEvents = logEventRepository.findAndRevert(collection, blockNumber, randomWordd(), topic).collectList().block()!!
         assertThat(revertedEvents.map { it.id }).containsExactlyInAnyOrder(confirmedEventLog.id, inactiveEventLog.id)
 
         val savedConfirmedLog = logEventRepository.findLogEvent(collection, confirmedEventLog.id).block()!!

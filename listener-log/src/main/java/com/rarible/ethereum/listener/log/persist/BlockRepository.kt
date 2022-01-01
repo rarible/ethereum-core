@@ -24,9 +24,19 @@ class BlockRepository(
      * Finds all [BlockHead]'s sorted by number desc
      */
     fun findBlocks(from: Long?, to: Long?): Flux<BlockHead> {
-        val query = Query().apply {
-            from?.apply { addCriteria(BlockHead::id gte this) }
-            to?.apply { addCriteria(BlockHead::id lt this) }
+        val c = if (from != null || to != null) {
+            Criteria("_id").apply {
+                if (from != null) {
+                    this.gte(from)
+                }
+                if (to != null) {
+                    this.lt(to)
+                }
+            }
+        } else {
+            Criteria()
+        }
+        val query = Query(c).apply {
             with(Sort.by(Sort.Direction.DESC, "_id"))
         }
         return mongo.find(query, BlockHead::class.java)

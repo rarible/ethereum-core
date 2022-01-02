@@ -23,7 +23,7 @@ class CheckWrongHashTaskHandler(
 ) : TaskHandler<Long> {
 
     override val type: String
-        get() = "CHECK_WRONG_HASH"
+        get() = TYPE
 
     override fun runLongTask(from: Long?, param: String): Flow<Long> {
         val start = param.toLong()
@@ -45,5 +45,6 @@ class CheckWrongHashTaskHandler(
 
     companion object {
         val logger: Logger = LoggerFactory.getLogger(CheckWrongHashTaskHandler::class.java)
+        const val TYPE: String = "CHECK_WRONG_HASH"
     }
 }

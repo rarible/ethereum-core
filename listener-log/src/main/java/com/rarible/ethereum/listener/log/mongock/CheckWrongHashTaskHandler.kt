@@ -19,7 +19,7 @@ import scalether.core.MonoEthereum
 class CheckWrongHashTaskHandler(
     private val blockRepository: BlockRepository,
     private val ethereum: MonoEthereum,
-    @Value("ethereumCheckWrongHashDelay:10000") private val delay: Long
+    @Value("\${ethereumCheckWrongHashDelay:10000}") private val delay: Long
 ) : TaskHandler<Long> {
 
     override val type: String

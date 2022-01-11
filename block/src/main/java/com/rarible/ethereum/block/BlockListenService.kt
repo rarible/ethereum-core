@@ -16,12 +16,19 @@ interface Block {
 
 class BlockListenService<B : Block>(
     private val state: BlockState<B>,
-    private val blockchain: Blockchain<B>
+    private val blockchain: Blockchain<B>,
+    private val stopListeningBlock: Long = Long.MAX_VALUE
 ) {
     fun listen(): Flux<BlockEvent<B>> {
         return LoggingUtils.withMarkerFlux { marker ->
-            blockchain.listenNewBlocks()
-                .concatMap { getNewBlocks(marker, it).concatMap { newBlock -> insertOrUpdateBlock(marker, newBlock) } }
+            blockchain.listenNewBlocks().concatMap { block ->
+                if (block.blockNumber >= stopListeningBlock) {
+                    logger.info("New block {} is greater or equal then stop block {}, skip", block.blockNumber, stopListeningBlock)
+                    Flux.empty()
+                } else {
+                    getNewBlocks(marker, block).concatMap { newBlock -> insertOrUpdateBlock(marker, newBlock) }
+                }
+            }
         }
     }
 

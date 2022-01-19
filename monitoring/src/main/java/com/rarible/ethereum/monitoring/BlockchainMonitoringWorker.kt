@@ -16,7 +16,7 @@ import kotlin.math.max
 class BlockchainMonitoringWorker(
     properties: DaemonWorkerProperties,
     private val blockchain: Blockchain,
-    private val meterRegistry: MeterRegistry,
+    meterRegistry: MeterRegistry,
     private val blockRepository: BlockRepository
 ) : SequentialDaemonWorker(meterRegistry, properties) {
 

@@ -7,6 +7,9 @@ import com.rarible.ethereum.listener.log.mock.randomLogEvent
 import com.rarible.ethereum.listener.log.mock.randomWordd
 import com.rarible.ethereum.listener.log.persist.LogEventRepository
 import io.daonomic.rpc.domain.Word
+import kotlinx.coroutines.reactive.awaitFirst
+import kotlinx.coroutines.reactive.awaitFirstOrNull
+import kotlinx.coroutines.runBlocking
 import org.apache.commons.lang3.RandomUtils
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
@@ -113,4 +116,18 @@ class LogEventRepositoryTest : AbstractIntegrationTest() {
         assertThat(savedEventLog2.id).isEqualTo(eventLog2.id)
     }
 
+    @Test
+    fun `should check reverted log by block number`() = runBlocking<Unit> {
+        val collection = "transfer"
+
+        val topic = Word.apply(RandomUtils.nextBytes(32))
+        val eventLog1 = randomLogEvent(topic).copy(blockNumber = 10, status = LogEventStatus.REVERTED)
+        val eventLog2 = randomLogEvent(topic).copy(blockNumber = 11, status = LogEventStatus.CONFIRMED)
+
+        logEventRepository.save(collection, eventLog1).awaitFirst()
+        logEventRepository.save(collection, eventLog2).awaitFirst()
+
+        assertThat(logEventRepository.hasRevertedLogEvent(collection, 10)).isTrue()
+        assertThat(logEventRepository.hasRevertedLogEvent(collection, 11)).isFalse()
+    }
 }

@@ -1,7 +1,6 @@
 package com.rarible.ethereum.listener.log
 
 import com.rarible.core.task.TaskService
-import com.rarible.ethereum.listener.log.mongock.CheckWrongHashTaskHandler
 import com.rarible.ethereum.listener.log.persist.BlockRepository
 import org.apache.commons.lang3.time.DateUtils
 import org.slf4j.Logger
@@ -34,20 +33,6 @@ class ReindexBlocksCheckJob(
         } catch (e: Throwable) {
             logger.error("Error pending block reindex", e)
         }
-    }
-
-    @Scheduled(
-        fixedDelayString = "\${checkWrongHashBlocksJobInterval:${DateUtils.MILLIS_PER_HOUR}}",
-        initialDelayString = "\${checkWrongHashBlocksJobInterval:${DateUtils.MILLIS_PER_HOUR}}"
-    )
-    fun checkWrongHashBlocksJob() {
-        if (!checkWrongHashBlocksJobEnabled) {
-            return
-        }
-        val lastBlockNumber = blockRepository.findFirstByIdDesc().block()?.id ?: return
-        val start = lastBlockNumber - checkWrongHashBlocksSuffixSize
-        logger.info("Scheduling a task to re-check wrong hash blocks starting from block number $start")
-        taskService.runTask(CheckWrongHashTaskHandler.TYPE, start.toString(), sample = 1)
     }
 
     companion object {

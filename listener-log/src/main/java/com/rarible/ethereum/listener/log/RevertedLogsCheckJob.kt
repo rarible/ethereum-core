@@ -22,6 +22,7 @@ class RevertedLogsCheckJob(
     private val logEventRepository: LogEventRepository,
     private val blockRepository: BlockRepository,
     private val revertedLogStateRepository: RevertedLogStateRepository,
+    private val logListenService: LogListenService,
     private val ethereum: MonoEthereum,
     logEventDescriptorHolder: LogEventDescriptorHolder,
     @Value("\${revertedLogsCheckJobInitBlockNumber:1}") private val initBlockNumber: Long,
@@ -55,10 +56,11 @@ class RevertedLogsCheckJob(
                         id = checkBlockNumber,
                         hash = blockchainBlock.hash(),
                         timestamp = blockchainBlock.timestamp().toLong(),
-                        status = BlockStatus.ERROR
+                        status = block?.status ?: BlockStatus.ERROR
                     )
                     logger.info("Block has incorrect hash or reverted logs, in the db: ${block?.id}, old hash: ${block?.hash}, new hash: ${blockchainBlock.hash()}, number: ${blockchainBlock.number().toLong()}")
                     blockRepository.save(blockHead)
+                    logListenService.reindexBlock(blockHead).awaitFirstOrNull()
                 }
                 revertedLogStateRepository.save(CheckedBlock(checkBlockNumber))
             }

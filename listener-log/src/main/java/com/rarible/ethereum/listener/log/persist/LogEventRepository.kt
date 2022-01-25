@@ -5,6 +5,7 @@ import com.rarible.ethereum.listener.log.domain.LogEvent
 import com.rarible.ethereum.listener.log.domain.LogEventStatus
 import com.rarible.ethereum.listener.log.mongock.ChangeLog00001
 import io.daonomic.rpc.domain.Word
+import kotlinx.coroutines.reactive.awaitFirstOrNull
 import org.bson.types.ObjectId
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
@@ -53,6 +54,14 @@ class LogEventRepository(
 
     fun findLogEvent(collection: String, id: ObjectId): Mono<LogEvent> {
         return mongo.findById(id, LogEvent::class.java, collection)
+    }
+
+    suspend fun hasRevertedLogEvent(collection: String, blockNumber: Long): Boolean {
+        val criteria = Criteria
+            .where(LogEvent::blockNumber.name).isEqualTo(blockNumber)
+            .and(LogEvent::status.name).isEqualTo(LogEventStatus.REVERTED)
+
+        return mongo.findOne(Query.query(criteria), LogEvent::class.java, collection).awaitFirstOrNull() != null
     }
 
     fun findAndRevert(collection: String, blockNumber: Long, blockHash: Word, topic: Word): Flux<LogEvent> {

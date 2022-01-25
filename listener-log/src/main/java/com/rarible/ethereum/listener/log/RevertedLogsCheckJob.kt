@@ -44,6 +44,7 @@ class RevertedLogsCheckJob(
             (lastCheckedBlockNumber until (latestStateBlockNumber - offset)).forEach { checkBlockNumber ->
                 val block = blockRepository.findById(checkBlockNumber)
                 val blockchainBlock = ethereum.ethGetBlockByNumber(checkBlockNumber.toBigInteger()).awaitFirst()
+                val isSuccessBlock = (block?.status ?: BlockStatus.SUCCESS) == BlockStatus.SUCCESS
 
                 val hasRevertedLog = coroutineScope {
                     checkCollections
@@ -51,12 +52,12 @@ class RevertedLogsCheckJob(
                         .awaitAll()
                         .any { it }
                 }
-                if (hasRevertedLog || blockchainBlock.hash() != block?.hash) {
+                if (isSuccessBlock && (hasRevertedLog || blockchainBlock.hash() != block?.hash)) {
                     val blockHead = BlockHead(
                         id = checkBlockNumber,
                         hash = blockchainBlock.hash(),
                         timestamp = blockchainBlock.timestamp().toLong(),
-                        status = block?.status ?: BlockStatus.ERROR
+                        status = BlockStatus.SUCCESS
                     )
                     logger.info("Block has incorrect hash or reverted logs, in the db: ${block?.id}, old hash: ${block?.hash}, new hash: ${blockchainBlock.hash()}, number: ${blockchainBlock.number().toLong()}")
                     blockRepository.save(blockHead)

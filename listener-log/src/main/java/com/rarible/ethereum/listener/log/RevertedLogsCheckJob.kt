@@ -16,6 +16,7 @@ import org.springframework.beans.factory.annotation.Value
 import org.springframework.scheduling.annotation.Scheduled
 import org.springframework.stereotype.Service
 import scalether.core.MonoEthereum
+import java.util.Collections.singletonList
 
 @Service
 class RevertedLogsCheckJob(
@@ -61,7 +62,7 @@ class RevertedLogsCheckJob(
                     )
                     logger.info("Block has incorrect hash or reverted logs, in the db: ${block?.id}, old hash: ${block?.hash}, new hash: ${blockchainBlock.hash()}, number: ${blockchainBlock.number().toLong()}")
                     blockRepository.save(blockHead)
-                    logListenService.reindexBlock(blockHead).awaitFirstOrNull()
+                    logListenService.reindexBlocks(singletonList(blockHead)).awaitFirstOrNull()
                 }
                 revertedLogStateRepository.save(CheckedBlock(checkBlockNumber))
             }

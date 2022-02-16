@@ -40,6 +40,7 @@ import scalether.java.Lists
 import java.math.BigInteger
 import java.time.Instant
 import java.time.temporal.ChronoUnit
+import java.util.Collections.singletonList
 
 @IntegrationTest
 class ListenTransfersTest : AbstractIntegrationTest() {
@@ -287,7 +288,7 @@ class ListenTransfersTest : AbstractIntegrationTest() {
             timestamp = Instant.EPOCH.epochSecond,
             reverted = blockHash
         )
-        logListenService.onBlock(replacingBlock).block()
+        logListenService.onBlockEvents(singletonList(replacingBlock)).block()
         waitAssert {
             val updatedLogEvent = mongo.findById(mintLogEvent.id, LogEvent::class.java, "transfer").block()!!
             assertThat(updatedLogEvent.status).isEqualTo(LogEventStatus.REVERTED)

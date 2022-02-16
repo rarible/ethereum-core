@@ -1,6 +1,5 @@
 package com.rarible.ethereum.listener.log;
 
-import com.rarible.core.apm.JavaHelpers;
 import com.rarible.core.logging.LoggerContext;
 import com.rarible.core.logging.LoggingUtils;
 import com.rarible.ethereum.block.BlockEvent;
@@ -35,8 +34,10 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 import static com.rarible.core.apm.JavaHelpers.withSpan;
+import static com.rarible.core.apm.JavaHelpers.withTransaction;
 import static java.util.Arrays.asList;
 import static java.util.Collections.emptyList;
+import static java.util.Collections.singletonList;
 import static java.util.stream.Collectors.toList;
 
 @Component
@@ -120,7 +121,7 @@ public class LogListenService {
                     logger.info("New block {} is greater or equal then stop block {}, skip handling", it.getNumber(), stopListeningBlock);
                     return Mono.empty();
                 } else  {
-                    return this.onBlock(it);
+                    return this.onBlockEvents(singletonList(it));
                 }
             })
             .then(Mono.<Void>error(new IllegalStateException("disconnected")))
@@ -146,44 +147,62 @@ public class LogListenService {
         return listener.reindex(from, to);
     }
 
-    public Mono<Void> reindexBlock(BlockHead block) {
+    public Mono<Void> reindexBlocks(List<BlockHead> blocks) {
         return LoggingUtils.withMarker(marker -> {
-            logger.info(marker, "reindexing block {}", block);
-            return ethereum.ethGetBlockByNumber(BigInteger.valueOf(block.getId()))
-                .flatMap(it -> onBlock(new NewBlockEvent(block.getId(), it.hash(), it.timestamp().longValue(), null)));
+            logger.info(marker, "reindexing blocks {}", blocks);
+            return Flux.merge(blocks.stream()
+                            .map(it -> ethereum.ethGetBlockByNumber(BigInteger.valueOf(it.getId())))
+                            .collect(toList()))
+                    .collectList()
+                    .map(list -> list.stream().map(it -> new NewBlockEvent(it.number().longValue(), it.hash(), it.timestamp().longValue(), null)).collect(toList()))
+                    .flatMap(this::onBlockEvents);
         });
     }
 
-    public Mono<Void> onBlock(NewBlockEvent event) {
+    public Mono<Void> onBlockEvents(List<NewBlockEvent> events) {
         final Mono<Void> result = LoggingUtils.withMarker(marker -> {
-            logger.info(marker, "onBlockEvent {}", event);
+            logger.info(marker, "onBlockEvents {}", events);
             return withSpan(
-                onBlockEvent(event).collectList(),
+                Flux.merge(events.stream().map(this::onBlockEvent).collect(toList())).collectList(),
                 "processLogs", null, null, null, emptyList()
             )
                 .flatMap(it -> postProcessLogs(it).thenReturn(BlockStatus.SUCCESS))
                 .timeout(Duration.ofMillis(maxProcessTime))
                 .onErrorResume(ex -> {
-                    logger.error(marker, "Unable to handle event " + event, ex);
+                    logger.error(marker, "Unable to handle events " + events, ex);
                     return Mono.just(BlockStatus.ERROR);
                 })
-                .flatMap(status -> blockRepository.updateBlockStatus(event.getNumber(), status))
+                .flatMap(status ->
+                        Flux.merge(events.stream().map(it -> blockRepository.updateBlockStatus(it.getNumber(), status)).collect(toList())).then()
+                )
                 .then()
                 .onErrorResume(ex -> {
-                    logger.error(marker, "Unable to save block status " + event, ex);
+                    logger.error(marker, "Unable to save block status " + events, ex);
                     return Mono.empty();
                 });
         });
-        return JavaHelpers.withTransaction(
-            result.subscriberContext(ctx -> LoggerContext.addToContext(ctx, event.getContextParams())),
-            "block",
-            asList(
-                new Pair<>("blockNumber", event.getNumber()),
-                new Pair<>("blockHash", event.getHash().toString())
-            ),
-            null,
-            null
-        );
+        if (events.size() == 1) {
+            final NewBlockEvent event = events.get(0);
+            return withTransaction(
+                    result.contextWrite(ctx -> LoggerContext.addToContext(ctx, event.getContextParams())),
+                    "block",
+                    asList(
+                            new Pair<>("blockNumber", event.getNumber()),
+                            new Pair<>("blockHash", event.getHash().toString())
+                    ),
+                    null,
+                    null
+            );
+        } else {
+            final List<Long> numbers = events.stream().map(NewBlockEvent::getNumber).collect(toList());
+            return withTransaction(
+                    result.contextWrite(ctx -> ctx.put("blockNumbers", numbers.toString())),
+                    "block",
+                    singletonList(new Pair<>("blockNumbers", numbers.toString())),
+                    null,
+                    null
+            );
+        }
     }
 
     private Flux<LogEvent> onBlockEvent(NewBlockEvent event) {

@@ -1,7 +1,5 @@
 package com.rarible.ethereum.listener.log
 
-import com.rarible.core.task.TaskService
-import com.rarible.ethereum.listener.log.persist.BlockRepository
 import org.apache.commons.lang3.time.DateUtils
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
@@ -12,11 +10,7 @@ import org.springframework.stereotype.Service
 @Service
 class ReindexBlocksCheckJob(
     private val reindexBlockService: ReindexBlockService,
-    private val blockRepository: BlockRepository,
-    private val taskService: TaskService,
     @Value("\${reindexBlocksJobEnabled:true}") private val reindexBlocksJobEnabled: Boolean,
-    @Value("\${checkWrongHashBlocksJobEnabled:true}") private val checkWrongHashBlocksJobEnabled: Boolean,
-    @Value("\${checkWrongHashBlocksSuffixSize:1000}") private val checkWrongHashBlocksSuffixSize: Long
 ) {
     @Scheduled(
         fixedDelayString = "\${pendingBlocksCheckJobInterval:${DateUtils.MILLIS_PER_MINUTE}}",

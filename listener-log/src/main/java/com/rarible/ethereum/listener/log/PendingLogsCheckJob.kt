@@ -20,6 +20,7 @@ import scalether.core.MonoEthereum
 import scalether.domain.response.Block
 import java.time.Duration
 import java.time.Instant
+import java.util.Collections.singletonList
 
 @Service
 class PendingLogsCheckJob(
@@ -73,7 +74,7 @@ class PendingLogsCheckJob(
 
     private fun onNewBlocks(newBlocks: List<Block<Word>>): Mono<Void> =
         newBlocks.toFlux().flatMap { block ->
-            logListenService.onBlock(NewBlockEvent(block.number().toLong(), block.hash(), block.timestamp().toLong(), null))
+            logListenService.onBlockEvents(singletonList(NewBlockEvent(block.number().toLong(), block.hash(), block.timestamp().toLong(), null)))
         }.then()
 
     private fun processLog(collection: String, log: LogEvent) =

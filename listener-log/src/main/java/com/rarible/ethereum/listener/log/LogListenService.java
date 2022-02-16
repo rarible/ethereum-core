@@ -181,28 +181,28 @@ public class LogListenService {
                     return Mono.empty();
                 });
         });
-        if (events.size() == 1) {
-            final NewBlockEvent event = events.get(0);
-            return withTransaction(
-                    result.contextWrite(ctx -> LoggerContext.addToContext(ctx, event.getContextParams())),
-                    "block",
-                    asList(
-                            new Pair<>("blockNumber", event.getNumber()),
-                            new Pair<>("blockHash", event.getHash().toString())
-                    ),
-                    null,
-                    null
-            );
-        } else {
-            final List<Long> numbers = events.stream().map(NewBlockEvent::getNumber).collect(toList());
-            return withTransaction(
-                    result.contextWrite(ctx -> ctx.put("blockNumbers", numbers.toString())),
-                    "block",
-                    singletonList(new Pair<>("blockNumbers", numbers.toString())),
-                    null,
-                    null
-            );
-        }
+	    if (events.size() == 1) {
+		    final NewBlockEvent event = events.get(0);
+		    return withTransaction(
+			    result.contextWrite(ctx -> LoggerContext.addToContext(ctx, event.getContextParams())),
+			    "block",
+			    asList(
+				    new Pair<>("blockNumber", event.getNumber()),
+				    new Pair<>("blockHash", event.getHash().toString())
+			    ),
+			    null,
+			    null
+		    );
+	    } else {
+		    final List<Long> numbers = events.stream().map(NewBlockEvent::getNumber).collect(toList());
+		    return withTransaction(
+			    result.contextWrite(ctx -> ctx.put("blockNumbers", numbers.toString())),
+			    "block",
+			    singletonList(new Pair<>("blockNumbers", numbers.toString())),
+			    null,
+			    null
+		    );
+	    }
     }
 
     private Flux<LogEvent> onBlockEvent(NewBlockEvent event) {

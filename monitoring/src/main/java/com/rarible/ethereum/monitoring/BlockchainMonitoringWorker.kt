@@ -62,6 +62,10 @@ class BlockchainMonitoringWorker(
         return (count - (last - first)).toDouble()
     }
 
+    private fun getLastKnownBlockNumber(): Long {
+        return lastSeenBlockHead?.id ?: 0
+    }
+
     private fun registerGauge() {
         Gauge.builder("protocol.listener.block.delay", this::getBlockDelay)
             .tag("blockchain", blockchain.value)
@@ -76,6 +80,10 @@ class BlockchainMonitoringWorker(
             .register(meterRegistry)
 
         Gauge.builder("protocol.listener.block.missing", this::getMissingBlockCount)
+            .tag("blockchain", blockchain.value)
+            .register(meterRegistry)
+
+        Gauge.builder("protocol.listener.block.last_number", this::getLastKnownBlockNumber)
             .tag("blockchain", blockchain.value)
             .register(meterRegistry)
     }

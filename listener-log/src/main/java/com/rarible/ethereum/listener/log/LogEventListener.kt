@@ -1,6 +1,7 @@
 package com.rarible.ethereum.listener.log
 
 import com.rarible.core.apm.withSpan
+import com.rarible.core.apm.withTransaction
 import com.rarible.core.common.justOrEmpty
 import com.rarible.core.common.retryOptimisticLock
 import com.rarible.core.common.toOptional
@@ -96,6 +97,7 @@ class LogEventListener<T : EventData>(
                     BlockRanges.getRanges(from, to, batchSize)
                         .concatMap {
                             reindexBlockRange(marker, filter, it).thenReturn(it)
+                                .withTransaction("reindexBlockRange", labels = listOf("range" to it.toString()))
                         }
                 }
         }
@@ -107,7 +109,7 @@ class LogEventListener<T : EventData>(
             BigInteger.valueOf(range.last).encodeForFilter()
         )
         logger.info(marker, "loading logs $finalFilter range=$range")
-        return ethereum.ethGetLogsJava(finalFilter)
+        return ethereum.ethGetLogsJava(finalFilter).withSpan("getLogs")
             .doOnNext {
                 logger.info(marker, "loaded ${it.size} logs for range $range")
             }
@@ -120,9 +122,9 @@ class LogEventListener<T : EventData>(
         return LoggingUtils.withMarkerFlux { marker ->
             logger.info(marker, "reindex. processing block ${logs.blockHash} logs: ${logs.logs.size}")
             ethereum
-                .ethGetFullBlockByHash(logs.blockHash)
-                .flatMapMany { block -> processLogs(marker, block, logs.logs) }
-        }.loggerContext(mapOf("blockHash" to "${logs.blockHash}"))
+                .ethGetFullBlockByHash(logs.blockHash).withSpan("getBlock", labels = listOf("blockHash" to logs.blockHash))
+                .flatMapMany { block -> processLogs(marker, block, logs.logs).withSpan("processLogs", labels = listOf("blockHash" to logs.blockHash)) }
+        }.loggerContext(mapOf("blockHash" to "${logs.blockHash}")).withSpan("reindex", labels = listOf("blockHash" to logs.blockHash))
     }
 
     private fun processLogs(marker: Marker, block: Block<Transaction>, logs: List<Log>): Flux<LogEvent> {

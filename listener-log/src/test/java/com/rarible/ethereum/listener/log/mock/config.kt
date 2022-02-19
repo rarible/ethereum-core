@@ -58,7 +58,7 @@ class TestLogConfiguration {
             override val topic: Word
                 get() = Word.apply(randomWord())
 
-            override fun convert(log: Log, transaction: Transaction, timestamp: Long): Publisher<DummyData1> {
+            override fun convert(log: Log, transaction: Transaction, timestamp: Long, index: Int, totalLogs: Int): Publisher<DummyData1> {
                 return Mono.empty()
             }
 
@@ -77,7 +77,7 @@ class TestLogConfiguration {
             override val topic: Word
                 get() = Word.apply(randomWord())
 
-            override fun convert(log: Log, transaction: Transaction, timestamp: Long): Publisher<DummyData2> {
+            override fun convert(log: Log, transaction: Transaction, timestamp: Long, index: Int, totalLogs: Int): Publisher<DummyData2> {
                 return Mono.empty()
             }
 

@@ -12,6 +12,6 @@ interface LogEventDescriptor<T : EventData> {
     val collection: String
     val topic: Word
 
-    fun convert(log: Log, transaction: Transaction, timestamp: Long): Publisher<T>
+    fun convert(log: Log, transaction: Transaction, timestamp: Long, index: Int, totalLogs: Int): Publisher<T>
     fun getAddresses(): Mono<Collection<Address>>
 }

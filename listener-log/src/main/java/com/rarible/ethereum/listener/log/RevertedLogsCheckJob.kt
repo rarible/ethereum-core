@@ -26,14 +26,18 @@ class RevertedLogsCheckJob(
     private val ethereum: MonoEthereum,
     logEventDescriptorHolder: LogEventDescriptorHolder,
     @Value("\${revertedLogsCheckJobInitBlockNumber:1}") private val initBlockNumber: Long,
-    @Value("\${revertedLogsCheckJobBlockOffset:12}") private val offset: Long
+    @Value("\${revertedLogsCheckJobBlockOffset:12}") private val offset: Long,
+    @Value("\${revertedLogsCheckJobBlockEnable:false}") private val enable: Boolean
 ) {
     private val checkCollections = logEventDescriptorHolder.list.map { descriptor -> descriptor.collection }.toSet()
 
     @Scheduled(fixedRateString = "\${revertedLogsCheckJobInterval:${DateUtils.MILLIS_PER_MINUTE * 5}}", initialDelay = DateUtils.MILLIS_PER_MINUTE)
     fun job() = runBlocking<Unit> {
+        if (enable.not()) {
+            logger.info("RevertedLogsCheckJob is not enabled")
+            return@runBlocking
+        }
         logger.info("Started reverted logs and hash check job")
-
         try {
             val latestStateBlockNumber = blockRepository.findFirstByIdDesc().awaitFirstOrNull()?.id ?: run {
                 logger.warn("Can't find any latest block")

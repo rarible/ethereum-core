@@ -134,13 +134,15 @@ class LogEventListener<T : EventData>(
         val indexedLogs = logs
             .groupBy { it.transactionHash() to it.address() }.values
             .flatMap { logsGroupedByTransactionAndAddress ->
-                logsGroupedByTransactionAndAddress.sortedBy { log -> log.logIndex() }.withIndex()
+                logsGroupedByTransactionAndAddress
+                    .sortedBy { log -> log.logIndex() }
+                    .mapIndexed { index, log -> Indexed(index, logsGroupedByTransactionAndAddress.size, log) }
             }.toFlux()
 
         return indexedLogs
-            .flatMap { (index, log) ->
+            .flatMap { (index, total, log) ->
                 val transaction = transactions[log.transactionHash()] ?: error("Can't find transaction for log $log")
-                onLog(marker, index, log, transaction, timestamp)
+                onLog(marker, index, total, log, transaction, timestamp)
             }
             .withSpan("onLogs")
     }
@@ -155,10 +157,10 @@ class LogEventListener<T : EventData>(
             minorLogIndex = toSave.minorLogIndex
         )
 
-    private fun onLog(marker: Marker, index: Int, log: Log, transaction: Transaction, timestamp: Long): Flux<LogEvent> {
+    private fun onLog(marker: Marker, index: Int, total: Int, log: Log, transaction: Transaction, timestamp: Long): Flux<LogEvent> {
         logger.debug(marker, "onLog $log")
 
-        return descriptor.convert(log, transaction, timestamp).toFlux()
+        return descriptor.convert(log, transaction, timestamp, index, total).toFlux()
             .doOnError { logger.error(marker, "failed to convert logs from $log", it) }
             .collectList()
             .flatMapIterable { dataCollection ->
@@ -229,3 +231,5 @@ private fun equals(first: LogEvent, second: LogEvent): Boolean {
 }
 
 data class BlockLogs(val blockHash: Word, val logs: List<Log>)
+
+data class Indexed<out T>(val index: Int, val total: Int, val value: T)

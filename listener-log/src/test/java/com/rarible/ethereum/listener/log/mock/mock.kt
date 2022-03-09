@@ -19,6 +19,7 @@ fun randomLogEvent(topic: Word = randomWordd()): LogEvent =
         topic = topic,
 
         from = randomAddress(),
+        to = randomAddress(),
         logIndex = 0,
         index = 0,
         minorLogIndex = 0,

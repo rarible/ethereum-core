@@ -57,7 +57,7 @@ class LogEventListener<T : EventData>(
             blockHash = event.hash,
             topic = topic,
             status = LogEventStatus.REVERTED
-        ).flatMap { onRevertedLogEvent(it) } // TODO should we emit such events?
+        )
 
         val revert = logEventRepository.findAndRevert(
             collection = collection,

@@ -56,6 +56,10 @@ data class LogEvent(
      */
     val from: Address? = null,
     /**
+     * Receiver of the transaction.
+     */
+    val to: Address? = null,
+    /**
      * Timestamp of the block to which this log event belongs.
      *
      * This field is nullable until all log events are updated in the database.

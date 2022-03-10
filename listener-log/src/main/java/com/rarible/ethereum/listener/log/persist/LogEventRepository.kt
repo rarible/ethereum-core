@@ -9,6 +9,7 @@ import kotlinx.coroutines.reactive.awaitFirstOrNull
 import org.bson.types.ObjectId
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
+import org.springframework.data.domain.Sort
 import org.springframework.data.mongodb.core.ReactiveMongoOperations
 import org.springframework.data.mongodb.core.query.Criteria
 import org.springframework.data.mongodb.core.query.Query
@@ -70,6 +71,7 @@ class LogEventRepository(
             addCriteria(LogEvent::topic isEqualTo topic)
             addCriteria(LogEvent::blockHash ne blockHash)
         }
+        query.with(Sort.by(Sort.Direction.DESC, LogEvent::logIndex.name, LogEvent::minorLogIndex.name))
         return LoggingUtils.withMarkerFlux { marker ->
             mongo.find(query, LogEvent::class.java, collection)
                 .map {

@@ -58,12 +58,14 @@ class LogEventListener<T : EventData>(
             topic = topic,
             status = LogEventStatus.REVERTED
         )
+
         val revert = logEventRepository.findAndRevert(
             collection = collection,
             blockNumber = event.number,
             blockHash = event.hash,
             topic = topic
-        )
+        ).flatMap { onRevertedLogEvent(it) }
+
         return Flux.concat(
             deleteReverted,
             revert,
@@ -122,9 +124,15 @@ class LogEventListener<T : EventData>(
         return LoggingUtils.withMarkerFlux { marker ->
             logger.info(marker, "reindex. processing block ${logs.blockHash} logs: ${logs.logs.size}")
             ethereum
-                .ethGetFullBlockByHash(logs.blockHash).withSpan("getBlock", labels = listOf("blockHash" to logs.blockHash))
-                .flatMapMany { block -> processLogs(marker, block, logs.logs).withSpan("processLogs", labels = listOf("blockHash" to logs.blockHash)) }
-        }.loggerContext(mapOf("blockHash" to "${logs.blockHash}")).withSpan("reindex", labels = listOf("blockHash" to logs.blockHash))
+                .ethGetFullBlockByHash(logs.blockHash)
+                .withSpan("getBlock", labels = listOf("blockHash" to logs.blockHash))
+                .flatMapMany { block ->
+                    processLogs(marker, block, logs.logs).withSpan(
+                        "processLogs", labels = listOf("blockHash" to logs.blockHash)
+                    )
+                }
+        }.loggerContext(mapOf("blockHash" to "${logs.blockHash}"))
+            .withSpan("reindex", labels = listOf("blockHash" to logs.blockHash))
     }
 
     private fun processLogs(marker: Marker, block: Block<Transaction>, logs: List<Log>): Flux<LogEvent> {
@@ -157,7 +165,9 @@ class LogEventListener<T : EventData>(
             minorLogIndex = toSave.minorLogIndex
         )
 
-    private fun onLog(marker: Marker, index: Int, total: Int, log: Log, transaction: Transaction, timestamp: Long): Flux<LogEvent> {
+    private fun onLog(
+        marker: Marker, index: Int, total: Int, log: Log, transaction: Transaction, timestamp: Long
+    ): Flux<LogEvent> {
         logger.debug(marker, "onLog $log")
 
         return descriptor.convert(log, transaction, timestamp, index, total).toFlux()
@@ -174,6 +184,7 @@ class LogEventListener<T : EventData>(
                         blockHash = log.blockHash(),
                         blockNumber = log.blockNumber().toLong(),
                         from = transaction.from(),
+                        to = transaction.to(),
                         logIndex = log.logIndex().toInt(),
                         minorLogIndex = minorLogIndex,
                         index = index,
@@ -191,13 +202,19 @@ class LogEventListener<T : EventData>(
                             .flatMap { opt ->
                                 if (opt.isPresent) {
                                     val found = opt.get()
-                                    val withCorrectId = toSave.copy(id = found.id, version = found.version, updatedAt = Instant.now())
+                                    val withCorrectId = toSave.copy(
+                                        id = found.id, version = found.version, updatedAt = Instant.now()
+                                    )
 
                                     if (equals(withCorrectId, found).not()) {
-                                        logger.debug(marker, "Saving changed LogEvent (${descriptor.collection}): $withCorrectId")
+                                        logger.debug(
+                                            marker, "Saving changed LogEvent (${descriptor.collection}): $withCorrectId"
+                                        )
                                         logEventRepository.save(descriptor.collection, withCorrectId)
                                     } else {
-                                        logger.debug(marker, "LogEvent didn't change (${descriptor.collection}): $withCorrectId")
+                                        logger.debug(
+                                            marker, "LogEvent didn't change (${descriptor.collection}): $withCorrectId"
+                                        )
                                         found.justOrEmpty()
                                     }
                                 } else {
@@ -206,13 +223,19 @@ class LogEventListener<T : EventData>(
                                 }
                             }
                     }
-                    .flatMap { savedEvent ->
-                        Flux
-                            .concat(onLogEventListeners.map { listener -> listener.onLogEvent(savedEvent) })
-                            .then(Mono.just(savedEvent))
-                    }
+                    .flatMap { savedEvent -> onLogEvent(savedEvent) }
                     .retryOptimisticLock(3)
             }
+    }
+
+    private fun onLogEvent(event: LogEvent): Mono<LogEvent> {
+        return Flux.concat(onLogEventListeners.map { listener -> listener.onLogEvent(event) })
+            .then(Mono.just(event))
+    }
+
+    private fun onRevertedLogEvent(event: LogEvent): Mono<LogEvent> {
+        return Flux.concat(onLogEventListeners.map { listener -> listener.onRevertedLogEvent(event) })
+            .then(Mono.just(event))
     }
 }
 

@@ -88,8 +88,13 @@ data class LogEvent(
     val version: Long? = null,
 
     val createdAt: Instant = Instant.EPOCH,
-    val updatedAt: Instant = createdAt
-) : Identifiable<ObjectId>
+    val updatedAt: Instant = createdAt,
+    val dbUpdatedAt: Instant = updatedAt
+) : Identifiable<ObjectId> {
+    fun withDbUpdated(): LogEvent {
+        return copy(dbUpdatedAt = Instant.now())
+    }
+}
 
 @JsonTypeInfo(use = JsonTypeInfo.Id.CLASS, property = "@class")
 interface EventData

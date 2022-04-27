@@ -46,7 +46,7 @@ class LogEventRepository(
     }
 
     fun save(collection: String, event: LogEvent): Mono<LogEvent> {
-        return mongo.save(event, collection)
+        return mongo.save(event.withDbUpdated(), collection)
     }
 
     fun findPendingLogs(collection: String): Flux<LogEvent> {
@@ -78,7 +78,7 @@ class LogEventRepository(
                     logger.info(marker, "reverting $it")
                     it.copy(status = LogEventStatus.REVERTED, visible = false)
                 }
-                .flatMap { mongo.save(it, collection) }
+                .flatMap { mongo.save(it.withDbUpdated(), collection) }
         }
     }
 

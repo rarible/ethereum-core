@@ -88,11 +88,11 @@ data class LogEvent(
     val version: Long? = null,
 
     val createdAt: Instant = Instant.EPOCH,
-    val updatedAt: Instant = createdAt,
-    val dbUpdatedAt: Instant = updatedAt
+    val updatedAt: Instant = createdAt
 ) : Identifiable<ObjectId> {
+
     fun withDbUpdated(): LogEvent {
-        return copy(dbUpdatedAt = Instant.now())
+        return copy(updatedAt = Instant.now())
     }
 }
 

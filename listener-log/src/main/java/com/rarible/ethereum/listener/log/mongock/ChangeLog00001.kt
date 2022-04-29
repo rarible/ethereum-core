@@ -4,10 +4,13 @@ import com.github.cloudyrock.mongock.ChangeLog
 import com.github.cloudyrock.mongock.ChangeSet
 import com.github.cloudyrock.mongock.driver.mongodb.springdata.v3.decorator.impl.MongockTemplate
 import com.rarible.ethereum.listener.log.LogEventDescriptorHolder
+import com.rarible.ethereum.listener.log.domain.LogEvent
 import io.changock.migration.api.annotations.NonLockGuarded
 import org.bson.Document
 import org.slf4j.LoggerFactory
 import org.springframework.data.domain.Sort
+import org.springframework.data.mongodb.core.aggregation.AggregationUpdate
+import org.springframework.data.mongodb.core.aggregation.ConvertOperators
 import org.springframework.data.mongodb.core.index.Index
 import org.springframework.data.mongodb.core.index.PartialIndexFilter
 import org.springframework.data.mongodb.core.query.Criteria
@@ -47,6 +50,18 @@ class ChangeLog00001 {
             } catch (e: Exception) {
                 logger.info("Did not remove Mongo Index from $collection: $oldIndexName")
             }
+        }
+    }
+
+    @ChangeSet(id = "fillUpdatedAtLogIndex", order = "0003", author = "protocol")
+    fun updateFieldsLogIndex(template: MongockTemplate, @NonLockGuarded holder: LogEventDescriptorHolder) {
+        val collections = holder.list.map { it.collection }.toSet()
+        val queryMulti = Query(Criteria.where(LogEvent::updatedAt.name).exists(false))
+        val multiUpdate = AggregationUpdate.update()
+            .set(LogEvent::updatedAt.name).toValue(ConvertOperators.valueOf("\$_id").convertToDate().toDocument())
+            .set(LogEvent::createdAt.name).toValue(ConvertOperators.valueOf("\$_id").convertToDate().toDocument())
+        collections.forEach {
+            template.updateMulti(queryMulti, multiUpdate, it)
         }
     }
 

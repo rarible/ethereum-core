@@ -56,11 +56,9 @@ class ChangeLog00001 {
     @ChangeSet(id = "fillUpdatedAtLogIndex", order = "0003", author = "protocol")
     fun updateFieldsLogIndex(template: MongockTemplate, @NonLockGuarded holder: LogEventDescriptorHolder) {
         val collections = holder.list.map { it.collection }.toSet()
-        val queryMulti = Query(Criteria.where(LogEvent::updatedAt.name).exists(false))
-        val multiUpdate = AggregationUpdate.update()
-            .set(LogEvent::updatedAt.name).toValue(ConvertOperators.valueOf("\$_id").convertToDate().toDocument())
-            .set(LogEvent::createdAt.name).toValue(ConvertOperators.valueOf("\$_id").convertToDate().toDocument())
         collections.forEach {
+            val queryMulti = fillUpdatedAtLogIndexQuery()
+            val multiUpdate = fillUpdatedAtLogIndexUpdate()
             template.updateMulti(queryMulti, multiUpdate, it)
         }
     }
@@ -117,5 +115,9 @@ class ChangeLog00001 {
 
     companion object {
         const val VISIBLE_INDEX_NAME = "transactionHash_1_topic_1_address_1_index_1_minorLogIndex_1_visible_1"
+        fun fillUpdatedAtLogIndexQuery() = Query(Criteria.where(LogEvent::updatedAt.name).exists(false))
+        fun fillUpdatedAtLogIndexUpdate(): AggregationUpdate = AggregationUpdate.update()
+            .set(LogEvent::updatedAt.name).toValue(ConvertOperators.valueOf("\$_id").convertToDate().toDocument())
+            .set(LogEvent::createdAt.name).toValue(ConvertOperators.valueOf("\$_id").convertToDate().toDocument())
     }
 }

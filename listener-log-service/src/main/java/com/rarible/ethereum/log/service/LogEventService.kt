@@ -10,5 +10,5 @@ class LogEventService(
     private val mongo: ReactiveMongoOperations
 ) {
     fun save(event: LogEvent): Mono<LogEvent> =
-        mongo.save(event, map.getValue(event.topic))
+        mongo.save(event.withDbUpdated(), map.getValue(event.topic))
 }

@@ -56,9 +56,9 @@ class ChangeLog00001 {
     @ChangeSet(id = "fillUpdatedAtLogIndex", order = "0003", author = "protocol")
     fun updateFieldsLogIndex(template: MongockTemplate, @NonLockGuarded holder: LogEventDescriptorHolder) {
         val collections = holder.list.map { it.collection }.toSet()
+        val queryMulti = fillUpdatedAtLogIndexQuery()
+        val multiUpdate = fillUpdatedAtLogIndexUpdate()
         collections.forEach {
-            val queryMulti = fillUpdatedAtLogIndexQuery()
-            val multiUpdate = fillUpdatedAtLogIndexUpdate()
             template.updateMulti(queryMulti, multiUpdate, it)
         }
     }

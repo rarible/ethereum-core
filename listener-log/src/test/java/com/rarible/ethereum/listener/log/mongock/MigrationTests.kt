@@ -20,7 +20,7 @@ class MigrationTests : AbstractIntegrationTest() {
     @Test
     fun `set updatedAt and createdAt field if not exists`() = runBlocking<Unit> {
         val collection = "log_event_test_collection"
-        repeat(5) {
+        repeat(50) {
             mongo.save(randomLogEvent(), collection)
         }
 

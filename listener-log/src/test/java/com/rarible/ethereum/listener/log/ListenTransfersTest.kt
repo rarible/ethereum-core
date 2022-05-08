@@ -334,7 +334,7 @@ class ListenTransfersTest : AbstractIntegrationTest() {
         logger.info("saving $newTask")
         mongo.save(newTask).block()
 
-        taskService.readAndRun()
+        taskService.runTasks()
 
         waitAssert {
             val tasks = runBlocking { taskService.findTasks(ReindexTopicTaskHandler.TOPIC).toList() }

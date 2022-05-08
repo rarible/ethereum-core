@@ -78,7 +78,7 @@ class LogEventRepository(
                     logger.info(marker, "reverting $it")
                     it.copy(status = LogEventStatus.REVERTED, visible = false)
                 }
-                .flatMap { mongo.save(it.withDbUpdated(), collection) }
+                .flatMap { save(collection, it) }
         }
     }
 

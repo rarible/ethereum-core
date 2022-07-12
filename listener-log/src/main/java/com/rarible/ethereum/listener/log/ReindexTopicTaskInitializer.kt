@@ -2,12 +2,14 @@ package com.rarible.ethereum.listener.log
 
 import com.rarible.core.task.TaskService
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.FlowPreview
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.scheduling.annotation.Scheduled
 import org.springframework.stereotype.Component
 
-@ExperimentalCoroutinesApi
 @Component
+@FlowPreview
+@ExperimentalCoroutinesApi
 class ReindexTopicTaskInitializer(
     private val taskService: TaskService,
     private val descriptors: List<LogEventDescriptor<*>>,

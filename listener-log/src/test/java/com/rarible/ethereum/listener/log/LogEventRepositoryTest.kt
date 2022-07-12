@@ -8,7 +8,6 @@ import com.rarible.ethereum.listener.log.mock.randomWordd
 import com.rarible.ethereum.listener.log.persist.LogEventRepository
 import io.daonomic.rpc.domain.Word
 import kotlinx.coroutines.reactive.awaitFirst
-import kotlinx.coroutines.reactive.awaitFirstOrNull
 import kotlinx.coroutines.runBlocking
 import org.apache.commons.lang3.RandomUtils
 import org.assertj.core.api.Assertions.assertThat
@@ -34,19 +33,14 @@ class LogEventRepositoryTest : AbstractIntegrationTest() {
         val topic = randomWordd()
         val confirmedEventLog =
             randomLogEvent(topic).copy(blockHash = targetBlockHash, status = LogEventStatus.CONFIRMED, blockNumber = blockNumber)
-        val inactiveEventLog = randomLogEvent(topic).copy(blockHash = targetBlockHash, status = LogEventStatus.INACTIVE, blockNumber = blockNumber)
 
         logEventRepository.save(collection, confirmedEventLog).block()
-        logEventRepository.save(collection, inactiveEventLog).block()
 
         val revertedEvents = logEventRepository.findAndRevert(collection, blockNumber, randomWordd(), topic).collectList().block()!!
-        assertThat(revertedEvents.map { it.id }).containsExactlyInAnyOrder(confirmedEventLog.id, inactiveEventLog.id)
+        assertThat(revertedEvents.map { it.id }).containsExactlyInAnyOrder(confirmedEventLog.id)
 
         val savedConfirmedLog = logEventRepository.findLogEvent(collection, confirmedEventLog.id).block()!!
         assertThat(savedConfirmedLog.status).isEqualTo(LogEventStatus.REVERTED)
-
-        val savedRevertedLog = logEventRepository.findLogEvent(collection, inactiveEventLog.id).block()!!
-        assertThat(savedRevertedLog.status).isEqualTo(LogEventStatus.REVERTED)
     }
 
     @Test

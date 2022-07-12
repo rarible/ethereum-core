@@ -5,7 +5,6 @@ import com.rarible.ethereum.listener.log.domain.LogEvent
 import com.rarible.ethereum.listener.log.domain.LogEventStatus
 import com.rarible.ethereum.listener.log.mongock.ChangeLog00001
 import io.daonomic.rpc.domain.Word
-import kotlinx.coroutines.reactive.awaitFirst
 import kotlinx.coroutines.reactive.awaitFirstOrNull
 import org.bson.types.ObjectId
 import org.slf4j.Logger
@@ -48,10 +47,6 @@ class LogEventRepository(
 
     fun save(collection: String, event: LogEvent): Mono<LogEvent> {
         return mongo.save(event.withDbUpdated(), collection)
-    }
-
-    fun findPendingLogs(collection: String): Flux<LogEvent> {
-        return mongo.find(Query(Criteria.where("status").`is`(LogEventStatus.PENDING)), LogEvent::class.java, collection)
     }
 
     fun findLogEvent(collection: String, id: ObjectId): Mono<LogEvent> {

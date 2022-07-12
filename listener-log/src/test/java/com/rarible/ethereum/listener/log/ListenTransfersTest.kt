@@ -13,8 +13,9 @@ import com.rarible.ethereum.listener.log.domain.*
 import com.rarible.ethereum.listener.log.mock.Transfer
 import com.rarible.ethereum.listener.log.mock.randomWordd
 import io.daonomic.rpc.domain.Binary
-import io.daonomic.rpc.domain.Word
 import io.mockk.*
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.flow.toList
 import kotlinx.coroutines.runBlocking
 import org.apache.commons.lang3.RandomUtils
@@ -39,11 +40,13 @@ import scalether.domain.response.Transaction
 import scalether.java.Lists
 import java.math.BigInteger
 import java.time.Instant
-import java.time.temporal.ChronoUnit
 
+@FlowPreview
+@ExperimentalCoroutinesApi
 @IntegrationTest
 class ListenTransfersTest : AbstractIntegrationTest() {
     @Autowired
+    @Suppress("SpringJavaInjectionPointsAutowiringInspection")
     private lateinit var taskService: TaskService
 
     @Autowired
@@ -54,9 +57,6 @@ class ListenTransfersTest : AbstractIntegrationTest() {
 
     @Autowired
     private lateinit var onOtherEventListener: OnLogEventListener
-
-    @Autowired
-    private lateinit var pendingLogsCheckJob: PendingLogsCheckJob
 
     @Autowired
     private lateinit var logListenService: LogListenService
@@ -116,135 +116,6 @@ class ListenTransfersTest : AbstractIntegrationTest() {
         waitAssert {
             val block = mongo.findById<BlockHead>(receipt.blockNumber().toLong()).block()!!
             assertThat(block.status).isEqualTo(BlockStatus.SUCCESS)
-        }
-    }
-
-    @Test
-    fun confirmPending() {
-        val contract = TestERC20.deployAndWait(sender, poller, "NAME", "NM").block()!!
-        val value = BigInteger.valueOf(RandomUtils.nextLong(0, 1000000))
-        contract.mint(sender.from(), value).execute().verifySuccess()
-        assertThat(contract.balanceOf(sender.from()).call().block()!!).isEqualTo(value)
-
-        waitAssert {
-            assertThat(mongo.count(Query(), "transfer").block()!!).isEqualTo(1)
-        }
-
-        val beneficiary = Address.apply(nextBytes(20))
-        val transferReceipt = contract.transfer(beneficiary, value).execute().verifySuccess()
-        val tx = ethereum.ethGetTransactionByHash(transferReceipt.transactionHash()).block()!!.get()
-
-        val saved = mongo.save(
-            LogEvent(
-                data = Transfer(sender.from(), beneficiary, value),
-                address = contract.address(),
-                topic = TransferEvent.id(),
-                transactionHash = tx.hash(),
-                status = LogEventStatus.PENDING,
-                from = sender.from(),
-                index = 0,
-                minorLogIndex = 0,
-                visible = true,
-                createdAt = Instant.now(),
-                blockTimestamp = Instant.now().epochSecond
-            ), "transfer"
-        ).block()!!
-
-        waitAssert {
-            assertThat(mongo.count(Query(), "transfer").block()!!).isEqualTo(3L)
-            val confirmed =
-                mongo.findOne(Query(Criteria.where("_id").ne(saved.id)), LogEvent::class.java, "transfer").block()!!
-            assertThat(confirmed.status).isEqualTo(LogEventStatus.CONFIRMED)
-            assertNotNull(confirmed.blockHash)
-            assertNotNull(confirmed.blockNumber)
-            assertNotNull(confirmed.logIndex)
-        }
-        val inactive = mongo.findById(saved.id, LogEvent::class.java, "transfer").block()
-        assertThat(inactive.status).isEqualTo(LogEventStatus.INACTIVE)
-
-        val block = mongo.findById(tx.blockNumber().toLong(), BlockHead::class.java).block()!!
-        assertThat(block.status).isEqualTo(BlockStatus.SUCCESS)
-    }
-
-    @Test
-    fun revertPending() {
-        val contract = TestERC20.deployAndWait(sender, poller, "NAME", "NM").block()!!
-
-        val value = BigInteger.valueOf(RandomUtils.nextLong(0, 1000000))
-        contract.mint(sender.from(), value).execute().verifySuccess()
-        assertThat(contract.balanceOf(sender.from()).call().block()!!).isEqualTo(value)
-
-        waitAssert {
-            assertThat(mongo.count(Query(), "transfer").block()!!).isEqualTo(1)
-        }
-
-        val beneficiary = Address.apply(nextBytes(20))
-        val transferReceipt =
-            contract.transfer(beneficiary, value).withGas(BigInteger.valueOf(23000)).execute().verifyError()
-
-        val saved = mongo.save(
-            LogEvent(
-                data = Transfer(sender.from(), beneficiary, value),
-                address = contract.address(),
-                topic = TransferEvent.id(),
-                transactionHash = transferReceipt.transactionHash(),
-                status = LogEventStatus.PENDING,
-                from = sender.from(),
-                index = 0,
-                minorLogIndex = 0,
-                visible = true,
-                createdAt = Instant.now()
-            ), "transfer"
-        ).block()!!
-
-        waitAssert {
-            val read = mongo.findById(saved.id, LogEvent::class.java, "transfer").block()!!
-            assertThat(read.status).isEqualTo(LogEventStatus.INACTIVE)
-            assertNull(read.blockNumber)
-            assertNull(read.logIndex)
-            assertThat(mongo.count(Query(), "transfer").block()!!).isEqualTo(2L)
-        }
-    }
-
-    @Test
-    fun revertCancelled() {
-        val contract = TestERC20.deployAndWait(sender, poller, "NAME", "NM").block()!!
-
-        val value = BigInteger.valueOf(RandomUtils.nextLong(0, 1000000))
-        contract.mint(sender.from(), value).execute().verifySuccess()
-        assertThat(contract.balanceOf(sender.from()).call().block()!!).isEqualTo(value)
-
-        waitAssert {
-            assertThat(mongo.count(Query(), "transfer").block()!!).isEqualTo(1)
-        }
-
-        val beneficiary = Address.apply(nextBytes(20))
-
-        val fakeHash = Word(nextBytes(32))
-        val saved = mongo.save(
-            LogEvent(
-                data = Transfer(sender.from(), beneficiary, value),
-                address = contract.address(),
-                topic = TransferEvent.id(),
-                transactionHash = fakeHash,
-                status = LogEventStatus.PENDING,
-                from = sender.from(),
-                index = 0,
-                minorLogIndex = 0,
-                visible = true,
-                createdAt = Instant.now().minus(10, ChronoUnit.MINUTES),
-                blockTimestamp = Instant.now().epochSecond - 10
-            ), "transfer"
-        ).block()!!
-
-        TestERC20.deploy(sender, "NAME", "NM").verifySuccess()
-        pendingLogsCheckJob.job()
-
-        waitAssert {
-            val read = mongo.findById(saved.id, LogEvent::class.java, "transfer").block()!!
-            assertThat(read.status).isEqualTo(LogEventStatus.DROPPED)
-            assertNull(read.blockNumber)
-            assertNull(read.logIndex)
         }
     }
 

@@ -56,7 +56,6 @@ public class LogListenService {
     private final long stopListeningBlock;
     private final long batchSize;
     private final LogEventRepository logEventRepository;
-    private final PendingLogService pendingLogService;
     private final List<OnLogEventListener> onLogEventListeners;
 
     public LogListenService(
@@ -66,7 +65,6 @@ public class LogListenService {
         List<LogEventsListener> logEventsListeners,
         List<LogEventDescriptor<?>> descriptors,
         List<OnLogEventListener> onLogEventListeners,
-        PendingLogService pendingLogService,
         BlockListenService<SimpleBlock> blockListenService,
         @Value("${ethereumBackoffMaxAttempts:5}") long maxAttempts,
         @Value("${ethereumBackoffMinBackoff:100}") long minBackoff,
@@ -87,7 +85,6 @@ public class LogListenService {
         this.blockListenService = blockListenService;
         this.batchSize = batchSize;
         this.logEventRepository = logEventRepository;
-        this.pendingLogService = pendingLogService;
         this.onLogEventListeners = onLogEventListeners;
 
         logger.info("injected descriptors: {}", descriptors);
@@ -212,7 +209,6 @@ public class LogListenService {
         return new LogEventListener<>(
                 descriptor,
                 topicOnEventListeners,
-                pendingLogService,
                 logEventRepository,
                 ethereum,
                 backoff,

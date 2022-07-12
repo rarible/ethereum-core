@@ -33,7 +33,7 @@
     </distributionManagement>
 
     <properties>
-        <revision>1.5.10</revision>
+        <revision>1.6.0</revision>
         <rarible-core.version>2.4.9</rarible-core.version>
     </properties>
 

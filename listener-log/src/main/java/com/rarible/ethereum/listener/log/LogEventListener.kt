@@ -34,7 +34,6 @@ import java.time.Instant
 class LogEventListener<T : EventData>(
     val descriptor: LogEventDescriptor<T>,
     private val onLogEventListeners: List<OnLogEventListener>,
-    private val pendingLogService: PendingLogService,
     private val logEventRepository: LogEventRepository,
     private val ethereum: MonoEthereum,
     private val backoff: RetryBackoffSpec,
@@ -69,7 +68,6 @@ class LogEventListener<T : EventData>(
         return Flux.concat(
             deleteReverted,
             revert,
-            pendingLogService.markInactive(descriptor.collection, descriptor.topic, fullBlock).withSpan("pending"),
             onNewBlock(fullBlock)
         ).withSpan("processTopicLogs", labels = listOf("topic" to topic.toString()))
     }

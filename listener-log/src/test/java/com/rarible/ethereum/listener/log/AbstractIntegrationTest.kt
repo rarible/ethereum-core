@@ -3,6 +3,8 @@ package com.rarible.ethereum.listener.log
 import com.rarible.ethereum.autoconfigure.EthereumAutoConfiguration
 import com.rarible.ethereum.autoconfigure.EthereumProperties
 import io.daonomic.rpc.domain.Word
+import io.micrometer.core.instrument.MeterRegistry
+import io.micrometer.core.instrument.simple.SimpleMeterRegistry
 import io.mockk.spyk
 import kotlinx.coroutines.reactive.awaitFirst
 import org.junit.jupiter.api.Assertions.assertFalse
@@ -84,5 +86,10 @@ class EthereumConfigurationIntr {
     fun testEthereum(ethereumProperties: EthereumProperties): MonoEthereum {
         val ethereum = EthereumAutoConfiguration(ethereumProperties).ethereum()
         return spyk(ethereum)
+    }
+
+    @Bean
+    fun testMeterRegistry(): MeterRegistry {
+        return SimpleMeterRegistry()
     }
 }

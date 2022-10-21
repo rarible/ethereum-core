@@ -53,6 +53,10 @@
             <artifactId>rarible-core-task</artifactId>
         </dependency>
         <dependency>
+            <groupId>com.rarible.core</groupId>
+            <artifactId>rarible-core-daemon</artifactId>
+        </dependency>
+        <dependency>
             <groupId>com.github.cloudyrock.mongock</groupId>
             <artifactId>mongock-spring-v5</artifactId>
         </dependency>
@@ -68,13 +72,16 @@
             <groupId>javax.annotation</groupId>
             <artifactId>javax.annotation-api</artifactId>
         </dependency>
+
         <dependency>
             <groupId>com.rarible.ethereum</groupId>
             <artifactId>rarible-ethereum-contracts-test</artifactId>
+            <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>com.rarible.core</groupId>
             <artifactId>rarible-core-test-common</artifactId>
+            <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>com.rarible.ethereum</groupId>

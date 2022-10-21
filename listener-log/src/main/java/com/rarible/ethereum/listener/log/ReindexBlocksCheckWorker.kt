@@ -17,6 +17,7 @@ import java.time.Duration
 @ExperimentalCoroutinesApi
 class ReindexBlocksCheckWorker(
     private val handler: ReindexBlockService,
+    @Value("\${reindexBlocksJobEnabled:true}") private val reindexEnabled: Boolean,
     @Value("\${pendingBlocksCheckJobInterval:${DateUtils.MILLIS_PER_MINUTE}}") private val checkInterval: Long,
     meterRegistry: MeterRegistry,
 ): SequentialDaemonWorker(
@@ -40,7 +41,11 @@ class ReindexBlocksCheckWorker(
 
     @EventListener(ApplicationReadyEvent::class)
     fun onApplicationStarted() {
-        logger.info("Starting pending/error block reindex worker: check interval $checkInterval ms")
-        start()
+        if (reindexEnabled) {
+            logger.info("Starting pending/error block reindex worker: check interval $checkInterval ms")
+            start()
+        } else {
+            logger.info("Pending/error block reindex worker is disabled")
+        }
     }
 }

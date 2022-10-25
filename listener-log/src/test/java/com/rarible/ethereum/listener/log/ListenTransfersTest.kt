@@ -9,11 +9,17 @@ import com.rarible.core.test.data.randomAddress
 import com.rarible.core.test.data.randomLong
 import com.rarible.core.test.wait.BlockingWait.waitAssert
 import com.rarible.core.test.wait.BlockingWait.waitFor
-import com.rarible.ethereum.listener.log.domain.*
+import com.rarible.ethereum.listener.log.domain.BlockHead
+import com.rarible.ethereum.listener.log.domain.BlockStatus
+import com.rarible.ethereum.listener.log.domain.LogEvent
+import com.rarible.ethereum.listener.log.domain.LogEventStatus
+import com.rarible.ethereum.listener.log.domain.NewBlockEvent
 import com.rarible.ethereum.listener.log.mock.Transfer
 import com.rarible.ethereum.listener.log.mock.randomWordd
 import io.daonomic.rpc.domain.Binary
-import io.mockk.*
+import io.mockk.clearMocks
+import io.mockk.every
+import io.mockk.verify
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.flow.toList
@@ -21,17 +27,22 @@ import kotlinx.coroutines.runBlocking
 import org.apache.commons.lang3.RandomUtils
 import org.apache.commons.lang3.RandomUtils.nextBytes
 import org.assertj.core.api.Assertions.assertThat
-import org.junit.jupiter.api.Assertions.*
+import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.data.mongodb.core.*
+import org.springframework.data.mongodb.core.find
+import org.springframework.data.mongodb.core.findAll
+import org.springframework.data.mongodb.core.findAllAndRemove
+import org.springframework.data.mongodb.core.findById
+import org.springframework.data.mongodb.core.findOne
 import org.springframework.data.mongodb.core.query.Criteria
 import org.springframework.data.mongodb.core.query.Query
 import org.springframework.data.mongodb.core.query.Update
 import org.springframework.data.mongodb.core.query.lt
+import org.springframework.data.mongodb.core.updateFirst
 import reactor.core.publisher.Mono
 import reactor.kotlin.core.publisher.toMono
 import scalether.domain.Address
@@ -84,7 +95,7 @@ class ListenTransfersTest : AbstractIntegrationTest() {
 
             val event = mongo.findOne<LogEvent>(Query(), "transfer").block()!!
             assertThat(event.status).isEqualTo(LogEventStatus.CONFIRMED)
-            assertThat(event.blockTimestamp).isEqualTo(receipt.getTimestamp().epochSecond)
+            assertThat(event.blockTimestamp).isGreaterThanOrEqualTo(receipt.getTimestamp().epochSecond)
             assertTrue(event.data is Transfer, "class is ${event.data.javaClass}")
             val t: Transfer = event.data as Transfer
             assertThat(t.from).isEqualTo(Address.apply(ByteArray(20)))

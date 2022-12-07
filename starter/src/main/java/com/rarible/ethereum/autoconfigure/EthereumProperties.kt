@@ -2,6 +2,7 @@ package com.rarible.ethereum.autoconfigure
 
 import org.springframework.boot.context.properties.ConfigurationProperties
 import org.springframework.boot.context.properties.ConstructorBinding
+import java.time.Duration
 
 internal const val RARIBLE_ETHEREUM = "rarible.ethereum"
 
@@ -14,5 +15,12 @@ data class EthereumProperties(
     val readWriteTimeoutMs: Int = 10000,
     val maxFrameSize: Int = 1024 * 1024,
     val retryMaxAttempts: Long = 5,
-    val retryBackoffDelay: Long = 100
+    val retryBackoffDelay: Long = 100,
+    val cache: CacheProperties = CacheProperties()
+)
+
+data class CacheProperties(
+    val enabled: Boolean = false,
+    val expireAfter: Duration = Duration.ofSeconds(10),
+    val maxSize: Long = 100,
 )

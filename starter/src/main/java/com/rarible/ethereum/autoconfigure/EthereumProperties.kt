@@ -21,6 +21,6 @@ data class EthereumProperties(
 
 data class CacheProperties(
     val enabled: Boolean = false,
-    val expireAfter: Duration = Duration.ofMinutes(1),
+    val expireAfter: Duration = Duration.ofSeconds(10),
     val maxSize: Long = 100,
 )

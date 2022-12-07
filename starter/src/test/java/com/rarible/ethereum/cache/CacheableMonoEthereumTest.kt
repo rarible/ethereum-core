@@ -8,6 +8,7 @@ import io.mockk.mockk
 import io.mockk.verify
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.reactive.awaitFirst
 import kotlinx.coroutines.runBlocking
 import org.assertj.core.api.Assertions.assertThat
@@ -44,6 +45,27 @@ internal class CacheableMonoEthereumTest {
         assertThat(requests.all { it == block }).isTrue
 
         verify(exactly = 1) { transport.send<Block<Transaction>>(any(),any()) }
+    }
+
+    @Test
+    fun `cache with expired - ok`() = runBlocking<Unit> {
+        val hash = randomWord()
+        val expireAfter = Duration.ofMillis(100)
+
+        val cacheableMonoEthereum = CacheableMonoEthereum(
+            transport = transport,
+            expireAfter = expireAfter,
+            cacheMaxSize = 100,
+        )
+        every {
+            transport.send<Block<Transaction>>(any(),any())
+        } returns Mono.just(Response(1, mockk<Block<Transaction>>()))
+
+        cacheableMonoEthereum.ethGetFullBlockByHash(hash).awaitFirst()
+        delay(expireAfter.multipliedBy(2).toMillis())
+        cacheableMonoEthereum.ethGetFullBlockByHash(hash).awaitFirst()
+
+        verify(exactly = 2) { transport.send<Block<Transaction>>(any(),any()) }
     }
 
     private fun randomWord(): Word {

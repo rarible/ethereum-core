@@ -1,5 +1,6 @@
 package com.rarible.ethereum.autoconfigure
 
+import com.rarible.ethereum.cache.CacheableMonoEthereum
 import io.daonomic.rpc.domain.Request
 import io.daonomic.rpc.domain.Response
 import io.daonomic.rpc.mono.WebClientTransport
@@ -44,6 +45,12 @@ class EthereumAutoConfiguration(
             override fun <T : Any?> send(request: Request?, manifest: Manifest<T>?): Mono<Response<T>> =
                 super.send(request, manifest).retryWhen(retry)
         }
-        MonoEthereum(transport)
+        if (cache.enabled) {
+            CacheableMonoEthereum(
+                transport = transport,
+                expireAfter = cache.expireAfter,
+                cacheMaxSize = cache.maxSize,
+            )
+        } else MonoEthereum(transport)
     }
 }

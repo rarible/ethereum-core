@@ -6,6 +6,7 @@ import com.rarible.ethereum.listener.log.domain.BlockHead
 import com.rarible.ethereum.listener.log.persist.BlockRepository
 import io.daonomic.rpc.domain.Bytes
 import io.daonomic.rpc.domain.Word
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Value
@@ -20,12 +21,19 @@ import scalether.core.EthPubSub
 import scalether.core.MonoEthereum
 import scalether.domain.response.Block
 import java.math.BigInteger
+import java.time.Duration
 
 @Component
+@ExperimentalCoroutinesApi
 class EthereumBlockchain(
     private val ethereum: MonoEthereum,
-    private val ethPubSub: EthPubSub
+    ethPubSub: EthPubSub,
+    @Value("\${ethereumBlockchainPollerEnabled:false}") ethereumBlockchainPollerEnabled: Boolean,
+    @Value("\${ethereumBlockchainPollerPeriod:1s}") ethereumBlockchainPollerPeriod: Duration,
 ) : Blockchain<SimpleBlock> {
+
+    private val subscriber = if (ethereumBlockchainPollerEnabled)
+        NewBlockPoller(ethereum, ethereumBlockchainPollerPeriod) else NewBlockPubSub(ethPubSub)
 
     override fun getBlock(hash: Bytes): Mono<SimpleBlock> {
         return ethereum.ethGetBlockByHash(Word.apply(hash))
@@ -43,7 +51,7 @@ class EthereumBlockchain(
     }
 
     override fun listenNewBlocks(): Flux<SimpleBlock> {
-        return ethPubSub.newHeads()
+        return subscriber.newHeads()
             .map { SimpleBlock(it) }
     }
 }

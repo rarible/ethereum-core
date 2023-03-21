@@ -9,12 +9,14 @@ import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.reactive.awaitFirstOrNull
 import kotlinx.coroutines.reactor.awaitSingle
 import kotlinx.coroutines.reactor.mono
+import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Service
 
 @Service
 class ReindexBlockService(
     private val blockRepository: BlockRepository,
-    private val logListenService: LogListenService
+    private val logListenService: LogListenService,
+    @Value("\${ethereumReindexBatchSize:5}") private val ethereumReindexBatchSize: Int
 ) {
     fun indexPendingBlocks() = mono {
         val pending = getBlocks(BlockStatus.PENDING)
@@ -30,7 +32,7 @@ class ReindexBlockService(
 
     private suspend fun reindexBlocks(blocks: List<BlockHead>) = coroutineScope {
         blocks
-            .chunked(50)
+            .chunked(ethereumReindexBatchSize)
             .map { chunk ->
                 chunk.map {
                     async { reindexBlock(it) }

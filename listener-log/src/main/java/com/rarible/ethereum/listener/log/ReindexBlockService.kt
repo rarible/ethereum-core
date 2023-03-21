@@ -1,25 +1,49 @@
 package com.rarible.ethereum.listener.log
 
+import com.rarible.ethereum.listener.log.domain.BlockHead
 import com.rarible.ethereum.listener.log.domain.BlockStatus
 import com.rarible.ethereum.listener.log.persist.BlockRepository
+import kotlinx.coroutines.async
+import kotlinx.coroutines.awaitAll
+import kotlinx.coroutines.coroutineScope
+import kotlinx.coroutines.reactive.awaitFirstOrNull
+import kotlinx.coroutines.reactor.awaitSingle
+import kotlinx.coroutines.reactor.mono
 import org.springframework.stereotype.Service
-import reactor.core.publisher.Flux
-import reactor.core.publisher.Mono
-import kotlin.math.abs
 
 @Service
 class ReindexBlockService(
     private val blockRepository: BlockRepository,
     private val logListenService: LogListenService
 ) {
+    fun indexPendingBlocks() = mono {
+        val pending = getBlocks(BlockStatus.PENDING)
+        val errors = getBlocks(BlockStatus.ERROR)
+        coroutineScope {
+            val pendingDeferred = async { reindexBlocks(pending) }
+            val errorDeferred = async { reindexBlocks(errors) }
 
-    fun indexPendingBlocks(): Mono<Void> {
-        return Flux.concat(
-            blockRepository.findByStatus(BlockStatus.PENDING)
-                .filter { abs(System.currentTimeMillis() / 1000 - it.timestamp) > 60 },
-            blockRepository.findByStatus(BlockStatus.ERROR)
-        )
-            .concatMap { logListenService.reindexBlock(it) }
-            .then()
+            pendingDeferred.await()
+            errorDeferred.await()
+        }
+    }
+
+    private suspend fun reindexBlocks(blocks: List<BlockHead>) = coroutineScope {
+        blocks
+            .chunked(50)
+            .map { chunk ->
+                chunk.map {
+                    async { reindexBlock(it) }
+                }.awaitAll()
+            }
+            .lastOrNull()
+    }
+
+    private suspend fun reindexBlock(block: BlockHead) {
+        logListenService.reindexBlock(block).awaitFirstOrNull()
+    }
+
+    private suspend fun getBlocks(status: BlockStatus): List<BlockHead> {
+        return blockRepository.findByStatus(status).collectList().awaitSingle()
     }
 }

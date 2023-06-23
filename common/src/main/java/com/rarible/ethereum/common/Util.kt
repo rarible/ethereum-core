@@ -4,10 +4,10 @@ import io.daonomic.rpc.domain.Binary
 import io.daonomic.rpc.domain.Bytes
 import io.daonomic.rpc.domain.Word
 import org.apache.commons.lang3.RandomUtils
-import org.web3j.crypto.Hash
-import org.web3j.crypto.Keys
-import org.web3j.crypto.Sign
-import org.web3j.utils.Numeric
+import org.web3jold.crypto.Hash
+import org.web3jold.crypto.Keys
+import org.web3jold.crypto.Sign
+import org.web3jold.utils.Numeric
 import scalether.domain.Address
 import scalether.util.Hex
 import java.math.BigInteger

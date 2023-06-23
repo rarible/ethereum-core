@@ -8,8 +8,8 @@ import io.daonomic.rpc.domain.Word
 import kotlinx.coroutines.reactive.awaitFirst
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
-import org.web3j.crypto.Keys
-import org.web3j.crypto.Sign
+import org.web3jold.crypto.Keys
+import org.web3jold.crypto.Sign
 import scalether.domain.Address
 import scalether.transaction.MonoTransactionSender
 import scalether.util.Hash

@@ -16,8 +16,8 @@ import org.junit.jupiter.api.Test
 import org.testcontainers.containers.GenericContainer
 import org.testcontainers.containers.wait.strategy.Wait
 import org.testcontainers.junit.jupiter.Testcontainers
-import org.web3j.crypto.Sign
-import org.web3j.utils.Numeric
+import org.web3jold.crypto.Sign
+import org.web3jold.utils.Numeric
 import reactor.core.publisher.Mono
 import scala.Tuple2
 import scala.Tuple5

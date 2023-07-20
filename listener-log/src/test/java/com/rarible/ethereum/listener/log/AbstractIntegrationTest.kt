@@ -2,6 +2,7 @@ package com.rarible.ethereum.listener.log
 
 import com.rarible.ethereum.autoconfigure.EthereumAutoConfiguration
 import com.rarible.ethereum.autoconfigure.EthereumProperties
+import com.rarible.ethereum.autoconfigure.EthereumTransport
 import io.daonomic.rpc.domain.Word
 import io.micrometer.core.instrument.MeterRegistry
 import io.micrometer.core.instrument.simple.SimpleMeterRegistry
@@ -27,12 +28,16 @@ import java.time.Instant
 abstract class AbstractIntegrationTest {
     @Autowired
     protected lateinit var sender: MonoTransactionSender
+
     @Autowired
     protected lateinit var poller: MonoTransactionPoller
+
     @Autowired
     protected lateinit var ethereum: MonoEthereum
+
     @Autowired
     protected lateinit var mongo: ReactiveMongoOperations
+
     @Autowired
     protected lateinit var mongoTemplate: MongoTemplate
 
@@ -82,8 +87,8 @@ class EthereumConfigurationIntr {
     fun poller(ethereum: MonoEthereum) = MonoTransactionPoller(ethereum)
 
     @Bean
-    fun testEthereum(ethereumProperties: EthereumProperties): MonoEthereum {
-        val ethereum = EthereumAutoConfiguration(ethereumProperties).ethereum()
+    fun testEthereum(ethereumProperties: EthereumProperties, ethereumTransport: EthereumTransport): MonoEthereum {
+        val ethereum = EthereumAutoConfiguration(ethereumProperties).ethereum(ethereumTransport)
         return spyk(ethereum)
     }
 

@@ -4,4 +4,5 @@ enum class Blockchain(val value: String) {
     ETHEREUM("ethereum"),
     POLYGON("polygon"),
     OPTIMISM("optimism"),
+    MANTLE("mantle"),
 }

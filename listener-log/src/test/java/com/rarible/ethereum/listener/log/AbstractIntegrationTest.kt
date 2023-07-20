@@ -3,7 +3,9 @@ package com.rarible.ethereum.listener.log
 import com.rarible.ethereum.autoconfigure.EthereumAutoConfiguration
 import com.rarible.ethereum.autoconfigure.EthereumProperties
 import com.rarible.ethereum.autoconfigure.EthereumTransport
+import io.daonomic.rpc.MonoRpcTransport
 import io.daonomic.rpc.domain.Word
+import io.daonomic.rpc.mono.WebClientTransport
 import io.micrometer.core.instrument.MeterRegistry
 import io.micrometer.core.instrument.simple.SimpleMeterRegistry
 import io.mockk.spyk
@@ -87,8 +89,8 @@ class EthereumConfigurationIntr {
     fun poller(ethereum: MonoEthereum) = MonoTransactionPoller(ethereum)
 
     @Bean
-    fun testEthereum(ethereumProperties: EthereumProperties, ethereumTransport: EthereumTransport): MonoEthereum {
-        val ethereum = EthereumAutoConfiguration(ethereumProperties).ethereum(ethereumTransport)
+    fun testEthereum(ethereumProperties: EthereumProperties, monoRpcTransport: MonoRpcTransport): MonoEthereum {
+        val ethereum = EthereumAutoConfiguration(ethereumProperties).ethereum(monoRpcTransport)
         return spyk(ethereum)
     }
 

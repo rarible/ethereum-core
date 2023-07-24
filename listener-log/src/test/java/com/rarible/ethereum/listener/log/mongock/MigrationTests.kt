@@ -35,7 +35,6 @@ class MigrationTests : AbstractIntegrationTest() {
             assertThat(it.updatedAt).isEqualTo(Instant.EPOCH)
         }
 
-
         val queryMulti = ChangeLog00001.fillUpdatedAtLogIndexQuery()
         val multiUpdate = ChangeLog00001.fillUpdatedAtLogIndexUpdate()
         mongo.updateMulti(

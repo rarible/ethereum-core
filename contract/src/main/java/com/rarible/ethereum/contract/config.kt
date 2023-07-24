@@ -5,7 +5,7 @@ import org.springframework.context.annotation.Configuration
 import org.springframework.context.annotation.Import
 
 @Target(AnnotationTarget.ANNOTATION_CLASS, AnnotationTarget.CLASS)
-@kotlin.annotation.Retention(AnnotationRetention.RUNTIME)
+@Retention(AnnotationRetention.RUNTIME)
 @Import(ContractServiceConfiguration::class)
 annotation class EnableContractService
 

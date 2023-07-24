@@ -6,9 +6,12 @@ import com.rarible.ethereum.listener.log.domain.CheckedBlock
 import com.rarible.ethereum.listener.log.persist.BlockRepository
 import com.rarible.ethereum.listener.log.persist.LogEventRepository
 import com.rarible.ethereum.listener.log.persist.RevertedLogStateRepository
-import kotlinx.coroutines.*
+import kotlinx.coroutines.async
+import kotlinx.coroutines.awaitAll
+import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.reactive.awaitFirst
 import kotlinx.coroutines.reactive.awaitFirstOrNull
+import kotlinx.coroutines.runBlocking
 import org.apache.commons.lang3.time.DateUtils
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
@@ -31,7 +34,10 @@ class RevertedLogsCheckJob(
 ) {
     private val checkCollections = logEventDescriptorHolder.list.map { descriptor -> descriptor.collection }.toSet()
 
-    @Scheduled(fixedRateString = "\${revertedLogsCheckJobInterval:${DateUtils.MILLIS_PER_MINUTE * 5}}", initialDelay = DateUtils.MILLIS_PER_MINUTE)
+    @Scheduled(
+        fixedRateString = "\${revertedLogsCheckJobInterval:${DateUtils.MILLIS_PER_MINUTE * 5}}",
+        initialDelay = DateUtils.MILLIS_PER_MINUTE
+    )
     fun job() = runBlocking<Unit> {
         if (enable.not()) {
             logger.info("RevertedLogsCheckJob is not enabled")
@@ -52,7 +58,14 @@ class RevertedLogsCheckJob(
 
                 val hasRevertedLog = coroutineScope {
                     checkCollections
-                        .map { collection -> async { logEventRepository.hasRevertedLogEvent(collection, checkBlockNumber) } }
+                        .map { collection ->
+                            async {
+                                logEventRepository.hasRevertedLogEvent(
+                                    collection,
+                                    checkBlockNumber
+                                )
+                            }
+                        }
                         .awaitAll()
                         .any { it }
                 }
@@ -63,7 +76,11 @@ class RevertedLogsCheckJob(
                         timestamp = blockchainBlock.timestamp().toLong(),
                         status = BlockStatus.SUCCESS
                     )
-                    logger.info("Block has incorrect hash or reverted logs, in the db: ${block?.id}, old hash: ${block?.hash}, new hash: ${blockchainBlock.hash()}, number: ${blockchainBlock.number().toLong()}")
+                    logger.info(
+                        "Block has incorrect hash or reverted logs, in the db: ${block?.id}, old hash: ${block?.hash}, new hash: ${blockchainBlock.hash()}, number: ${
+                            blockchainBlock.number().toLong()
+                        }"
+                    )
                     blockRepository.save(blockHead)
                     logListenService.reindexBlock(blockHead).awaitFirstOrNull()
                 }

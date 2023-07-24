@@ -5,6 +5,8 @@ import io.daonomic.rpc.domain.Request
 import io.daonomic.rpc.domain.Response
 import io.daonomic.rpc.mono.WebClientTransport
 import io.netty.channel.ChannelException
+import kotlinx.coroutines.reactive.awaitSingle
+import kotlinx.coroutines.reactor.mono
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.web.reactive.function.client.WebClientException
@@ -21,14 +23,51 @@ import java.time.Duration
 import java.util.concurrent.atomic.AtomicReference
 
 class EthereumTransportProvider(private val ethereumProperties: EthereumProperties) {
-    var node: AtomicReference<EthereumTransport> = AtomicReference(aliveNode())
+    private val websocketNode: AtomicReference<EthereumTransport> = AtomicReference()
+    private val rpcNode: AtomicReference<EthereumTransport> = AtomicReference()
 
-    fun rediscover() {
-        val newNode = aliveNode()
-        node.set(newNode)
+    /**
+     * In case websocket is disconnected we rediscover new node
+     */
+    fun websocketDisconnected() {
+        websocketNode.set(null)
+        rpcNode.set(null)
     }
 
-    private fun aliveNode(): EthereumTransport {
+    /**
+     * In case rpc error and there is a websocket connection we still use websocket connection. If there is no
+     * websocket connection we wil rediscover
+     */
+    fun rpcError() {
+        rpcNode.set(websocketNode.get())
+    }
+
+    suspend fun getWebsocketTransport(): WebSocketPubSubTransport {
+        val cachedNode = websocketNode.get()
+        if (cachedNode == null) {
+            val aliveNode = aliveNode()
+            websocketNode.set(aliveNode)
+            rpcNode.set(aliveNode)
+            return aliveNode.websocketTransport
+        }
+        return cachedNode.websocketTransport
+    }
+
+    suspend fun getRpcTransport(): WebClientTransport {
+        // Always prefer current websocket connection over rpc
+        val cachedNode = websocketNode.get() ?: rpcNode.get()
+        if (cachedNode == null) {
+            val aliveNode = aliveNode()
+            // Could be updated also from getWebsocketTransport. We prefer one from websocket
+            val nodeToUse = rpcNode.accumulateAndGet(aliveNode) { prev, next ->
+                prev ?: next
+            }
+            return nodeToUse.rpcTransport
+        }
+        return cachedNode.rpcTransport
+    }
+
+    private suspend fun aliveNode(): EthereumTransport {
         for (node in ethereumProperties.nodes) {
             logger.info("Using new node definition httpUrl={}, websocketUrl={}", node.httpUrl, node.websocketUrl)
             val httpTransport = httpTransport(node.httpUrl, ethereumProperties)
@@ -72,9 +111,9 @@ class EthereumTransportProvider(private val ethereumProperties: EthereumProperti
             }
         }
 
-    private fun nodeAvailable(rpcUrl: String, rpcTransport: WebClientTransport): Boolean =
+    private suspend fun nodeAvailable(rpcUrl: String, rpcTransport: WebClientTransport): Boolean =
         try {
-            MonoEthereum(rpcTransport).netListening().block() as Boolean
+            MonoEthereum(rpcTransport).netListening().awaitSingle() as Boolean
         } catch (e: Exception) {
             logger.warn("Error while calling node {}. Trying next node...", rpcUrl, e)
             false
@@ -92,12 +131,13 @@ data class EthereumTransport(
 
 class FailoverPubSubTransport(private val ethereumTransportProvider: EthereumTransportProvider) : PubSubTransport {
     override fun <T : Any?> subscribe(name: String?, param: Option<Any>?, manifest: Manifest<T>?): Flux<T> {
-        val delegate = ethereumTransportProvider.node.get().websocketTransport
-        return delegate.subscribe(name, param, manifest)
-            .doOnError {
-                logger.error("PubSub transport encountered an error", it)
-                ethereumTransportProvider.rediscover()
-            }
+        return mono { ethereumTransportProvider.getWebsocketTransport() }.flatMapMany { delegate ->
+            delegate.subscribe(name, param, manifest)
+                .doOnComplete {
+                    logger.error("PubSub transport disconnected")
+                    ethereumTransportProvider.websocketDisconnected()
+                }
+        }
     }
 
     companion object {
@@ -107,12 +147,13 @@ class FailoverPubSubTransport(private val ethereumTransportProvider: EthereumTra
 
 class FailoverRpcTransport(private val ethereumTransportProvider: EthereumTransportProvider) : MonoRpcTransport {
     override fun <T : Any?> send(request: Request?, manifest: Manifest<T>?): Mono<Response<T>> {
-        val rpcTransport = ethereumTransportProvider.node.get().rpcTransport
-        return rpcTransport.send(request, manifest)
-            .doOnError {
-                logger.error("Rpc transport encountered an error", it)
-                ethereumTransportProvider.rediscover()
-            }
+        return mono { ethereumTransportProvider.getRpcTransport() }.flatMap { rpcTransport ->
+            rpcTransport.send(request, manifest)
+                .doOnError {
+                    logger.error("Rpc transport encountered an error", it)
+                    ethereumTransportProvider.rpcError()
+                }
+        }
     }
 
     companion object {

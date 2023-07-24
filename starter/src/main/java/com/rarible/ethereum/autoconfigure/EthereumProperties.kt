@@ -2,9 +2,6 @@ package com.rarible.ethereum.autoconfigure
 
 import org.springframework.boot.context.properties.ConfigurationProperties
 import org.springframework.boot.context.properties.ConstructorBinding
-import org.springframework.context.annotation.Condition
-import org.springframework.context.annotation.ConditionContext
-import org.springframework.core.type.AnnotatedTypeMetadata
 import java.time.Duration
 
 internal const val RARIBLE_ETHEREUM = "rarible.ethereum"

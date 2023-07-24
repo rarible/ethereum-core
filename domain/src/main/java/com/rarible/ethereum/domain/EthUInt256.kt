@@ -16,7 +16,7 @@ import java.math.BigInteger
 
 @JsonSerialize(using = EthUInt256.EthUint256Serializer::class)
 @JsonDeserialize(using = EthUInt256.EthUint256Deserializer::class)
-data class EthUInt256(val value: BigInteger) : Comparable<EthUInt256>  {
+data class EthUInt256(val value: BigInteger) : Comparable<EthUInt256> {
 
     operator fun plus(other: EthUInt256): EthUInt256 {
         return copy(value = value.add(other.value))

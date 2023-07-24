@@ -164,7 +164,12 @@ class LogEventListener<T : EventData>(
         )
 
     private fun onLog(
-        marker: Marker, index: Int, total: Int, log: Log, transaction: Transaction, timestamp: Long
+        marker: Marker,
+        index: Int,
+        total: Int,
+        log: Log,
+        transaction: Transaction,
+        timestamp: Long
     ): Flux<LogEvent> {
         logger.debug(marker, "onLog $log")
 

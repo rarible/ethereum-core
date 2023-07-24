@@ -39,7 +39,8 @@ class LazyNftValidator(
             }
             results.awaitAll().fold<ValidationResult, ValidationResult>(ValidationResult.Valid) { acc, result ->
                 if (result is ValidationResult.InvalidCreatorSignature) {
-                    val otherInvalidCreators = (acc as? ValidationResult.InvalidCreatorSignature)?.creators ?: emptyList()
+                    val otherInvalidCreators =
+                        (acc as? ValidationResult.InvalidCreatorSignature)?.creators ?: emptyList()
                     ValidationResult.InvalidCreatorSignature(result.creators + otherInvalidCreators)
                 } else {
                     acc
@@ -56,4 +57,3 @@ class LazyNftValidator(
         return domain.hashToSign(lazyNft.hash())
     }
 }
-

@@ -2,7 +2,6 @@ package com.rarible.ethereum.autoconfigure
 
 import com.rarible.ethereum.cache.CacheableMonoEthereum
 import io.daonomic.rpc.MonoRpcTransport
-import io.daonomic.rpc.mono.WebClientTransport
 import org.springframework.boot.autoconfigure.ImportAutoConfiguration
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass

@@ -9,7 +9,12 @@ import com.rarible.ethereum.sign.domain.EIP712Domain
 import com.rarible.ethereum.sign.service.ERC1271SignService
 import io.daonomic.rpc.domain.Binary
 import io.daonomic.rpc.domain.Word
-import io.mockk.*
+import io.mockk.clearMocks
+import io.mockk.coEvery
+import io.mockk.coVerify
+import io.mockk.every
+import io.mockk.mockk
+import io.mockk.verify
 import kotlinx.coroutines.runBlocking
 import org.apache.commons.lang3.RandomUtils
 import org.assertj.core.api.Assertions.assertThat
@@ -21,7 +26,8 @@ import org.junit.jupiter.params.provider.MethodSource
 import scalether.domain.Address
 import scalether.domain.AddressFactory
 import java.math.BigInteger
-import java.util.*
+import java.util.Arrays
+import java.util.UUID
 import java.util.stream.Stream
 
 internal class LazyNftValidatorTest {
@@ -180,6 +186,9 @@ internal class LazyNftValidatorTest {
 
         val result = lazyAssetValidator.validate(assetType)
         assertThat(result).isInstanceOf(ValidationResult.InvalidCreatorSignature::class.java)
-        assertThat((result as ValidationResult.InvalidCreatorSignature).creators).containsExactlyInAnyOrder(creator2, creator4)
+        assertThat((result as ValidationResult.InvalidCreatorSignature).creators).containsExactlyInAnyOrder(
+            creator2,
+            creator4
+        )
     }
 }

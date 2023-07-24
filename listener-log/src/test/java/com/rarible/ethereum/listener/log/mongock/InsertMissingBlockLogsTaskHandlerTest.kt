@@ -60,7 +60,7 @@ internal class InsertMissingBlockLogsTaskHandlerTest {
         every { blockRepository.findFirstByIdDesc() } returns Mono.just(blockHead)
         every { logEventRepository.countLogsByBlockNumber(collection1, any()) } returns Mono.just(1L)
         every { logEventRepository.countLogsByBlockNumber(collection2, any()) } returns Mono.just(1L)
-        val checkedBlocks = handler.runLongTask(null,  collections).toList()
+        val checkedBlocks = handler.runLongTask(null, collections).toList()
         assertThat(checkedBlocks).containsExactly(5L, 4L, 3L, 2L, 1L)
         verify(exactly = 0) { logListenService.reindexBlock(any()) }
     }
@@ -102,7 +102,7 @@ internal class InsertMissingBlockLogsTaskHandlerTest {
         every { logListenService.reindexBlock(blockHead3) } returns Mono.empty()
         every { logListenService.reindexBlock(blockHead4) } returns Mono.empty()
 
-        val checkedBlocks = handler.runLongTask(5,  collections).toList()
+        val checkedBlocks = handler.runLongTask(5, collections).toList()
         assertThat(checkedBlocks).hasSize(5)
         verify(exactly = 2) { logListenService.reindexBlock(any()) }
 
@@ -129,7 +129,7 @@ internal class InsertMissingBlockLogsTaskHandlerTest {
         coEvery { blockRepository.findById(3L) } returns blockHead3
         every { ethereum.ethGetBlockByNumber(3.toBigInteger()) } returns Mono.just(block3)
 
-        val checkedBlocks = handler.runLongTask(5,  collections).toList()
+        val checkedBlocks = handler.runLongTask(5, collections).toList()
         assertThat(checkedBlocks).hasSize(5)
         verify(exactly = 0) { logListenService.reindexBlock(any()) }
     }

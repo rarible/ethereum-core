@@ -104,10 +104,18 @@ class EthereumTransportProvider(private val ethereumProperties: EthereumProperti
             ) {
                 override fun maxInMemorySize(): Int = maxFrameSize
                 override fun <T : Any?> get(url: String?, manifest: Manifest<T>?): Mono<T> =
-                    super.get(url, manifest).retryWhen(retry)
+                    super.get(url, manifest)
+                        .doOnError {
+                            logger.warn(it.message, it)
+                        }
+                        .retryWhen(retry)
 
                 override fun <T : Any?> send(request: Request?, manifest: Manifest<T>?): Mono<Response<T>> =
-                    super.send(request, manifest).retryWhen(retry)
+                    super.send(request, manifest)
+                        .doOnError {
+                            logger.warn(it.message, it)
+                        }
+                        .retryWhen(retry)
             }
         }
 

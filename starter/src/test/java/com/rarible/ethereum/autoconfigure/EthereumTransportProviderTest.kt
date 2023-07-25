@@ -142,6 +142,7 @@ internal class EthereumTransportProviderTest {
                     .maxBackoff(Duration.ofMillis(2000))
             ).subscribe()
         assertThat(receivedEvents.poll(5, TimeUnit.SECONDS)).isEqualTo("request1")
+        rpcServer1.shutdown()
         wsServer1.shutdown()
         // Should receive event from server2 after reconnect
         assertThat(receivedEvents.poll(5, TimeUnit.SECONDS)).isEqualTo("request2")

@@ -34,7 +34,7 @@ internal class CacheableMonoEthereumTest {
         val block = mockk<Block<Transaction>>()
 
         every {
-            transport.send<Block<Transaction>>(any(),any())
+            transport.send<Block<Transaction>>(any(), any())
         } returns Mono.just(Response(1, block))
 
         val requests = (1..100).map {
@@ -44,7 +44,7 @@ internal class CacheableMonoEthereumTest {
         assertThat(requests).hasSize(100)
         assertThat(requests.all { it == block }).isTrue
 
-        verify(exactly = 1) { transport.send<Block<Transaction>>(any(),any()) }
+        verify(exactly = 1) { transport.send<Block<Transaction>>(any(), any()) }
     }
 
     @Test
@@ -58,14 +58,14 @@ internal class CacheableMonoEthereumTest {
             cacheMaxSize = 100,
         )
         every {
-            transport.send<Block<Transaction>>(any(),any())
+            transport.send<Block<Transaction>>(any(), any())
         } returns Mono.just(Response(1, mockk<Block<Transaction>>()))
 
         cacheableMonoEthereum.ethGetFullBlockByHash(hash).awaitFirst()
         delay(expireAfter.multipliedBy(2).toMillis())
         cacheableMonoEthereum.ethGetFullBlockByHash(hash).awaitFirst()
 
-        verify(exactly = 2) { transport.send<Block<Transaction>>(any(),any()) }
+        verify(exactly = 2) { transport.send<Block<Transaction>>(any(), any()) }
     }
 
     private fun randomWord(): Word {

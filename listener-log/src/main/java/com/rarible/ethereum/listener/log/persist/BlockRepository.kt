@@ -10,7 +10,10 @@ import org.springframework.data.domain.Sort
 import org.springframework.data.mongodb.core.ReactiveMongoOperations
 import org.springframework.data.mongodb.core.find
 import org.springframework.data.mongodb.core.findOne
-import org.springframework.data.mongodb.core.query.*
+import org.springframework.data.mongodb.core.query.Criteria
+import org.springframework.data.mongodb.core.query.Query
+import org.springframework.data.mongodb.core.query.Update
+import org.springframework.data.mongodb.core.query.isEqualTo
 import org.springframework.stereotype.Service
 import reactor.core.publisher.Flux
 import reactor.core.publisher.Mono
@@ -41,7 +44,6 @@ class BlockRepository(
         }
         return mongo.find(query, BlockHead::class.java)
     }
-
 
     fun findByStatus(status: BlockStatus): Flux<BlockHead> =
         mongo.find(Query(BlockHead::status isEqualTo status))

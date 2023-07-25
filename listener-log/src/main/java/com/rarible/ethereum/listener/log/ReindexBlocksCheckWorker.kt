@@ -20,7 +20,7 @@ class ReindexBlocksCheckWorker(
     @Value("\${reindexBlocksJobEnabled:true}") private val reindexEnabled: Boolean,
     @Value("\${pendingBlocksCheckJobInterval:${DateUtils.MILLIS_PER_MINUTE}}") private val checkInterval: Long,
     meterRegistry: MeterRegistry,
-): SequentialDaemonWorker(
+) : SequentialDaemonWorker(
     meterRegistry,
     DaemonWorkerProperties().run {
         val interval = Duration.ofMillis(checkInterval)

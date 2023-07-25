@@ -39,16 +39,16 @@ data class LogEvent(
     /**
      * Hash of the block inside which this log event was produced, or `null` for pending logs.
      */
-    val blockHash: Word? = null, //TODO: As pending was removed, need set mandatory after 1-2 releases
+    val blockHash: Word? = null, // TODO: As pending was removed, need set mandatory after 1-2 releases
     /**
      * Number of the block inside which this log event was produced, or `null` for pending logs.
      */
-    val blockNumber: Long? = null, //TODO: As pending was removed, need set mandatory after 1-2 releases
+    val blockNumber: Long? = null, // TODO: As pending was removed, need set mandatory after 1-2 releases
     /**
      * Index of this log event inside the whole block, or `null` for pending logs.
      * This is a native Ethereum value.
      */
-    val logIndex: Int? = null, //TODO: As pending was removed, need set mandatory after 1-2 releases
+    val logIndex: Int? = null, // TODO: As pending was removed, need set mandatory after 1-2 releases
     /**
      * Sender of the transaction.
      *

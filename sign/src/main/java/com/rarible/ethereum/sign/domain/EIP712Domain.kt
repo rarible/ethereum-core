@@ -16,20 +16,28 @@ data class EIP712Domain(
     val verifyingContract: Address
 ) {
     fun hash(): Word =
-        keccak256(Tuples.eip712DomainHashType().encode(Tuple5(
-            TYPE_HASH.bytes(),
-            keccak256(name).bytes(),
-            keccak256(version).bytes(),
-            chainId,
-            verifyingContract
-        )))
+        keccak256(
+            Tuples.eip712DomainHashType().encode(
+                Tuple5(
+                    TYPE_HASH.bytes(),
+                    keccak256(name).bytes(),
+                    keccak256(version).bytes(),
+                    chainId,
+                    verifyingContract
+                )
+            )
+        )
 
-    fun hashToSign(structHash: Word): Word = Word(Hash.sha3(
-        Binary.apply("0x1901")
-            .add(hash())
-            .add(structHash).bytes()))
+    fun hashToSign(structHash: Word): Word = Word(
+        Hash.sha3(
+            Binary.apply("0x1901")
+                .add(hash())
+                .add(structHash).bytes()
+        )
+    )
 
     companion object {
-        private val TYPE_HASH: Word = keccak256("EIP712Domain(string name,string version,uint256 chainId,address verifyingContract)")
+        private val TYPE_HASH: Word =
+            keccak256("EIP712Domain(string name,string version,uint256 chainId,address verifyingContract)")
     }
 }

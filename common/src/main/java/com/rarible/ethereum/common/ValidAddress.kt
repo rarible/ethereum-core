@@ -30,7 +30,7 @@ annotation class ValidAddress(
 
             return if (matcher.find().not()) {
                 context
-                    .buildConstraintViolationWithTemplate("Address '${address}' is not valid format")
+                    .buildConstraintViolationWithTemplate("Address '$address' is not valid format")
                     .addConstraintViolation()
                 false
             } else {

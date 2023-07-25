@@ -3,9 +3,9 @@ package com.rarible.ethereum.contract.service
 import com.rarible.contracts.test.erc1155.TestERC1155
 import com.rarible.contracts.test.erc20.TestERC20
 import com.rarible.contracts.test.erc721.TestERC721
+import com.rarible.core.contract.model.ContractType
 import com.rarible.core.test.containers.MongodbReactiveBaseTest
 import com.rarible.core.test.containers.OpenEthereumTestContainer
-import com.rarible.core.contract.model.ContractType
 import com.rarible.ethereum.contract.repository.ContractRepository
 import kotlinx.coroutines.reactive.awaitFirst
 import kotlinx.coroutines.runBlocking
@@ -73,4 +73,3 @@ class ContractServiceTest : MongodbReactiveBaseTest() {
         assertThat(savedContract).isEqualTo(result)
     }
 }
-

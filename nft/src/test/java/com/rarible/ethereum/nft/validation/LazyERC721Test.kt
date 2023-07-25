@@ -61,7 +61,16 @@ internal class LazyERC721Test {
         )
         val hashToSign = domain.hashToSign(lazyErc721.hash())
         val signature = hashToSign.sign(key1)
-        contract.mintAndTransfer(Tuple5(tokenId, uri, arrayOf(Tuple2(sender1.from(), 10000.toBigInteger())), arrayOf(), arrayOf(signature.bytes())), sender2.from())
+        contract.mintAndTransfer(
+            Tuple5(
+                tokenId,
+                uri,
+                arrayOf(Tuple2(sender1.from(), 10000.toBigInteger())),
+                arrayOf(),
+                arrayOf(signature.bytes())
+            ),
+            sender2.from()
+        )
             .withSender(sender2)
             .execute()
             .verifySuccess()
@@ -123,10 +132,15 @@ internal class LazyERC721Test {
         val receipt = waitReceipt()
         Assertions.assertTrue(receipt.success()) {
             val result = ethereum.executeRaw(
-                Request(1, "trace_replayTransaction", Lists.toScala(
-                receipt.transactionHash().toString(),
-                Lists.toScala("trace")
-            ), "2.0")
+                Request(
+                    1,
+                    "trace_replayTransaction",
+                    Lists.toScala(
+                        receipt.transactionHash().toString(),
+                        Lists.toScala("trace")
+                    ),
+                    "2.0"
+                )
             ).block()!!
             "traces: ${result.result().get()}"
         }

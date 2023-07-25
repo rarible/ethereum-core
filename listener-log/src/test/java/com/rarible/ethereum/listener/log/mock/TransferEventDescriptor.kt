@@ -15,13 +15,21 @@ class TransferEventDescriptor : LogEventDescriptor<Transfer> {
     override val collection: String = "transfer"
     override val topic: Word = TransferEvent.id()
 
-    override fun convert(log: Log, transaction: Transaction, timestamp: Long, index: Int, totalLogs: Int): Mono<Transfer> {
+    override fun convert(
+        log: Log,
+        transaction: Transaction,
+        timestamp: Long,
+        index: Int,
+        totalLogs: Int
+    ): Mono<Transfer> {
         val scalether = TransferEvent.apply(log)
-        return Mono.just(Transfer(
-            from = scalether.from(),
-            to = scalether.to(),
-            value = scalether.value()
-        ))
+        return Mono.just(
+            Transfer(
+                from = scalether.from(),
+                to = scalether.to(),
+                value = scalether.value()
+            )
+        )
     }
 
     override fun getAddresses(): Mono<Collection<Address>> {

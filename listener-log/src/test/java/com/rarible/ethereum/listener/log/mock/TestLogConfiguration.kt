@@ -26,7 +26,7 @@ import scalether.domain.response.Transaction
 @EnableAutoConfiguration
 class TestLogConfiguration {
     @Bean
-    fun onErc20TransferEventListener1() : OnLogEventListener {
+    fun onErc20TransferEventListener1(): OnLogEventListener {
         return mockk {
             every { topics } returns listOf(TransferEvent.id(), TransferSingleEvent.id())
             every { onLogEvent(any()) } returns Mono.empty()
@@ -34,7 +34,7 @@ class TestLogConfiguration {
     }
 
     @Bean
-    fun onErc20TransferEventListener2() : OnLogEventListener {
+    fun onErc20TransferEventListener2(): OnLogEventListener {
         return mockk {
             every { topics } returns listOf(TransferSingleEvent.id(), TransferEvent.id())
             every { onLogEvent(any()) } returns Mono.empty()
@@ -42,7 +42,7 @@ class TestLogConfiguration {
     }
 
     @Bean
-    fun onOtherEventListener() : OnLogEventListener {
+    fun onOtherEventListener(): OnLogEventListener {
         return mockk {
             every { topics } returns listOf(TransferSingleEvent.id())
             every { onLogEvent(any()) } returns Mono.empty()
@@ -50,7 +50,7 @@ class TestLogConfiguration {
     }
 
     @Bean
-    fun logEventDescriptorWithDummyData1(): LogEventDescriptor<DummyData1>  {
+    fun logEventDescriptorWithDummyData1(): LogEventDescriptor<DummyData1> {
         return object : LogEventDescriptor<DummyData1> {
             override val collection: String
                 get() = "dummy_data1"
@@ -58,7 +58,13 @@ class TestLogConfiguration {
             override val topic: Word
                 get() = Word.apply(randomWord())
 
-            override fun convert(log: Log, transaction: Transaction, timestamp: Long, index: Int, totalLogs: Int): Publisher<DummyData1> {
+            override fun convert(
+                log: Log,
+                transaction: Transaction,
+                timestamp: Long,
+                index: Int,
+                totalLogs: Int
+            ): Publisher<DummyData1> {
                 return Mono.empty()
             }
 
@@ -69,7 +75,7 @@ class TestLogConfiguration {
     }
 
     @Bean
-    fun logEventDescriptorWithDummyData2(): LogEventDescriptor<DummyData2>  {
+    fun logEventDescriptorWithDummyData2(): LogEventDescriptor<DummyData2> {
         return object : LogEventDescriptor<DummyData2> {
             override val collection: String
                 get() = "dummy_data2"
@@ -77,7 +83,13 @@ class TestLogConfiguration {
             override val topic: Word
                 get() = Word.apply(randomWord())
 
-            override fun convert(log: Log, transaction: Transaction, timestamp: Long, index: Int, totalLogs: Int): Publisher<DummyData2> {
+            override fun convert(
+                log: Log,
+                transaction: Transaction,
+                timestamp: Long,
+                index: Int,
+                totalLogs: Int
+            ): Publisher<DummyData2> {
                 return Mono.empty()
             }
 

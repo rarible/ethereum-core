@@ -13,7 +13,7 @@ import java.math.BigInteger
 sealed class LazyNft {
     abstract val token: Address
     abstract val tokenId: BigInteger
-    abstract val uri:String
+    abstract val uri: String
     abstract val creators: List<Part>
     abstract val signatures: List<Binary>
     abstract val royalties: List<Part>
@@ -36,16 +36,21 @@ data class LazyERC721(
         }
     }
 
-    override fun hash(): Word = keccak256(Tuples.lazy721HashType().encode(Tuple5(
-            TYPE_HASH.bytes(),
-            tokenId,
-            keccak256(uri).bytes(),
-            creators.map { it.hash() }.hash(),
-            royalties.map { it.hash() }.hash()
-    )))
+    override fun hash(): Word = keccak256(
+        Tuples.lazy721HashType().encode(
+            Tuple5(
+                TYPE_HASH.bytes(),
+                tokenId,
+                keccak256(uri).bytes(),
+                creators.map { it.hash() }.hash(),
+                royalties.map { it.hash() }.hash()
+            )
+        )
+    )
 
     companion object {
-        private val TYPE_HASH: Word = keccak256("Mint721(uint256 tokenId,string tokenURI,Part[] creators,Part[] royalties)Part(address account,uint96 value)")
+        private val TYPE_HASH: Word =
+            keccak256("Mint721(uint256 tokenId,string tokenURI,Part[] creators,Part[] royalties)Part(address account,uint96 value)")
     }
 }
 
@@ -65,16 +70,21 @@ data class LazyERC1155(
         }
     }
 
-    override fun hash(): Word = keccak256(Tuples.lazy1155HashType().encode(Tuple6(
-            TYPE_HASH.bytes(),
-            tokenId,
-            supply,
-            keccak256(uri).bytes(),
-            creators.map { it.hash() }.hash(),
-            royalties.map { it.hash() }.hash()
-    )))
+    override fun hash(): Word = keccak256(
+        Tuples.lazy1155HashType().encode(
+            Tuple6(
+                TYPE_HASH.bytes(),
+                tokenId,
+                supply,
+                keccak256(uri).bytes(),
+                creators.map { it.hash() }.hash(),
+                royalties.map { it.hash() }.hash()
+            )
+        )
+    )
 
     companion object {
-        private val TYPE_HASH: Word = keccak256("Mint1155(uint256 tokenId,uint256 supply,string tokenURI,Part[] creators,Part[] royalties)Part(address account,uint96 value)")
+        private val TYPE_HASH: Word =
+            keccak256("Mint1155(uint256 tokenId,uint256 supply,string tokenURI,Part[] creators,Part[] royalties)Part(address account,uint96 value)")
     }
 }

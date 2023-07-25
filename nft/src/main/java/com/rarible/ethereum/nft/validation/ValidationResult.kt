@@ -9,5 +9,5 @@ sealed class ValidationResult {
 
     object NotUniqCreators : ValidationResult()
 
-    data class InvalidCreatorSignature(val creators: List<Address>): ValidationResult()
+    data class InvalidCreatorSignature(val creators: List<Address>) : ValidationResult()
 }

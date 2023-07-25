@@ -45,7 +45,5 @@ class StartersTest {
     }
 
     @TestConfiguration
-    internal class Configuration {
-
-    }
+    internal class Configuration
 }

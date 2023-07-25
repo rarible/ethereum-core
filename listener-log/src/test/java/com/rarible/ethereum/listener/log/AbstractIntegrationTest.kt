@@ -2,6 +2,7 @@ package com.rarible.ethereum.listener.log
 
 import com.rarible.ethereum.autoconfigure.EthereumAutoConfiguration
 import com.rarible.ethereum.autoconfigure.EthereumProperties
+import io.daonomic.rpc.MonoRpcTransport
 import io.daonomic.rpc.domain.Word
 import io.micrometer.core.instrument.MeterRegistry
 import io.micrometer.core.instrument.simple.SimpleMeterRegistry
@@ -20,19 +21,26 @@ import org.web3jold.utils.Numeric
 import reactor.core.publisher.Mono
 import scalether.core.MonoEthereum
 import scalether.domain.response.TransactionReceipt
-import scalether.transaction.*
+import scalether.transaction.MonoSigningTransactionSender
+import scalether.transaction.MonoSimpleNonceProvider
+import scalether.transaction.MonoTransactionPoller
+import scalether.transaction.MonoTransactionSender
 import java.math.BigInteger
 import java.time.Instant
 
 abstract class AbstractIntegrationTest {
     @Autowired
     protected lateinit var sender: MonoTransactionSender
+
     @Autowired
     protected lateinit var poller: MonoTransactionPoller
+
     @Autowired
     protected lateinit var ethereum: MonoEthereum
+
     @Autowired
     protected lateinit var mongo: ReactiveMongoOperations
+
     @Autowired
     protected lateinit var mongoTemplate: MongoTemplate
 
@@ -82,8 +90,8 @@ class EthereumConfigurationIntr {
     fun poller(ethereum: MonoEthereum) = MonoTransactionPoller(ethereum)
 
     @Bean
-    fun testEthereum(ethereumProperties: EthereumProperties): MonoEthereum {
-        val ethereum = EthereumAutoConfiguration(ethereumProperties).ethereum()
+    fun testEthereum(ethereumProperties: EthereumProperties, monoRpcTransport: MonoRpcTransport): MonoEthereum {
+        val ethereum = EthereumAutoConfiguration(ethereumProperties).ethereum(monoRpcTransport)
         return spyk(ethereum)
     }
 

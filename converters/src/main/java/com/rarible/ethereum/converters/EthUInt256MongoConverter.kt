@@ -4,7 +4,7 @@ import com.rarible.core.mongo.converter.SimpleMongoConverter
 import com.rarible.ethereum.domain.EthUInt256
 import org.springframework.core.convert.converter.Converter
 import org.springframework.stereotype.Component
-import java.util.*
+import java.util.Optional
 
 @Component
 class EthUInt256MongoConverter : SimpleMongoConverter<String, EthUInt256> {

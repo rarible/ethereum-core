@@ -19,7 +19,7 @@ class EthereumMonoParityAutoConfiguration(
 ) {
     @Bean
     @ConditionalOnMissingBean(MonoParity::class)
-    fun monoParity() = with (ethereumParityProperties) {
+    fun monoParity() = with(ethereumParityProperties) {
         MonoParity(object : WebClientTransport(httpUrl, MonoEthereum.mapper(), requestTimeoutMs, readWriteTimeoutMs) {
             override fun maxInMemorySize(): Int = maxFrameSize
         })

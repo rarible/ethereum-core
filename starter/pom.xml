@@ -21,6 +21,10 @@
             <optional>true</optional>
         </dependency>
         <dependency>
+            <groupId>org.jetbrains.kotlinx</groupId>
+            <artifactId>kotlinx-coroutines-reactor</artifactId>
+        </dependency>
+        <dependency>
             <groupId>io.daonomic.scalether</groupId>
             <artifactId>core-mono_${scala.major.version}</artifactId>
             <version>${scalether.version}</version>
@@ -62,6 +66,11 @@
         <dependency>
             <groupId>io.mockk</groupId>
             <artifactId>mockk</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.squareup.okhttp3</groupId>
+            <artifactId>mockwebserver</artifactId>
             <scope>test</scope>
         </dependency>
     </dependencies>

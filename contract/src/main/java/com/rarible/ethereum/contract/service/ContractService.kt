@@ -18,7 +18,6 @@ import reactor.core.publisher.Mono
 import scalether.domain.Address
 import scalether.transaction.MonoTransactionSender
 import java.math.BigInteger
-import kotlin.math.log
 
 @Service
 class ContractService(
@@ -40,9 +39,9 @@ class ContractService(
         val erc165 = IERC165(address, sender)
 
         return when {
-            isSupportedInterface(ERC721, erc165)
-                || isSupportedInterface(ERC721_DEPRECATED1, erc165)
-                || isSupportedInterface(ERC721_DEPRECATED2, erc165)
+            isSupportedInterface(ERC721, erc165) ||
+                isSupportedInterface(ERC721_DEPRECATED1, erc165) ||
+                isSupportedInterface(ERC721_DEPRECATED2, erc165)
             -> {
                 val erc721 = IERC721(address, sender)
                 Erc721Token(

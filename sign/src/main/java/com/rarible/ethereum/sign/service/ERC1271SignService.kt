@@ -77,10 +77,10 @@ class ERC1271SignService(
     private fun getEthSignedMessageHash(hash: Word): Word =
         keccak256(Binary.apply("${START}32".toByteArray()).add(hash))
 
-    private fun fixVAndHash(v: Byte, hash: Word): Pair<Byte, Word> = when(v.toInt()) {
+    private fun fixVAndHash(v: Byte, hash: Word): Pair<Byte, Word> = when (v.toInt()) {
         0, 1 -> (27 + v).toByte() to hash
         27, 28 -> v to hash
-        //For hardware wallets that do not support EIP-712 we artificially increment v by 4 to distinguish signing of message's hash by 'eth_sign'.
+        // For hardware wallets that do not support EIP-712 we artificially increment v by 4 to distinguish signing of message's hash by 'eth_sign'.
         31, 32 -> (v - 4).toByte() to getEthSignedMessageHash(hash)
         else -> error("Value of 'v' is not recognised: $v")
     }

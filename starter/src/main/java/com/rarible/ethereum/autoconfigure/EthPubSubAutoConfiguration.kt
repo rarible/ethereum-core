@@ -1,25 +1,21 @@
 package com.rarible.ethereum.autoconfigure
 
+import org.springframework.boot.autoconfigure.ImportAutoConfiguration
+import org.springframework.boot.autoconfigure.condition.ConditionalOnBean
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean
-import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty
-import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import scalether.core.EthPubSub
-import scalether.transport.WebSocketPubSubTransport
+import scalether.core.PubSubTransport
 
 @Configuration
-@EnableConfigurationProperties(EthereumProperties::class)
-@ConditionalOnProperty(prefix = RARIBLE_ETHEREUM, name = ["websocketUrl"], matchIfMissing = false)
-@ConditionalOnClass(WebSocketPubSubTransport::class, EthPubSub::class)
-class EthPubSubAutoConfiguration(
-    private val ethereumProperties: EthereumProperties
-) {
+@ImportAutoConfiguration(EthereumTransportConfiguration::class)
+@ConditionalOnClass(EthPubSub::class)
+class EthPubSubAutoConfiguration {
 
     @Bean
     @ConditionalOnMissingBean(EthPubSub::class)
-    fun ethPubSub() = with (ethereumProperties) {
-        EthPubSub(WebSocketPubSubTransport(websocketUrl, maxFrameSize))
-    }
+    @ConditionalOnBean(PubSubTransport::class)
+    fun ethPubSub(webSocketTransport: PubSubTransport) = EthPubSub(webSocketTransport)
 }

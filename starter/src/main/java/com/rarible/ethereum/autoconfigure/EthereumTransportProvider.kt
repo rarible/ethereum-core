@@ -7,6 +7,8 @@ import io.daonomic.rpc.mono.WebClientTransport
 import io.netty.channel.ChannelException
 import kotlinx.coroutines.reactive.awaitSingle
 import kotlinx.coroutines.reactor.mono
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.web.reactive.function.client.WebClientException
@@ -23,49 +25,35 @@ import java.time.Duration
 import java.util.concurrent.atomic.AtomicReference
 
 class EthereumTransportProvider(private val ethereumProperties: EthereumProperties) {
-    private val websocketNode: AtomicReference<EthereumTransport> = AtomicReference()
-    private val rpcNode: AtomicReference<EthereumTransport> = AtomicReference()
+    private val mutex = Mutex()
+    private val node: AtomicReference<EthereumTransport> = AtomicReference()
 
     /**
      * In case websocket is disconnected we rediscover new node
      */
     fun websocketDisconnected() {
-        websocketNode.set(null)
-        rpcNode.set(null)
+        node.set(null)
     }
 
-    /**
-     * In case rpc error and there is a websocket connection we still use websocket connection. If there is no
-     * websocket connection we wil rediscover
-     */
-    fun rpcError() {
-        rpcNode.set(websocketNode.get())
-    }
-
-    suspend fun getWebsocketTransport(): WebSocketPubSubTransport {
-        val cachedNode = websocketNode.get()
-        if (cachedNode == null) {
-            val aliveNode = aliveNode()
-            websocketNode.set(aliveNode)
-            rpcNode.set(aliveNode)
-            return aliveNode.websocketTransport
+    private suspend fun getNode(): EthereumTransport {
+        val cachedNode = node.get()
+        if (cachedNode != null) {
+            return cachedNode
         }
-        return cachedNode.websocketTransport
-    }
-
-    suspend fun getRpcTransport(): WebClientTransport {
-        // Always prefer current websocket connection over rpc
-        val cachedNode = websocketNode.get() ?: rpcNode.get()
-        if (cachedNode == null) {
-            val aliveNode = aliveNode()
-            // Could be updated also from getWebsocketTransport. We prefer one from websocket
-            val nodeToUse = rpcNode.accumulateAndGet(aliveNode) { prev, next ->
-                prev ?: next
+        return mutex.withLock {
+            val cachedNode = node.get()
+            if (cachedNode != null) {
+                return cachedNode
             }
-            return nodeToUse.rpcTransport
+            val aliveNode = aliveNode()
+            node.set(aliveNode)
+            aliveNode
         }
-        return cachedNode.rpcTransport
     }
+
+    suspend fun getWebsocketTransport(): WebSocketPubSubTransport = getNode().websocketTransport
+
+    suspend fun getRpcTransport(): WebClientTransport = getNode().rpcTransport
 
     private suspend fun aliveNode(): EthereumTransport {
         for (node in ethereumProperties.nodes) {
@@ -159,7 +147,6 @@ class FailoverRpcTransport(private val ethereumTransportProvider: EthereumTransp
             rpcTransport.send(request, manifest)
                 .doOnError {
                     logger.error("Rpc transport encountered an error", it)
-                    ethereumTransportProvider.rpcError()
                 }
         }
     }

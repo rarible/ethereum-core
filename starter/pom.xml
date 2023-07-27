@@ -28,30 +28,25 @@
             <groupId>io.daonomic.scalether</groupId>
             <artifactId>core-mono_${scala.major.version}</artifactId>
             <version>${scalether.version}</version>
-            <optional>true</optional>
         </dependency>
         <dependency>
             <groupId>io.daonomic.scalether</groupId>
             <artifactId>transaction-mono_${scala.major.version}</artifactId>
             <version>${scalether.version}</version>
-            <optional>true</optional>
         </dependency>
         <dependency>
             <groupId>io.daonomic.rpc</groupId>
             <artifactId>transport-mono_${scala.major.version}</artifactId>
             <version>${scalether.version}</version>
-            <optional>true</optional>
         </dependency>
         <dependency>
             <groupId>io.daonomic.scalether</groupId>
             <artifactId>transport-mono_${scala.major.version}</artifactId>
             <version>${scalether.version}</version>
-            <optional>true</optional>
         </dependency>
         <dependency>
             <groupId>com.github.ben-manes.caffeine</groupId>
             <artifactId>caffeine</artifactId>
-            <scope>compile</scope>
         </dependency>
         <dependency>
             <groupId>org.springframework.boot</groupId>

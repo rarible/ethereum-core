@@ -13,7 +13,12 @@ class EthereumTransportConfiguration(
     private val ethereumProperties: EthereumProperties,
 ) {
     @Bean
-    fun ethereumTransportProvider() = EthereumTransportProvider(ethereumProperties)
+    fun ethereumTransportProvider(): EthereumTransportProvider =
+        if (ethereumProperties.nodes.isNotEmpty()) {
+            HAEthereumTransportProvider(ethereumProperties)
+        } else {
+            LegacyEthereumTransportProvider(ethereumProperties)
+        }
 
     @Bean
     fun ethereumRpc(ethereumTransportProvider: EthereumTransportProvider): MonoRpcTransport =

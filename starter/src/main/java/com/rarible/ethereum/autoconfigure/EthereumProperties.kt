@@ -12,11 +12,13 @@ data class EthereumProperties(
     val httpUrl: String?,
     val websocketUrl: String?,
     val nodes: List<NodeProperty> = emptyList(),
+    val externalNodes: List<NodeProperty> = emptyList(),
     val requestTimeoutMs: Int = 10000,
     val readWriteTimeoutMs: Int = 10000,
     val maxFrameSize: Int = 1024 * 1024,
     val retryMaxAttempts: Long = 5,
     val retryBackoffDelay: Long = 100,
+    val monitoringThreadInterval: Duration = Duration.ofSeconds(30),
     val cache: CacheProperties = CacheProperties(),
 )
 

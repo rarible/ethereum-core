@@ -1,5 +1,7 @@
-package com.rarible.ethereum.autoconfigure
+package com.rarible.ethereum.client
 
+import com.rarible.ethereum.client.failover.NoopFailoverPredicate
+import com.rarible.ethereum.client.failover.SimplePredicate
 import io.daonomic.rpc.domain.Request
 import kotlinx.coroutines.reactive.awaitSingle
 import kotlinx.coroutines.runBlocking
@@ -101,27 +103,28 @@ internal class HAEthereumTransportProviderTest {
                 .setBody("""{"jsonrpc": "2.0","id": 2,"result": "response2"}""")
         )
         val provider = HAEthereumTransportProvider(
-            EthereumProperties(
-                httpUrl = null,
-                websocketUrl = null,
-                monitoringThreadInterval = Duration.ofMillis(100),
-                nodes = listOf(
-                    NodeProperty(
-                        httpUrl = "http://127.0.0.1:${rpcInternalServer.port}",
-                        websocketUrl = "ws://127.0.0.1:${internalServer.port}"
-                    ),
-                    NodeProperty(
-                        httpUrl = "http://127.0.0.1:$rpcInternalServer2Port",
-                        websocketUrl = "ws://127.0.0.1:$internalServer2Port"
-                    )
+            monitoringThreadInterval = Duration.ofMillis(100),
+            localNodes = listOf(
+                EthereumNode(
+                    httpUrl = "http://127.0.0.1:${rpcInternalServer.port}",
+                    websocketUrl = "ws://127.0.0.1:${internalServer.port}"
                 ),
-                externalNodes = listOf(
-                    NodeProperty(
-                        httpUrl = "http://127.0.0.1:${rpcExternalServer.port}",
-                        websocketUrl = "ws://127.0.0.1:${externalServer.port}"
-                    )
+                EthereumNode(
+                    httpUrl = "http://127.0.0.1:$rpcInternalServer2Port",
+                    websocketUrl = "ws://127.0.0.1:$internalServer2Port"
                 )
-            )
+            ),
+            externalNodes = listOf(
+                EthereumNode(
+                    httpUrl = "http://127.0.0.1:${rpcExternalServer.port}",
+                    websocketUrl = "ws://127.0.0.1:${externalServer.port}"
+                )
+            ),
+            maxFrameSize = 1024 * 1024,
+            retryMaxAttempts = 5,
+            retryBackoffDelay = 100,
+            requestTimeoutMs = 10000,
+            readWriteTimeoutMs = 10000,
         )
 
         // Should receive event from server1
@@ -143,7 +146,10 @@ internal class HAEthereumTransportProviderTest {
         assertThat(receivedEvents.poll(5, TimeUnit.SECONDS)).isEqualTo("request2")
 
         // Should get response from external server
-        val response = FailoverRpcTransport(provider).send(
+        val response = FailoverRpcTransport(
+            ethereumTransportProvider = provider,
+            failoverPredicate = NoopFailoverPredicate(),
+        ).send(
             Request(
                 1L,
                 "GET",
@@ -162,7 +168,10 @@ internal class HAEthereumTransportProviderTest {
         assertThat(receivedEvents.poll(5, TimeUnit.SECONDS)).isEqualTo("request3")
 
         // Should get response from internal server 2
-        val response2 = FailoverRpcTransport(provider).send(
+        val response2 = FailoverRpcTransport(
+            ethereumTransportProvider = provider,
+            failoverPredicate = NoopFailoverPredicate(),
+        ).send(
             Request(
                 1L,
                 "GET",
@@ -172,6 +181,125 @@ internal class HAEthereumTransportProviderTest {
             Manifest.Any(),
         ).awaitSingle()
         assertThat(response2.result().get()).isEqualTo("response3")
+    }
+
+    @Test
+    fun `rpc failover to external node`() = runBlocking<Unit> {
+        val internalServer = MockWebServer()
+        internalServer.start()
+        val externalServer = MockWebServer()
+        externalServer.start()
+
+        val provider = HAEthereumTransportProvider(
+            monitoringThreadInterval = Duration.ofMillis(100),
+            localNodes = listOf(
+                EthereumNode(
+                    httpUrl = "http://127.0.0.1:${internalServer.port}",
+                    websocketUrl = "ws://127.0.0.1:${internalServer.port}"
+                ),
+            ),
+            externalNodes = listOf(
+                EthereumNode(
+                    httpUrl = "http://127.0.0.1:${externalServer.port}",
+                    websocketUrl = "ws://127.0.0.1:${externalServer.port}"
+                )
+            ),
+            maxFrameSize = 1024 * 1024,
+            retryMaxAttempts = 5,
+            retryBackoffDelay = 100,
+            requestTimeoutMs = 10000,
+            readWriteTimeoutMs = 10000,
+        )
+
+        internalServer.enqueue(
+            MockResponse()
+                .setHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+                .setBody("""{"jsonrpc": "2.0","id": 1,"result": true}""")
+        )
+        internalServer.enqueue(
+            MockResponse()
+                .setHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+                .setBody("""{"jsonrpc": "2.0","id": 2,"result": "response1", "error": { "message": "test", "code": -32000 }}""")
+        )
+        externalServer.enqueue(
+            MockResponse()
+                .setHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+                .setBody("""{"jsonrpc": "2.0","id": 2,"result": "response2"}""")
+        )
+
+        val response = FailoverRpcTransport(
+            ethereumTransportProvider = provider,
+            failoverPredicate = SimplePredicate(code = -32000, errorMessagePrefix = "test"),
+        ).send(
+            Request(
+                1L,
+                "GET",
+                CollectionConverters.asScala(emptyList<Any>()).toList(),
+                ""
+            ),
+            Manifest.Any(),
+        ).awaitSingle()
+
+        assertThat(response.result().get()).isEqualTo("response2")
+    }
+
+    @Test
+    fun `rpc no failover already on external node`() = runBlocking<Unit> {
+        val externalServer1 = MockWebServer()
+        externalServer1.start()
+        val externalServer2 = MockWebServer()
+        externalServer2.start()
+
+        val provider = HAEthereumTransportProvider(
+            monitoringThreadInterval = Duration.ofMillis(100),
+            localNodes = emptyList(),
+            externalNodes = listOf(
+                EthereumNode(
+                    httpUrl = "http://127.0.0.1:${externalServer1.port}",
+                    websocketUrl = "ws://127.0.0.1:${externalServer1.port}"
+                ),
+                EthereumNode(
+                    httpUrl = "http://127.0.0.1:${externalServer2.port}",
+                    websocketUrl = "ws://127.0.0.1:${externalServer2.port}"
+                )
+            ),
+            maxFrameSize = 1024 * 1024,
+            retryMaxAttempts = 5,
+            retryBackoffDelay = 100,
+            requestTimeoutMs = 10000,
+            readWriteTimeoutMs = 10000,
+        )
+
+        externalServer1.enqueue(
+            MockResponse()
+                .setHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+                .setBody("""{"jsonrpc": "2.0","id": 1,"result": true}""")
+        )
+        externalServer1.enqueue(
+            MockResponse()
+                .setHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+                .setBody("""{"jsonrpc": "2.0","id": 2,"result": "response1", "error": { "message": "test", "code": -32000 }}""")
+        )
+        externalServer2.enqueue(
+            MockResponse()
+                .setHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+                .setBody("""{"jsonrpc": "2.0","id": 2,"result": "response2"}""")
+        )
+
+        val response = FailoverRpcTransport(
+            ethereumTransportProvider = provider,
+            failoverPredicate = SimplePredicate(code = -32000, errorMessagePrefix = "test"),
+        ).send(
+            Request(
+                1L,
+                "GET",
+                CollectionConverters.asScala(emptyList<Any>()).toList(),
+                ""
+            ),
+            Manifest.Any(),
+        ).awaitSingle()
+
+        assertThat(response.result().get()).isEqualTo("response1")
     }
 
     companion object {
@@ -202,9 +330,5 @@ class MockWebsocketListener(private val response: String) : WebSocketListener() 
                     "subscription": "$subscriptionId"
                 }"""
         )
-    }
-
-    companion object {
-        private val logger = LoggerFactory.getLogger(MockWebsocketListener::class.java)
     }
 }

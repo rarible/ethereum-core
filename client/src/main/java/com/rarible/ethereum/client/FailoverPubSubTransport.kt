@@ -1,4 +1,4 @@
-package com.rarible.ethereum.autoconfigure
+package com.rarible.ethereum.client
 
 import kotlinx.coroutines.reactor.mono
 import org.slf4j.Logger

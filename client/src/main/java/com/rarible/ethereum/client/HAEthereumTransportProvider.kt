@@ -1,14 +1,24 @@
-package com.rarible.ethereum.autoconfigure
+package com.rarible.ethereum.client
 
 import io.daonomic.rpc.mono.WebClientTransport
 import kotlinx.coroutines.reactive.awaitSingle
 import kotlinx.coroutines.runBlocking
 import scalether.core.MonoEthereum
 import scalether.transport.WebSocketPubSubTransport
+import java.time.Duration
 import java.util.concurrent.CopyOnWriteArrayList
 import java.util.concurrent.atomic.AtomicReference
 
-class HAEthereumTransportProvider(private val ethereumProperties: EthereumProperties) : AutoCloseable,
+class HAEthereumTransportProvider(
+    private val localNodes: List<EthereumNode>,
+    private val externalNodes: List<EthereumNode>,
+    private val requestTimeoutMs: Int,
+    private val readWriteTimeoutMs: Int,
+    private val maxFrameSize: Int,
+    private val retryMaxAttempts: Long,
+    private val retryBackoffDelay: Long,
+    private val monitoringThreadInterval: Duration,
+) : AutoCloseable,
     EthereumTransportProvider() {
     private val websocketNode: AtomicReference<EthereumTransport> = AtomicReference()
     private val rpcNode: AtomicReference<EthereumTransport> = AtomicReference()
@@ -69,8 +79,15 @@ class HAEthereumTransportProvider(private val ethereumProperties: EthereumProper
         return cachedNode.rpcTransport
     }
 
+    override suspend fun getFailoverRpcTransport(): WebClientTransport? =
+        if (externalNodes.isNotEmpty() && rpcNode.get()?.let { it.node !in externalNodes } == true) {
+            createHttpTransport(externalNodes.first())
+        } else {
+            null
+        }
+
     private suspend fun aliveNode(
-        nodes: List<NodeProperty> = ethereumProperties.nodes + ethereumProperties.externalNodes
+        nodes: List<EthereumNode> = localNodes + externalNodes
     ): EthereumTransport {
         logger.info("Will check nodes: $nodes")
         for (node in nodes) {
@@ -78,19 +95,28 @@ class HAEthereumTransportProvider(private val ethereumProperties: EthereumProper
             val httpTransport = WebClientTransport(
                 node.httpUrl,
                 MonoEthereum.mapper(),
-                ethereumProperties.requestTimeoutMs,
-                ethereumProperties.readWriteTimeoutMs
+                requestTimeoutMs,
+                readWriteTimeoutMs
             )
             if (nodeAvailable(node.httpUrl, httpTransport)) {
                 return EthereumTransport(
-                    rpcTransport = httpTransport(node.httpUrl, ethereumProperties),
-                    websocketTransport = WebSocketPubSubTransport(node.websocketUrl, ethereumProperties.maxFrameSize),
+                    rpcTransport = createHttpTransport(node),
+                    websocketTransport = WebSocketPubSubTransport(node.websocketUrl, maxFrameSize),
                     node = node,
                 )
             }
         }
-        throw IllegalStateException("None of nodes ${ethereumProperties.nodes} are available")
+        throw IllegalStateException("None of nodes $nodes are available")
     }
+
+    private fun createHttpTransport(node: EthereumNode) = httpTransport(
+        httpUrl = node.httpUrl,
+        requestTimeoutMs = requestTimeoutMs,
+        readWriteTimeoutMs = readWriteTimeoutMs,
+        maxFrameSize = maxFrameSize,
+        retryMaxAttempts = retryMaxAttempts,
+        retryBackoffDelay = retryBackoffDelay,
+    )
 
     private suspend fun nodeAvailable(rpcUrl: String, rpcTransport: WebClientTransport): Boolean =
         try {
@@ -119,14 +145,14 @@ class HAEthereumTransportProvider(private val ethereumProperties: EthereumProper
                 } catch (e: Exception) {
                     logger.error("Error in monitoring thread: ${e.message}", e)
                 }
-                sleep(ethereumProperties.monitoringThreadInterval.toMillis())
+                sleep(monitoringThreadInterval.toMillis())
             }
         }
 
         private suspend fun checkNode() {
             val nodeInUse = websocketNode.get() ?: rpcNode.get() ?: return
-            if (nodeInUse.node in ethereumProperties.externalNodes) {
-                val node = aliveNode(ethereumProperties.nodes)
+            if (nodeInUse.node in externalNodes) {
+                val node = aliveNode(localNodes)
                 logger.info("Found alive node ${node.node}")
                 rpcNode.set(node)
                 websocketNode.accumulateAndGet(node) { prev, next ->
@@ -149,6 +175,6 @@ class HAEthereumTransportProvider(private val ethereumProperties: EthereumProper
     data class EthereumTransport(
         val rpcTransport: WebClientTransport,
         val websocketTransport: WebSocketPubSubTransport,
-        val node: NodeProperty,
+        val node: EthereumNode,
     )
 }

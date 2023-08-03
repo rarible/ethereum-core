@@ -1,4 +1,4 @@
-package com.rarible.ethereum.cache
+package com.rarible.ethereum.client.cache
 
 import com.github.benmanes.caffeine.cache.AsyncLoadingCache
 import com.github.benmanes.caffeine.cache.Caffeine

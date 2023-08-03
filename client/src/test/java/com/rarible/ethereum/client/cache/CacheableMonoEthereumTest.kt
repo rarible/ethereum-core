@@ -1,4 +1,4 @@
-package com.rarible.ethereum.cache
+package com.rarible.ethereum.client.cache
 
 import io.daonomic.rpc.MonoRpcTransport
 import io.daonomic.rpc.domain.Response

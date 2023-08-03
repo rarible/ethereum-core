@@ -33,7 +33,7 @@
     </distributionManagement>
 
     <properties>
-        <revision>1.7.13</revision>
+        <revision>1.7.14</revision>
         <rarible-core.version>2.5.33</rarible-core.version>
         <mockserver-netty.version>5.11.2</mockserver-netty.version>
         <mockserver.version>4.11.0</mockserver.version>
@@ -77,6 +77,11 @@
             <dependency>
                 <groupId>com.rarible.ethereum</groupId>
                 <artifactId>rarible-ethereum-converters</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.rarible.ethereum</groupId>
+                <artifactId>rarible-ethereum-client</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
@@ -201,6 +206,7 @@
         <module>listener-log-service</module>
         <module>block</module>
         <module>domain</module>
+        <module>client</module>
         <module>starter</module>
         <module>monitoring</module>
         <module>test-coverage</module>

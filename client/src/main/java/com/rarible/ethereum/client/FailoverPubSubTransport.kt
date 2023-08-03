@@ -3,6 +3,7 @@ package com.rarible.ethereum.client
 import kotlinx.coroutines.reactor.mono
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
+import reactor.core.Disposable
 import reactor.core.publisher.Flux
 import reactor.core.publisher.FluxSink
 import scala.Option
@@ -19,14 +20,12 @@ class FailoverPubSubTransport(private val ethereumTransportProvider: EthereumTra
                 disposable.get().dispose()
                 disposable.set(subscribe(name, param, manifest, sink))
             }
-            sink.onCancel {
+            val terminateCallback = {
                 ethereumTransportProvider.unregisterWebsocketSubscription(reconnectCallback)
                 disposable.get().dispose()
             }
-            sink.onDispose {
-                ethereumTransportProvider.unregisterWebsocketSubscription(reconnectCallback)
-                disposable.get().dispose()
-            }
+            sink.onCancel(terminateCallback)
+            sink.onDispose(terminateCallback)
             ethereumTransportProvider.registerWebsocketSubscription(reconnectCallback)
         }
     }

@@ -45,17 +45,15 @@ abstract class EthereumTransportProvider {
             override fun maxInMemorySize(): Int = maxFrameSize
             override fun <T : Any?> get(url: String?, manifest: Manifest<T>?): Mono<T> =
                 super.get(url, manifest)
-                    .doOnError {
-                        logger.warn(it.message, it)
-                    }
-                    .retryWhen(retry)
+                    .logOnErrorAndRetry()
 
             override fun <T : Any?> send(request: Request?, manifest: Manifest<T>?): Mono<Response<T>> =
                 super.send(request, manifest)
-                    .doOnError {
-                        logger.warn(it.message, it)
-                    }
-                    .retryWhen(retry)
+                    .logOnErrorAndRetry()
+
+            private fun <T : Any?> Mono<T>.logOnErrorAndRetry(): Mono<T> = doOnError {
+                logger.warn(it.message, it)
+            }.retryWhen(retry)
         }
     }
 }

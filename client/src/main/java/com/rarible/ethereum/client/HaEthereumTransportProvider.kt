@@ -9,7 +9,7 @@ import java.time.Duration
 import java.util.concurrent.CopyOnWriteArrayList
 import java.util.concurrent.atomic.AtomicReference
 
-class HAEthereumTransportProvider(
+class HaEthereumTransportProvider(
     private val localNodes: List<EthereumNode>,
     private val externalNodes: List<EthereumNode>,
     private val requestTimeoutMs: Int,
@@ -26,7 +26,7 @@ class HAEthereumTransportProvider(
     private val monitoringThread = MonitoringThread()
 
     init {
-        logger.info("Will use HA ethereum transport provider")
+        logger.info("Will use HA ethereum transport provider. localNodes=$localNodes, externalNodes=$externalNodes")
         monitoringThread.start()
     }
 
@@ -91,7 +91,7 @@ class HAEthereumTransportProvider(
     ): EthereumTransport {
         logger.info("Will check nodes: $nodes")
         for (node in nodes) {
-            logger.info("Using new node definition httpUrl=${node.httpUrl}, websocketUrl=${node.websocketUrl}")
+            logger.info("Checking node definition $node")
             val httpTransport = WebClientTransport(
                 node.httpUrl,
                 MonoEthereum.mapper(),
@@ -99,6 +99,7 @@ class HAEthereumTransportProvider(
                 readWriteTimeoutMs
             )
             if (nodeAvailable(node.httpUrl, httpTransport)) {
+                logger.info("Node $node is available. Will use it")
                 return EthereumTransport(
                     rpcTransport = createHttpTransport(node),
                     websocketTransport = WebSocketPubSubTransport(node.websocketUrl, maxFrameSize),

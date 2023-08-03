@@ -26,7 +26,7 @@ import java.util.UUID
 import java.util.concurrent.LinkedBlockingQueue
 import java.util.concurrent.TimeUnit
 
-internal class HAEthereumTransportProviderTest {
+internal class HaEthereumTransportProviderTest {
 
     @Test
     fun `fallback to external and then reconnect to internal`() = runBlocking<Unit> {
@@ -102,7 +102,7 @@ internal class HAEthereumTransportProviderTest {
                 .setHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
                 .setBody("""{"jsonrpc": "2.0","id": 2,"result": "response2"}""")
         )
-        val provider = HAEthereumTransportProvider(
+        val provider = HaEthereumTransportProvider(
             monitoringThreadInterval = Duration.ofMillis(100),
             localNodes = listOf(
                 EthereumNode(
@@ -190,7 +190,7 @@ internal class HAEthereumTransportProviderTest {
         val externalServer = MockWebServer()
         externalServer.start()
 
-        val provider = HAEthereumTransportProvider(
+        val provider = HaEthereumTransportProvider(
             monitoringThreadInterval = Duration.ofMillis(100),
             localNodes = listOf(
                 EthereumNode(
@@ -250,7 +250,7 @@ internal class HAEthereumTransportProviderTest {
         val externalServer2 = MockWebServer()
         externalServer2.start()
 
-        val provider = HAEthereumTransportProvider(
+        val provider = HaEthereumTransportProvider(
             monitoringThreadInterval = Duration.ofMillis(100),
             localNodes = emptyList(),
             externalNodes = listOf(
@@ -303,7 +303,7 @@ internal class HAEthereumTransportProviderTest {
     }
 
     companion object {
-        private val logger = LoggerFactory.getLogger(HAEthereumTransportProviderTest::class.java)
+        private val logger = LoggerFactory.getLogger(HaEthereumTransportProviderTest::class.java)
     }
 }
 

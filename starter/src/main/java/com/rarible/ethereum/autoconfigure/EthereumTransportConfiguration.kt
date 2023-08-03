@@ -4,7 +4,7 @@ import com.rarible.ethereum.client.EthereumNode
 import com.rarible.ethereum.client.EthereumTransportProvider
 import com.rarible.ethereum.client.FailoverPubSubTransport
 import com.rarible.ethereum.client.FailoverRpcTransport
-import com.rarible.ethereum.client.HAEthereumTransportProvider
+import com.rarible.ethereum.client.HaEthereumTransportProvider
 import com.rarible.ethereum.client.LegacyEthereumTransportProvider
 import com.rarible.ethereum.client.failover.CompositeFailoverPredicate
 import com.rarible.ethereum.client.failover.NoopFailoverPredicate
@@ -24,7 +24,7 @@ class EthereumTransportConfiguration(
     @Bean
     fun ethereumTransportProvider(): EthereumTransportProvider =
         if (ethereumProperties.nodes.isNotEmpty()) {
-            HAEthereumTransportProvider(
+            HaEthereumTransportProvider(
                 localNodes = ethereumProperties.nodes,
                 externalNodes = ethereumProperties.externalNodes,
                 requestTimeoutMs = ethereumProperties.requestTimeoutMs,

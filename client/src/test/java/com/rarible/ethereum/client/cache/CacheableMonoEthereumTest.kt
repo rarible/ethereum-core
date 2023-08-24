@@ -14,6 +14,7 @@ import kotlinx.coroutines.runBlocking
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import reactor.core.publisher.Mono
+import scalether.core.MonoEthereum
 import scalether.domain.response.Block
 import scalether.domain.response.Transaction
 import java.time.Duration
@@ -23,7 +24,7 @@ import java.util.concurrent.ThreadLocalRandom
 internal class CacheableMonoEthereumTest {
     private val transport = mockk<MonoRpcTransport>()
     private val cacheableMonoEthereum = CacheableMonoEthereum(
-        transport = transport,
+        delegate = MonoEthereum(transport),
         expireAfter = Duration.ofDays(1),
         cacheMaxSize = 100,
     )
@@ -53,7 +54,7 @@ internal class CacheableMonoEthereumTest {
         val expireAfter = Duration.ofMillis(100)
 
         val cacheableMonoEthereum = CacheableMonoEthereum(
-            transport = transport,
+            delegate = MonoEthereum(transport),
             expireAfter = expireAfter,
             cacheMaxSize = 100,
         )

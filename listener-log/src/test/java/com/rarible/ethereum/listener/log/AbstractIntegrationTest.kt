@@ -91,7 +91,10 @@ class EthereumConfigurationIntr {
 
     @Bean
     fun testEthereum(ethereumProperties: EthereumProperties, monoRpcTransport: MonoRpcTransport): MonoEthereum {
-        val ethereum = EthereumAutoConfiguration(ethereumProperties).ethereum(monoRpcTransport)
+        val ethereum = EthereumAutoConfiguration(ethereumProperties).ethereum(
+            rpcTransport = monoRpcTransport,
+            monitoringCallback = null
+        )
         return spyk(ethereum)
     }
 

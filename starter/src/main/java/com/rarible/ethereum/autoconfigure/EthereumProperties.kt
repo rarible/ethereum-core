@@ -12,7 +12,13 @@ internal const val RARIBLE_ETHEREUM = "rarible.ethereum"
 data class EthereumProperties(
     val httpUrl: String?,
     val websocketUrl: String?,
+    val httpUrls: List<String> = emptyList(),
+    val websocketUrls: List<String> = emptyList(),
+    val externalHttpUrls: List<String> = emptyList(),
+    val externalWebsocketUrls: List<String> = emptyList(),
+    @Deprecated("use httpUrls, websocketUrls")
     val nodes: List<EthereumNode> = emptyList(),
+    @Deprecated("use externalHttpUrls, externalWebsocketUrls")
     val externalNodes: List<EthereumNode> = emptyList(),
     val requestTimeoutMs: Int = 10000,
     val readWriteTimeoutMs: Int = 10000,
@@ -22,7 +28,17 @@ data class EthereumProperties(
     val monitoringThreadInterval: Duration = Duration.ofSeconds(30),
     val cache: CacheProperties = CacheProperties(),
     val failoverEnabled: Boolean = true,
-)
+) {
+    init {
+        require(httpUrls.size == websocketUrls.size) {
+            "httpUrls has different size ${httpUrls.size} from websocketUrls ${websocketUrls.size}"
+        }
+        require(externalHttpUrls.size == externalWebsocketUrls.size) {
+            "externalHttpUrls has different size ${externalHttpUrls.size} from " +
+                "externalWebsocketUrls ${externalWebsocketUrls.size}"
+        }
+    }
+}
 
 data class CacheProperties(
     val enabled: Boolean = false,

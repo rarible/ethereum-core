@@ -23,10 +23,25 @@ class EthereumTransportConfiguration(
 ) {
     @Bean
     fun ethereumTransportProvider(): EthereumTransportProvider =
-        if (ethereumProperties.nodes.isNotEmpty()) {
+        if (ethereumProperties.nodes.isNotEmpty() ||
+            ethereumProperties.httpUrls.isNotEmpty() ||
+            ethereumProperties.externalHttpUrls.isNotEmpty()
+        ) {
+            val nodes = ethereumProperties.httpUrls.mapIndexed { index, url ->
+                EthereumNode(
+                    httpUrl = url,
+                    websocketUrl = ethereumProperties.websocketUrls[index],
+                )
+            }.ifEmpty { ethereumProperties.nodes }
+            val externalNodes = ethereumProperties.externalHttpUrls.mapIndexed { index, url ->
+                EthereumNode(
+                    httpUrl = url,
+                    websocketUrl = ethereumProperties.externalWebsocketUrls[index],
+                )
+            }.ifEmpty { ethereumProperties.externalNodes }
             HaEthereumTransportProvider(
-                localNodes = ethereumProperties.nodes,
-                externalNodes = ethereumProperties.externalNodes,
+                localNodes = nodes,
+                externalNodes = externalNodes,
                 requestTimeoutMs = ethereumProperties.requestTimeoutMs,
                 readWriteTimeoutMs = ethereumProperties.readWriteTimeoutMs,
                 maxFrameSize = ethereumProperties.maxFrameSize,

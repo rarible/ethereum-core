@@ -22,7 +22,6 @@ import scalether.domain.response.Transaction
 import scalether.domain.response.TransactionReceipt
 import java.math.BigInteger
 import java.time.Duration
-import java.util.function.Function
 
 class CacheableMonoEthereum(
     private val delegate: MonoEthereum,

@@ -28,4 +28,6 @@ data class CacheProperties(
     val enabled: Boolean = false,
     val expireAfter: Duration = Duration.ofSeconds(10),
     val maxSize: Long = 100,
+    val enableCacheByNumber: Boolean = false,
+    val blockByNumberCacheExpireAfter: Duration = Duration.ofSeconds(10)
 )

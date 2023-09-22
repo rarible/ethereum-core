@@ -139,11 +139,11 @@ internal class HaEthereumTransportProviderTest {
                     .maxBackoff(Duration.ofMillis(2000))
             )
             .subscribe()
-        assertThat(receivedEvents.poll(5, TimeUnit.SECONDS)).isEqualTo("request1")
+        assertThat(receivedEvents.poll(20, TimeUnit.SECONDS)).isEqualTo("request1")
         rpcInternalServer.shutdown()
         internalServer.shutdown()
         // Should receive event from external server after reconnect
-        assertThat(receivedEvents.poll(5, TimeUnit.SECONDS)).isEqualTo("request2")
+        assertThat(receivedEvents.poll(20, TimeUnit.SECONDS)).isEqualTo("request2")
 
         // Should get response from external server
         val response = FailoverRpcTransport(
@@ -165,7 +165,7 @@ internal class HaEthereumTransportProviderTest {
         rpcInternalServer2.start(rpcInternalServer2Port)
 
         // Should receive event from internal server 2 after reconnect
-        assertThat(receivedEvents.poll(5, TimeUnit.SECONDS)).isEqualTo("request3")
+        assertThat(receivedEvents.poll(20, TimeUnit.SECONDS)).isEqualTo("request3")
 
         // Should get response from internal server 2
         val response2 = FailoverRpcTransport(

@@ -12,8 +12,8 @@ annotation class ConditionalOnEthereumNodesProperty
 
 class EthereumNodesCondition : Condition {
     override fun matches(context: ConditionContext, metadata: AnnotatedTypeMetadata): Boolean {
-        val ethereumNodeProperty = context.environment.getProperty("$RARIBLE_ETHEREUM.nodes[0].httpUrl")
-        val legacyEthereumNodeProperty = context.environment.getProperty("$RARIBLE_ETHEREUM.httpUrl")
+        val ethereumNodeProperty = context.environment.getProperty("$RARIBLE_ETHEREUM.nodes[0].http-url")
+        val legacyEthereumNodeProperty = context.environment.getProperty("$RARIBLE_ETHEREUM.http-url")
         return ethereumNodeProperty != null || legacyEthereumNodeProperty != null
     }
 }

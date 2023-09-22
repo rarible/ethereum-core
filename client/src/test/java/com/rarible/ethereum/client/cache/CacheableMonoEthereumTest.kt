@@ -17,6 +17,7 @@ import reactor.core.publisher.Mono
 import scalether.core.MonoEthereum
 import scalether.domain.response.Block
 import scalether.domain.response.Transaction
+import java.math.BigInteger
 import java.time.Duration
 import java.util.concurrent.ThreadLocalRandom
 
@@ -27,12 +28,16 @@ internal class CacheableMonoEthereumTest {
         delegate = MonoEthereum(transport),
         expireAfter = Duration.ofDays(1),
         cacheMaxSize = 100,
+        blockByNumberCacheExpireAfter = Duration.ofDays(1),
+        enableCacheByNumber = true,
     )
 
     @Test
     fun `cache - ok`() = runBlocking<Unit> {
         val hash = randomWord()
-        val block = mockk<Block<Transaction>>()
+        val block = mockk<Block<Transaction>> {
+            every { blockNumber } returns BigInteger.TEN
+        }
 
         every {
             transport.send<Block<Transaction>>(any(), any())
@@ -49,18 +54,57 @@ internal class CacheableMonoEthereumTest {
     }
 
     @Test
+    fun `cache - ok, by block number`() = runBlocking<Unit> {
+        val hash = randomWord()
+        val number = BigInteger.TEN
+        val block = mockk<Block<Transaction>>() {
+            every { hash() } returns hash
+        }
+        every {
+            transport.send<Block<Transaction>>(any(), any())
+        } returns Mono.just(Response(1, block))
+
+        cacheableMonoEthereum.ethGetFullBlockByNumber(number).awaitFirst()
+        cacheableMonoEthereum.ethGetFullBlockByHash(hash).awaitFirst()
+
+        verify(exactly = 1) { transport.send<Block<Transaction>>(any(), any()) }
+    }
+
+    @Test
+    fun `cache - ok, by block number to dedicated cache`() = runBlocking<Unit> {
+        val hash = randomWord()
+        val number = BigInteger.TEN
+        val block = mockk<Block<Transaction>>() {
+            every { blockNumber } returns number
+            every { hash() } returns hash
+        }
+        every {
+            transport.send<Block<Transaction>>(any(), any())
+        } returns Mono.just(Response(1, block))
+
+        cacheableMonoEthereum.ethGetFullBlockByHash(hash).awaitFirst()
+        cacheableMonoEthereum.ethGetFullBlockByNumber(number).awaitFirst()
+
+        verify(exactly = 1) { transport.send<Block<Transaction>>(any(), any()) }
+    }
+
+    @Test
     fun `cache with expired - ok`() = runBlocking<Unit> {
         val hash = randomWord()
         val expireAfter = Duration.ofMillis(100)
-
+        val block = mockk<Block<Transaction>>() {
+            every { blockNumber } returns BigInteger.TEN
+        }
         val cacheableMonoEthereum = CacheableMonoEthereum(
             delegate = MonoEthereum(transport),
             expireAfter = expireAfter,
             cacheMaxSize = 100,
+            enableCacheByNumber = true,
+            blockByNumberCacheExpireAfter = Duration.ofMinutes(1)
         )
         every {
             transport.send<Block<Transaction>>(any(), any())
-        } returns Mono.just(Response(1, mockk<Block<Transaction>>()))
+        } returns Mono.just(Response(1, block))
 
         cacheableMonoEthereum.ethGetFullBlockByHash(hash).awaitFirst()
         delay(expireAfter.multipliedBy(2).toMillis())

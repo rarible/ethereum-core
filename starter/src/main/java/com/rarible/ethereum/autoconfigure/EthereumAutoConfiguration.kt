@@ -42,6 +42,8 @@ class EthereumAutoConfiguration(
                 delegate = monitoredClient,
                 expireAfter = cache.expireAfter,
                 cacheMaxSize = cache.maxSize,
+                enableCacheByNumber = cache.enableCacheByNumber,
+                blockByNumberCacheExpireAfter = cache.blockByNumberCacheExpireAfter,
             )
         } else {
             monitoredClient

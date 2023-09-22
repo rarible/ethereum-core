@@ -2,6 +2,7 @@ package com.rarible.ethereum.client.cache
 
 import com.fasterxml.jackson.databind.JsonNode
 import com.github.benmanes.caffeine.cache.AsyncLoadingCache
+import com.github.benmanes.caffeine.cache.Cache
 import com.github.benmanes.caffeine.cache.Caffeine
 import com.rarible.ethereum.client.DummyMonoRpcTransport
 import io.daonomic.rpc.domain.Binary
@@ -27,15 +28,40 @@ class CacheableMonoEthereum(
     private val delegate: MonoEthereum,
     expireAfter: Duration,
     cacheMaxSize: Long,
+    blockByNumberCacheExpireAfter: Duration,
+    private val enableCacheByNumber: Boolean
 ) : MonoEthereum(DummyMonoRpcTransport()) {
+
+    private val blockByNumberCache: Cache<BigInteger, Block<Transaction>> = Caffeine.newBuilder()
+        .expireAfterWrite(blockByNumberCacheExpireAfter)
+        .maximumSize(cacheMaxSize)
+        .build()
 
     private val blockByHashCache: AsyncLoadingCache<Word, Block<Transaction>> = Caffeine.newBuilder()
         .expireAfterWrite(expireAfter)
         .maximumSize(cacheMaxSize)
-        .buildAsync { key, _ -> super.ethGetFullBlockByHash(key).toFuture() }
+        .buildAsync { key, _ ->
+            super
+                .ethGetFullBlockByHash(key)
+                .map {
+                    blockByNumberCache.put(it.blockNumber, it)
+                    it
+                }
+                .toFuture()
+        }
 
     override fun ethGetFullBlockByHash(hash: Word): Mono<Block<Transaction>> {
         return Mono.fromFuture(blockByHashCache.get(hash))
+    }
+
+    override fun ethGetFullBlockByNumber(number: BigInteger): Mono<Block<Transaction>> {
+        if (enableCacheByNumber) {
+            val cache = blockByNumberCache.getIfPresent(number)
+            if (cache != null) return Mono.just(cache)
+        }
+        return delegate
+            .ethGetFullBlockByNumber(number)
+            .flatMap { block -> Mono.fromFuture(blockByHashCache.get(block.hash()) { _ -> block }) }
     }
 
     override fun executeRaw(request: Request?): Mono<Response<JsonNode>> {
@@ -75,10 +101,6 @@ class CacheableMonoEthereum(
 
     override fun ethGetBalance(address: Address?, defaultBlockParameter: String?): Mono<BigInteger> {
         return delegate.ethGetBalance(address, defaultBlockParameter)
-    }
-
-    override fun ethGetFullBlockByNumber(number: BigInteger?): Mono<Block<Transaction>> {
-        return delegate.ethGetFullBlockByNumber(number)
     }
 
     override fun netPeerCount(): Mono<BigInteger> {

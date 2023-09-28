@@ -42,9 +42,7 @@ class ContractServiceTest : MongodbReactiveBaseTest() {
         val userSender = ethereumTestContainer.signingTransactionSender()
         val poller = ethereumTestContainer.monoTransactionPoller()
 
-        val name = "Test ERC1155"
-        val symbol = "ERC1155 Symbol"
-        val contract = TestERC1155.deployAndWait(userSender, poller, name).awaitFirst()
+        val contract = TestERC1155.deployAndWait(userSender, poller).awaitFirst()
 
         val result = contractService.get(contract.address())
         assertThat(result.type).isEqualTo(ContractType.ERC1155_TOKEN)

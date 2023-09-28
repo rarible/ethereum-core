@@ -108,5 +108,6 @@ class ContractService(
         val ERC721_DEPRECATED2: Binary = Binary.apply("0x80ac58cd")
         val CK: Binary = ERC721_DEPRECATED2
         val ERC1155: Binary = Binary.apply("0xd9b67a26")
+        val ERC1155_UPGRADABLE: Binary = Binary.apply("0xd9b67a26")
     }
 }

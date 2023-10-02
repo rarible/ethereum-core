@@ -1,7 +1,5 @@
 package com.rarible.ethereum.listener.log
 
-import com.rarible.core.apm.withSpan
-import com.rarible.core.apm.withTransaction
 import com.rarible.core.common.justOrEmpty
 import com.rarible.core.common.retryOptimisticLock
 import com.rarible.core.common.toOptional
@@ -69,7 +67,7 @@ class LogEventListener<T : EventData>(
             deleteReverted,
             revert,
             onNewBlock(fullBlock)
-        ).withSpan("processTopicLogs", labels = listOf("topic" to topic.toString()))
+        )
     }
 
     private fun onNewBlock(block: Block<Transaction>): Flux<LogEvent> {
@@ -80,7 +78,7 @@ class LogEventListener<T : EventData>(
                         .apply(TopicFilter.simple(descriptor.topic))
                         .address(*contracts.toTypedArray())
                         .blockHash(block.hash())
-                    ethereum.ethGetLogsJava(filter).withSpan("getLogs")
+                    ethereum.ethGetLogsJava(filter)
                         .doOnError { logger.warn(marker, "Unable to get logs for block ${block.hash()}", it) }
                         .retryWhen(backoff)
                 }
@@ -97,7 +95,6 @@ class LogEventListener<T : EventData>(
                     BlockRanges.getRanges(from, to, batchSize)
                         .concatMap {
                             reindexBlockRange(marker, filter, it).thenReturn(it)
-                                .withTransaction("reindexBlockRange", labels = listOf("range" to it.toString()))
                         }
                 }
         }
@@ -109,7 +106,7 @@ class LogEventListener<T : EventData>(
             BigInteger.valueOf(range.last).encodeForFilter()
         )
         logger.info(marker, "loading logs $finalFilter range=$range")
-        return ethereum.ethGetLogsJava(finalFilter).withSpan("getLogs")
+        return ethereum.ethGetLogsJava(finalFilter)
             .doOnNext {
                 logger.info(marker, "loaded ${it.size} logs for range $range")
             }
@@ -123,14 +120,10 @@ class LogEventListener<T : EventData>(
             logger.info(marker, "reindex. processing block ${logs.blockHash} logs: ${logs.logs.size}")
             ethereum
                 .ethGetFullBlockByHash(logs.blockHash)
-                .withSpan("getBlock", labels = listOf("blockHash" to logs.blockHash))
                 .flatMapMany { block ->
-                    processLogs(marker, block, logs.logs).withSpan(
-                        "processLogs", labels = listOf("blockHash" to logs.blockHash)
-                    )
+                    processLogs(marker, block, logs.logs)
                 }
         }.loggerContext(mapOf("blockHash" to "${logs.blockHash}"))
-            .withSpan("reindex", labels = listOf("blockHash" to logs.blockHash))
     }
 
     private fun processLogs(marker: Marker, block: Block<Transaction>, logs: List<Log>): Flux<LogEvent> {
@@ -150,7 +143,6 @@ class LogEventListener<T : EventData>(
                 val transaction = transactions[log.transactionHash()] ?: error("Can't find transaction for log $log")
                 onLog(marker, index, total, log, transaction, timestamp)
             }
-            .withSpan("onLogs")
     }
 
     private fun findTheSameLogEvent(toSave: LogEvent): Mono<LogEvent> =

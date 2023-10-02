@@ -1,6 +1,5 @@
 package com.rarible.ethereum.listener.log;
 
-import com.rarible.core.apm.JavaHelpers;
 import com.rarible.core.logging.LoggerContext;
 import com.rarible.core.logging.LoggingUtils;
 import com.rarible.ethereum.block.BlockEvent;
@@ -14,7 +13,6 @@ import com.rarible.ethereum.listener.log.persist.BlockRepository;
 import com.rarible.ethereum.listener.log.persist.LogEventRepository;
 import com.rarible.ethereum.log.LogEventsListener;
 import io.daonomic.rpc.domain.Word;
-import kotlin.Pair;
 import kotlin.ranges.LongRange;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -29,13 +27,10 @@ import scalether.core.MonoEthereum;
 import javax.annotation.PostConstruct;
 import java.math.BigInteger;
 import java.time.Duration;
-import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-import static com.rarible.core.apm.JavaHelpers.withSpan;
-import static java.util.Arrays.asList;
 import static java.util.Collections.emptyList;
 import static java.util.stream.Collectors.toList;
 
@@ -59,20 +54,20 @@ public class LogListenService {
     private final List<OnLogEventListener> onLogEventListeners;
 
     public LogListenService(
-        LogEventRepository logEventRepository,
-        BlockRepository blockRepository,
-        MonoEthereum ethereum,
-        List<LogEventsListener> logEventsListeners,
-        List<LogEventDescriptor<?>> descriptors,
-        List<OnLogEventListener> onLogEventListeners,
-        BlockListenService<SimpleBlock> blockListenService,
-        @Value("${ethereumBackoffMaxAttempts:5}") long maxAttempts,
-        @Value("${ethereumBackoffMinBackoff:100}") long minBackoff,
-        @Value("${ethereumMaxProcessTime:300000}") long maxProcessTime,
-        @Value("${ethereumBlockBatchSize:100}") long batchSize,
-        @Value("${ethereumBlockListeningDelay:300000}") long blockListeningDelay,
-        @Value("${ethereumBlockProcessingDelay:0}") long blockProcessingDelay,
-        @Value("${ethereumStopListeningBlock:9223372036854775807}") long stopListeningBlock
+            LogEventRepository logEventRepository,
+            BlockRepository blockRepository,
+            MonoEthereum ethereum,
+            List<LogEventsListener> logEventsListeners,
+            List<LogEventDescriptor<?>> descriptors,
+            List<OnLogEventListener> onLogEventListeners,
+            BlockListenService<SimpleBlock> blockListenService,
+            @Value("${ethereumBackoffMaxAttempts:5}") long maxAttempts,
+            @Value("${ethereumBackoffMinBackoff:100}") long minBackoff,
+            @Value("${ethereumMaxProcessTime:300000}") long maxProcessTime,
+            @Value("${ethereumBlockBatchSize:100}") long batchSize,
+            @Value("${ethereumBlockListeningDelay:300000}") long blockListeningDelay,
+            @Value("${ethereumBlockProcessingDelay:0}") long blockProcessingDelay,
+            @Value("${ethereumStopListeningBlock:9223372036854775807}") long stopListeningBlock
     ) {
         this.backoff = Retry.backoff(maxAttempts, Duration.ofMillis(minBackoff));
         this.maxProcessTime = maxProcessTime;
@@ -110,27 +105,27 @@ public class LogListenService {
          *  This may not be enough, but at least minimizes number of block errors caused by unavailable traces.
          */
         (blockProcessingDelay != 0 ? blocks.delayElements(Duration.ofMillis(blockProcessingDelay)) : blocks)
-            .map(it -> new NewBlockEvent(it.getBlock().getNumber(), it.getBlock().getHash(), it.getBlock().getTimestamp(), it.getReverted() != null ? Word.apply(it.getReverted().getHash()) : null))
-            .timeout(Duration.ofMillis(blockListeningDelay))
-            .concatMap(it -> {
-                if (it.getNumber() >= stopListeningBlock) {
-                    logger.info("New block {} is greater or equal then stop block {}, skip handling", it.getNumber(), stopListeningBlock);
-                    return Mono.empty();
-                } else  {
-                    return this.onBlock(it);
-                }
-            })
-            .then(Mono.<Void>error(new IllegalStateException("disconnected")))
-            .retryWhen(
-                Retry.backoff(Long.MAX_VALUE, Duration.ofMillis(300))
-                    .maxBackoff(Duration.ofMillis(2000))
-                    .doAfterRetry(s -> logger.warn("retrying connection to the node (attempt = {})", s))
-            )
-            .subscribe(
-                n -> {
-                },
-                th -> logger.error("unable to process block events. should never happen", th)
-            );
+                .map(it -> new NewBlockEvent(it.getBlock().getNumber(), it.getBlock().getHash(), it.getBlock().getTimestamp(), it.getReverted() != null ? Word.apply(it.getReverted().getHash()) : null))
+                .timeout(Duration.ofMillis(blockListeningDelay))
+                .concatMap(it -> {
+                    if (it.getNumber() >= stopListeningBlock) {
+                        logger.info("New block {} is greater or equal then stop block {}, skip handling", it.getNumber(), stopListeningBlock);
+                        return Mono.empty();
+                    } else {
+                        return this.onBlock(it);
+                    }
+                })
+                .then(Mono.<Void>error(new IllegalStateException("disconnected")))
+                .retryWhen(
+                        Retry.backoff(Long.MAX_VALUE, Duration.ofMillis(300))
+                                .maxBackoff(Duration.ofMillis(2000))
+                                .doAfterRetry(s -> logger.warn("retrying connection to the node (attempt = {})", s))
+                )
+                .subscribe(
+                        n -> {
+                        },
+                        th -> logger.error("unable to process block events. should never happen", th)
+                );
     }
 
     public Flux<LongRange> reindex(Word topic, long from, long to) {
@@ -147,63 +142,47 @@ public class LogListenService {
         return LoggingUtils.withMarker(marker -> {
             logger.info(marker, "reindexing block {}", block);
             return ethereum.ethGetBlockByNumber(BigInteger.valueOf(block.getId()))
-                .flatMap(it -> onBlock(new NewBlockEvent(block.getId(), it.hash(), it.timestamp().longValue(), null)));
+                    .flatMap(it -> onBlock(new NewBlockEvent(block.getId(), it.hash(), it.timestamp().longValue(), null)));
         });
     }
 
     public Mono<Void> onBlock(NewBlockEvent event) {
         final Mono<Void> result = LoggingUtils.withMarker(marker -> {
             logger.info(marker, "onBlockEvent {}", event);
-            return withSpan(
-                onBlockEvent(event).collectList(),
-                "processLogs", null, null, null, emptyList()
-            )
-                .flatMap(it -> postProcessLogs(it).thenReturn(BlockStatus.SUCCESS))
-                .timeout(Duration.ofMillis(maxProcessTime))
-                .onErrorResume(ex -> {
-                    logger.error(marker, "Unable to handle event " + event, ex);
-                    return Mono.just(BlockStatus.ERROR);
-                })
-                .flatMap(status -> blockRepository.updateBlockStatus(event.getNumber(), status))
-                .then()
-                .onErrorResume(ex -> {
-                    logger.error(marker, "Unable to save block status " + event, ex);
-                    return Mono.empty();
-                });
+            return onBlockEvent(event).collectList()
+                    .flatMap(it -> postProcessLogs(it).thenReturn(BlockStatus.SUCCESS))
+                    .timeout(Duration.ofMillis(maxProcessTime))
+                    .onErrorResume(ex -> {
+                        logger.error(marker, "Unable to handle event " + event, ex);
+                        return Mono.just(BlockStatus.ERROR);
+                    })
+                    .flatMap(status -> blockRepository.updateBlockStatus(event.getNumber(), status))
+                    .then()
+                    .onErrorResume(ex -> {
+                        logger.error(marker, "Unable to save block status " + event, ex);
+                        return Mono.empty();
+                    });
         });
-        return JavaHelpers.withTransaction(
-            result.subscriberContext(ctx -> LoggerContext.addToContext(ctx, event.getContextParams())),
-            "block",
-            asList(
-                new Pair<>("blockNumber", event.getNumber()),
-                new Pair<>("blockHash", event.getHash().toString())
-            ),
-            null,
-            null
-        );
+        return result.subscriberContext(ctx -> LoggerContext.addToContext(ctx, event.getContextParams()));
     }
 
     private Flux<LogEvent> onBlockEvent(NewBlockEvent event) {
-        return withSpan(
-                ethereum.ethGetFullBlockByHash(event.getHash()),
-                "getFullBlock", null, null, null,
-                Collections.emptyList()
-        )
-        .doOnError(throwable -> logger.warn("Unable to get block by hash: " + event.getHash(), throwable))
-        .retryWhen(backoff)
-        .flatMapMany(block -> Flux.fromIterable(listeners).flatMap(listener -> listener.onBlockEvent(event, block)));
+        return ethereum.ethGetFullBlockByHash(event.getHash())
+                .doOnError(throwable -> logger.warn("Unable to get block by hash: " + event.getHash(), throwable))
+                .retryWhen(backoff)
+                .flatMapMany(block -> Flux.fromIterable(listeners).flatMap(listener -> listener.onBlockEvent(event, block)));
     }
 
     private Mono<Void> postProcessLogs(List<LogEvent> logs) {
-        final Mono<Void> result = Flux.fromIterable(logEventsListeners != null ? logEventsListeners : emptyList())
-            .flatMap(it -> it.postProcessLogs(logs))
-            .then();
-        return withSpan(result, "postProcess", null, null, null, emptyList());
+        return Flux.fromIterable(logEventsListeners != null ? logEventsListeners : emptyList())
+                .flatMap(it -> it.postProcessLogs(logs))
+                .then();
+
     }
 
     private LogEventListener<?> createLogEventListener(LogEventDescriptor<?> descriptor) {
         final List<OnLogEventListener> topicOnEventListeners = onLogEventListeners.stream()
-                .filter(onEventListener -> onEventListener.getTopics().contains(descriptor.getTopic()) )
+                .filter(onEventListener -> onEventListener.getTopics().contains(descriptor.getTopic()))
                 .collect(toList());
 
         return new LogEventListener<>(

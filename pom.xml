@@ -33,8 +33,8 @@
     </distributionManagement>
 
     <properties>
-        <revision>1.7.22</revision>
-        <rarible-core.version>2.5.33</rarible-core.version>
+        <revision>1.7.23</revision>
+        <rarible-core.version>2.6.7</rarible-core.version>
         <mockserver-netty.version>5.11.2</mockserver-netty.version>
         <mockserver.version>4.11.0</mockserver.version>
     </properties>

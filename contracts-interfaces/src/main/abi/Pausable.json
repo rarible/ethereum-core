@@ -1,0 +1,520 @@
+{
+  "contractName": "Pausable",
+  "abi": [
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": false,
+          "internalType": "address",
+          "name": "account",
+          "type": "address"
+        }
+      ],
+      "name": "Paused",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": false,
+          "internalType": "address",
+          "name": "account",
+          "type": "address"
+        }
+      ],
+      "name": "Unpaused",
+      "type": "event"
+    }
+  ],
+  "metadata": "{\"compiler\":{\"version\":\"0.7.6+commit.7338295f\"},\"language\":\"Solidity\",\"output\":{\"abi\":[{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"internalType\":\"address\",\"name\":\"account\",\"type\":\"address\"}],\"name\":\"Paused\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"internalType\":\"address\",\"name\":\"account\",\"type\":\"address\"}],\"name\":\"Unpaused\",\"type\":\"event\"}],\"devdoc\":{\"details\":\"Contract module which allows children to implement an emergency stop mechanism that can be triggered by an authorized account. This module is used through inheritance. It will make available the modifiers `whenNotPaused` and `whenPaused`, which can be applied to the functions of your contract. Note that they will not be pausable by simply including this module, only once the modifiers are put in place.\",\"events\":{\"Paused(address)\":{\"details\":\"Emitted when the pause is triggered by `account`.\"},\"Unpaused(address)\":{\"details\":\"Emitted when the pause is lifted by `account`.\"}},\"kind\":\"dev\",\"methods\":{},\"version\":1},\"userdoc\":{\"kind\":\"user\",\"methods\":{},\"version\":1}},\"settings\":{\"compilationTarget\":{\"project:/contracts/Pausable.sol\":\"Pausable\"},\"evmVersion\":\"istanbul\",\"libraries\":{},\"metadata\":{\"bytecodeHash\":\"ipfs\"},\"optimizer\":{\"enabled\":true,\"runs\":200},\"remappings\":[]},\"sources\":{\"@openzeppelin/contracts/utils/Context.sol\":{\"keccak256\":\"0x8d3cb350f04ff49cfb10aef08d87f19dcbaecc8027b0bed12f3275cd12f38cf0\",\"license\":\"MIT\",\"urls\":[\"bzz-raw://ded47ec7c96750f9bd04bbbc84f659992d4ba901cb7b532a52cd468272cf378f\",\"dweb:/ipfs/QmfBrGtQP7rZEqEg6Wz6jh2N2Kukpj1z5v3CGWmAqrzm96\"]},\"project:/contracts/Pausable.sol\":{\"keccak256\":\"0x958c196290a9efa98524d5bbfa784458e46e495799c1c806f686a430b716c414\",\"license\":\"MIT\",\"urls\":[\"bzz-raw://abfa22c63581e5093a2c36522b19da5f65a199d249648a928c32bb4c68ea1d51\",\"dweb:/ipfs/QmVrHGaxeVAYY1zT6bisMPrEcJrM8cievD3qKcoigLwhE5\"]}},\"version\":1}",
+  "bytecode": "0x",
+  "deployedBytecode": "0x",
+  "immutableReferences": {},
+  "generatedSources": [],
+  "deployedGeneratedSources": [],
+  "sourceMap": "",
+  "deployedSourceMap": "",
+  "source": "// SPDX-License-Identifier: MIT\n// OpenZeppelin Contracts (last updated v4.7.0) (security/Pausable.sol)\n\npragma solidity 0.7.6;\n\nimport {Context} from \"@openzeppelin/contracts/utils/Context.sol\";\n\n/**\n * @dev Contract module which allows children to implement an emergency stop\n * mechanism that can be triggered by an authorized account.\n *\n * This module is used through inheritance. It will make available the\n * modifiers `whenNotPaused` and `whenPaused`, which can be applied to\n * the functions of your contract. Note that they will not be pausable by\n * simply including this module, only once the modifiers are put in place.\n */\nabstract contract Pausable is Context {\n    bool private _paused;\n\n    /**\n     * @dev Emitted when the pause is triggered by `account`.\n     */\n    event Paused(address account);\n\n    /**\n     * @dev Emitted when the pause is lifted by `account`.\n     */\n    event Unpaused(address account);\n}",
+  "sourcePath": "/Users/abukata/Projects/work/protocol-contracts/tokens-test/contracts/Pausable.sol",
+  "ast": {
+    "absolutePath": "project:/contracts/Pausable.sol",
+    "exportedSymbols": {
+      "Context": [
+        4944
+      ],
+      "Pausable": [
+        4964
+      ]
+    },
+    "id": 4965,
+    "license": "MIT",
+    "nodeType": "SourceUnit",
+    "nodes": [
+      {
+        "id": 4946,
+        "literals": [
+          "solidity",
+          "0.7",
+          ".6"
+        ],
+        "nodeType": "PragmaDirective",
+        "src": "105:22:21"
+      },
+      {
+        "absolutePath": "@openzeppelin/contracts/utils/Context.sol",
+        "file": "@openzeppelin/contracts/utils/Context.sol",
+        "id": 4948,
+        "nodeType": "ImportDirective",
+        "scope": 4965,
+        "sourceUnit": 4945,
+        "src": "129:66:21",
+        "symbolAliases": [
+          {
+            "foreign": {
+              "id": 4947,
+              "name": "Context",
+              "nodeType": "Identifier",
+              "overloadedDeclarations": [],
+              "src": "137:7:21",
+              "typeDescriptions": {}
+            }
+          }
+        ],
+        "unitAlias": ""
+      },
+      {
+        "abstract": true,
+        "baseContracts": [
+          {
+            "baseName": {
+              "id": 4950,
+              "name": "Context",
+              "nodeType": "UserDefinedTypeName",
+              "referencedDeclaration": 4944,
+              "src": "667:7:21",
+              "typeDescriptions": {
+                "typeIdentifier": "t_contract$_Context_$4944",
+                "typeString": "contract Context"
+              }
+            },
+            "id": 4951,
+            "nodeType": "InheritanceSpecifier",
+            "src": "667:7:21"
+          }
+        ],
+        "contractDependencies": [
+          4944
+        ],
+        "contractKind": "contract",
+        "documentation": {
+          "id": 4949,
+          "nodeType": "StructuredDocumentation",
+          "src": "197:439:21",
+          "text": " @dev Contract module which allows children to implement an emergency stop\n mechanism that can be triggered by an authorized account.\n This module is used through inheritance. It will make available the\n modifiers `whenNotPaused` and `whenPaused`, which can be applied to\n the functions of your contract. Note that they will not be pausable by\n simply including this module, only once the modifiers are put in place."
+        },
+        "fullyImplemented": true,
+        "id": 4964,
+        "linearizedBaseContracts": [
+          4964,
+          4944
+        ],
+        "name": "Pausable",
+        "nodeType": "ContractDefinition",
+        "nodes": [
+          {
+            "constant": false,
+            "id": 4953,
+            "mutability": "mutable",
+            "name": "_paused",
+            "nodeType": "VariableDeclaration",
+            "scope": 4964,
+            "src": "681:20:21",
+            "stateVariable": true,
+            "storageLocation": "default",
+            "typeDescriptions": {
+              "typeIdentifier": "t_bool",
+              "typeString": "bool"
+            },
+            "typeName": {
+              "id": 4952,
+              "name": "bool",
+              "nodeType": "ElementaryTypeName",
+              "src": "681:4:21",
+              "typeDescriptions": {
+                "typeIdentifier": "t_bool",
+                "typeString": "bool"
+              }
+            },
+            "visibility": "private"
+          },
+          {
+            "anonymous": false,
+            "documentation": {
+              "id": 4954,
+              "nodeType": "StructuredDocumentation",
+              "src": "708:73:21",
+              "text": " @dev Emitted when the pause is triggered by `account`."
+            },
+            "id": 4958,
+            "name": "Paused",
+            "nodeType": "EventDefinition",
+            "parameters": {
+              "id": 4957,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 4956,
+                  "indexed": false,
+                  "mutability": "mutable",
+                  "name": "account",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 4958,
+                  "src": "799:15:21",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_address",
+                    "typeString": "address"
+                  },
+                  "typeName": {
+                    "id": 4955,
+                    "name": "address",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "799:7:21",
+                    "stateMutability": "nonpayable",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_address",
+                      "typeString": "address"
+                    }
+                  },
+                  "visibility": "internal"
+                }
+              ],
+              "src": "798:17:21"
+            },
+            "src": "786:30:21"
+          },
+          {
+            "anonymous": false,
+            "documentation": {
+              "id": 4959,
+              "nodeType": "StructuredDocumentation",
+              "src": "822:70:21",
+              "text": " @dev Emitted when the pause is lifted by `account`."
+            },
+            "id": 4963,
+            "name": "Unpaused",
+            "nodeType": "EventDefinition",
+            "parameters": {
+              "id": 4962,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 4961,
+                  "indexed": false,
+                  "mutability": "mutable",
+                  "name": "account",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 4963,
+                  "src": "912:15:21",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_address",
+                    "typeString": "address"
+                  },
+                  "typeName": {
+                    "id": 4960,
+                    "name": "address",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "912:7:21",
+                    "stateMutability": "nonpayable",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_address",
+                      "typeString": "address"
+                    }
+                  },
+                  "visibility": "internal"
+                }
+              ],
+              "src": "911:17:21"
+            },
+            "src": "897:32:21"
+          }
+        ],
+        "scope": 4965,
+        "src": "637:294:21"
+      }
+    ],
+    "src": "105:826:21"
+  },
+  "legacyAST": {
+    "attributes": {
+      "absolutePath": "project:/contracts/Pausable.sol",
+      "exportedSymbols": {
+        "Context": [
+          4944
+        ],
+        "Pausable": [
+          4964
+        ]
+      },
+      "license": "MIT"
+    },
+    "children": [
+      {
+        "attributes": {
+          "literals": [
+            "solidity",
+            "0.7",
+            ".6"
+          ]
+        },
+        "id": 4946,
+        "name": "PragmaDirective",
+        "src": "105:22:21"
+      },
+      {
+        "attributes": {
+          "SourceUnit": 4945,
+          "absolutePath": "@openzeppelin/contracts/utils/Context.sol",
+          "file": "@openzeppelin/contracts/utils/Context.sol",
+          "scope": 4965,
+          "symbolAliases": [
+            {
+              "foreign": {
+                "attributes": {
+                  "overloadedDeclarations": [
+                    null
+                  ],
+                  "value": "Context"
+                },
+                "id": 4947,
+                "name": "Identifier",
+                "src": "137:7:21"
+              }
+            }
+          ],
+          "unitAlias": ""
+        },
+        "id": 4948,
+        "name": "ImportDirective",
+        "src": "129:66:21"
+      },
+      {
+        "attributes": {
+          "abstract": true,
+          "contractDependencies": [
+            4944
+          ],
+          "contractKind": "contract",
+          "fullyImplemented": true,
+          "linearizedBaseContracts": [
+            4964,
+            4944
+          ],
+          "name": "Pausable",
+          "scope": 4965
+        },
+        "children": [
+          {
+            "attributes": {
+              "text": " @dev Contract module which allows children to implement an emergency stop\n mechanism that can be triggered by an authorized account.\n This module is used through inheritance. It will make available the\n modifiers `whenNotPaused` and `whenPaused`, which can be applied to\n the functions of your contract. Note that they will not be pausable by\n simply including this module, only once the modifiers are put in place."
+            },
+            "id": 4949,
+            "name": "StructuredDocumentation",
+            "src": "197:439:21"
+          },
+          {
+            "attributes": {},
+            "children": [
+              {
+                "attributes": {
+                  "name": "Context",
+                  "referencedDeclaration": 4944,
+                  "type": "contract Context"
+                },
+                "id": 4950,
+                "name": "UserDefinedTypeName",
+                "src": "667:7:21"
+              }
+            ],
+            "id": 4951,
+            "name": "InheritanceSpecifier",
+            "src": "667:7:21"
+          },
+          {
+            "attributes": {
+              "constant": false,
+              "mutability": "mutable",
+              "name": "_paused",
+              "scope": 4964,
+              "stateVariable": true,
+              "storageLocation": "default",
+              "type": "bool",
+              "visibility": "private"
+            },
+            "children": [
+              {
+                "attributes": {
+                  "name": "bool",
+                  "type": "bool"
+                },
+                "id": 4952,
+                "name": "ElementaryTypeName",
+                "src": "681:4:21"
+              }
+            ],
+            "id": 4953,
+            "name": "VariableDeclaration",
+            "src": "681:20:21"
+          },
+          {
+            "attributes": {
+              "anonymous": false,
+              "name": "Paused"
+            },
+            "children": [
+              {
+                "attributes": {
+                  "text": " @dev Emitted when the pause is triggered by `account`."
+                },
+                "id": 4954,
+                "name": "StructuredDocumentation",
+                "src": "708:73:21"
+              },
+              {
+                "children": [
+                  {
+                    "attributes": {
+                      "constant": false,
+                      "indexed": false,
+                      "mutability": "mutable",
+                      "name": "account",
+                      "scope": 4958,
+                      "stateVariable": false,
+                      "storageLocation": "default",
+                      "type": "address",
+                      "visibility": "internal"
+                    },
+                    "children": [
+                      {
+                        "attributes": {
+                          "name": "address",
+                          "stateMutability": "nonpayable",
+                          "type": "address"
+                        },
+                        "id": 4955,
+                        "name": "ElementaryTypeName",
+                        "src": "799:7:21"
+                      }
+                    ],
+                    "id": 4956,
+                    "name": "VariableDeclaration",
+                    "src": "799:15:21"
+                  }
+                ],
+                "id": 4957,
+                "name": "ParameterList",
+                "src": "798:17:21"
+              }
+            ],
+            "id": 4958,
+            "name": "EventDefinition",
+            "src": "786:30:21"
+          },
+          {
+            "attributes": {
+              "anonymous": false,
+              "name": "Unpaused"
+            },
+            "children": [
+              {
+                "attributes": {
+                  "text": " @dev Emitted when the pause is lifted by `account`."
+                },
+                "id": 4959,
+                "name": "StructuredDocumentation",
+                "src": "822:70:21"
+              },
+              {
+                "children": [
+                  {
+                    "attributes": {
+                      "constant": false,
+                      "indexed": false,
+                      "mutability": "mutable",
+                      "name": "account",
+                      "scope": 4963,
+                      "stateVariable": false,
+                      "storageLocation": "default",
+                      "type": "address",
+                      "visibility": "internal"
+                    },
+                    "children": [
+                      {
+                        "attributes": {
+                          "name": "address",
+                          "stateMutability": "nonpayable",
+                          "type": "address"
+                        },
+                        "id": 4960,
+                        "name": "ElementaryTypeName",
+                        "src": "912:7:21"
+                      }
+                    ],
+                    "id": 4961,
+                    "name": "VariableDeclaration",
+                    "src": "912:15:21"
+                  }
+                ],
+                "id": 4962,
+                "name": "ParameterList",
+                "src": "911:17:21"
+              }
+            ],
+            "id": 4963,
+            "name": "EventDefinition",
+            "src": "897:32:21"
+          }
+        ],
+        "id": 4964,
+        "name": "ContractDefinition",
+        "src": "637:294:21"
+      }
+    ],
+    "id": 4965,
+    "name": "SourceUnit",
+    "src": "105:826:21"
+  },
+  "compiler": {
+    "name": "solc",
+    "version": "0.7.6+commit.7338295f.Emscripten.clang"
+  },
+  "networks": {},
+  "schemaVersion": "3.4.15",
+  "updatedAt": "2023-10-02T15:05:30.841Z",
+  "devdoc": {
+    "details": "Contract module which allows children to implement an emergency stop mechanism that can be triggered by an authorized account. This module is used through inheritance. It will make available the modifiers `whenNotPaused` and `whenPaused`, which can be applied to the functions of your contract. Note that they will not be pausable by simply including this module, only once the modifiers are put in place.",
+    "events": {
+      "Paused(address)": {
+        "details": "Emitted when the pause is triggered by `account`."
+      },
+      "Unpaused(address)": {
+        "details": "Emitted when the pause is lifted by `account`."
+      }
+    },
+    "kind": "dev",
+    "methods": {},
+    "version": 1
+  },
+  "userdoc": {
+    "kind": "user",
+    "methods": {},
+    "version": 1
+  }
+}

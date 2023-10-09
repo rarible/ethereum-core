@@ -52,10 +52,11 @@ abstract class EthereumTransportProvider {
 
             override fun <T : Any?> send(request: Request?, manifest: Manifest<T>?): Mono<Response<T>> =
                 super.send(request, manifest)
-                    .logOnErrorAndRetry()
+                    .logOnErrorAndRetry(request)
 
-            private fun <T : Any?> Mono<T>.logOnErrorAndRetry(): Mono<T> = doOnError {
-                logger.warn(it.message, it)
+            private fun <T : Any?> Mono<T>.logOnErrorAndRetry(request: Request? = null): Mono<T> = doOnError {
+                val body = mapper.writeValueAsString(request)
+                logger.warn("Failed request: $body. ${it.message}", it)
             }.retryWhen(retry)
         }
     }

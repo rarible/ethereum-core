@@ -1,9 +1,9 @@
 package com.rarible.ethereum.domain
 
-enum class Blockchain(val value: String) {
-    ETHEREUM("ethereum"),
-    POLYGON("polygon"),
-    OPTIMISM("optimism"),
-    MANTLE("mantle"),
-    HEDERA("hedera"),
+// value must be in lower case, example: "ethereum"
+data class Blockchain(val value: String) {
+
+    // it is used for backward compatibility
+    val name: String
+        get() = value.uppercase()
 }

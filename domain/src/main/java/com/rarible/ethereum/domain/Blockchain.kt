@@ -1,9 +1,11 @@
 package com.rarible.ethereum.domain
 
-// value must be in lower case, example: "ethereum"
-data class Blockchain(val value: String) {
+// This class is used if for backward compatibility
+data class Blockchain(val blockchain: String) {
 
-    // it is used for backward compatibility
+    val value: String
+        get() = blockchain.lowercase()
+
     val name: String
-        get() = value.uppercase()
+        get() = blockchain.uppercase()
 }

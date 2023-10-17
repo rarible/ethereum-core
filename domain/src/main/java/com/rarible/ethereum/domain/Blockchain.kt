@@ -6,4 +6,6 @@ enum class Blockchain(val value: String) {
     OPTIMISM("optimism"),
     MANTLE("mantle"),
     HEDERA("hedera"),
+    CHILIZ("chiliz"),
+    ARBITRUM("arbitrum"),
 }

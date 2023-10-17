@@ -23,7 +23,7 @@ class EthereumTransportConfiguration(
 ) {
     @Bean
     fun ethereumTransportProvider(): EthereumTransportProvider =
-        if (ethereumProperties.nodes.isNotEmpty()) {
+        if (ethereumProperties.highAvailabilityEnabled && ethereumProperties.nodes.isNotEmpty()) {
             HaEthereumTransportProvider(
                 localNodes = ethereumProperties.nodes,
                 externalNodes = ethereumProperties.externalNodes,
@@ -35,10 +35,12 @@ class EthereumTransportConfiguration(
                 monitoringThreadInterval = ethereumProperties.monitoringThreadInterval,
             )
         } else {
+            val httpUrl = ethereumProperties.nodes.firstOrNull()?.httpUrl ?: ethereumProperties.httpUrl!!
+            val websocketUrl = ethereumProperties.nodes.firstOrNull()?.websocketUrl ?: ethereumProperties.websocketUrl!!
             LegacyEthereumTransportProvider(
                 node = EthereumNode(
-                    httpUrl = ethereumProperties.httpUrl!!,
-                    websocketUrl = ethereumProperties.websocketUrl!!,
+                    httpUrl = httpUrl,
+                    websocketUrl = websocketUrl,
                 ),
                 requestTimeoutMs = ethereumProperties.requestTimeoutMs,
                 readWriteTimeoutMs = ethereumProperties.readWriteTimeoutMs,

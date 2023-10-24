@@ -2,6 +2,7 @@ package com.rarible.ethereum.client
 
 import com.rarible.ethereum.client.failover.NoopFailoverPredicate
 import com.rarible.ethereum.client.failover.SimplePredicate
+import io.daonomic.rpc.domain.Binary
 import io.daonomic.rpc.domain.Request
 import kotlinx.coroutines.reactive.awaitSingle
 import kotlinx.coroutines.runBlocking
@@ -20,8 +21,14 @@ import scala.Option
 import scala.collection.Map
 import scala.jdk.javaapi.CollectionConverters
 import scala.reflect.Manifest
+import scalether.abi.Int8Type
+import scalether.abi.IntType
+import scalether.abi.Uint32Type
+import scalether.abi.Uint8Type
+import java.math.BigInteger
 import java.net.ServerSocket
 import java.time.Duration
+import java.time.Instant
 import java.util.UUID
 import java.util.concurrent.LinkedBlockingQueue
 import java.util.concurrent.TimeUnit
@@ -67,41 +74,66 @@ internal class HaEthereumTransportProviderTest {
             |External server: rpcPort=${rpcExternalServer.port}, wsPort=${externalServer.port}
         """.trimMargin()
         )
+
         rpcInternalServer.enqueue(
             MockResponse()
                 .setHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
-                .setBody("""{"jsonrpc": "2.0","id": 1,"result": true}""")
+                .setBody(getBlockNumberResponse(1))
+        )
+        rpcInternalServer.enqueue(
+            MockResponse()
+                .setHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+                .setBody(getBlockResponse())
         )
         rpcInternalServer.enqueue(
             MockResponse()
                 .setHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
                 .setBody("""{"jsonrpc": "2.0","id": 2,"result": "response1"}""")
         )
+
         rpcInternalServer2.enqueue(
             MockResponse()
                 .setHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
-                .setBody("""{"jsonrpc": "2.0","id": 1,"result": true}""")
+                .setBody(getBlockNumberResponse(2))
         )
         rpcInternalServer2.enqueue(
             MockResponse()
                 .setHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
-                .setBody("""{"jsonrpc": "2.0","id": 1,"result": true}""")
+                .setBody(getBlockResponse())
+        )
+        rpcInternalServer2.enqueue(
+            MockResponse()
+                .setHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+                .setBody(getBlockNumberResponse(3))
+        )
+        rpcInternalServer2.enqueue(
+            MockResponse()
+                .setHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+                .setBody(getBlockResponse())
         )
         rpcInternalServer2.enqueue(
             MockResponse()
                 .setHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
                 .setBody("""{"jsonrpc": "2.0","id": 2,"result": "response3"}""")
         )
+
+
         rpcExternalServer.enqueue(
             MockResponse()
                 .setHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
-                .setBody("""{"jsonrpc": "2.0","id": 1,"result": true}""")
+                .setBody(getBlockNumberResponse(4))
+        )
+        rpcExternalServer.enqueue(
+            MockResponse()
+                .setHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+                .setBody(getBlockResponse())
         )
         rpcExternalServer.enqueue(
             MockResponse()
                 .setHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
                 .setBody("""{"jsonrpc": "2.0","id": 2,"result": "response2"}""")
         )
+
         val provider = HaEthereumTransportProvider(
             monitoringThreadInterval = Duration.ofMillis(100),
             localNodes = listOf(
@@ -122,9 +154,10 @@ internal class HaEthereumTransportProviderTest {
             ),
             maxFrameSize = 1024 * 1024,
             retryMaxAttempts = 5,
-            retryBackoffDelay = 100,
-            requestTimeoutMs = 10000,
+            retryBackoffDelay = 0,
+            requestTimeoutMs = 0,
             readWriteTimeoutMs = 10000,
+            maxBlockDelay = Duration.ofSeconds(10),
         )
 
         // Should receive event from server1
@@ -209,12 +242,18 @@ internal class HaEthereumTransportProviderTest {
             retryBackoffDelay = 100,
             requestTimeoutMs = 10000,
             readWriteTimeoutMs = 10000,
+            maxBlockDelay = Duration.ofSeconds(10),
         )
 
         internalServer.enqueue(
             MockResponse()
                 .setHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
-                .setBody("""{"jsonrpc": "2.0","id": 1,"result": true}""")
+                .setBody(getBlockNumberResponse(1))
+        )
+        internalServer.enqueue(
+            MockResponse()
+                .setHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+                .setBody(getBlockResponse())
         )
         internalServer.enqueue(
             MockResponse()
@@ -268,12 +307,18 @@ internal class HaEthereumTransportProviderTest {
             retryBackoffDelay = 100,
             requestTimeoutMs = 10000,
             readWriteTimeoutMs = 10000,
+            maxBlockDelay = Duration.ofSeconds(10),
         )
 
         externalServer1.enqueue(
             MockResponse()
                 .setHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
-                .setBody("""{"jsonrpc": "2.0","id": 1,"result": true}""")
+                .setBody(getBlockNumberResponse(1))
+        )
+        externalServer1.enqueue(
+            MockResponse()
+                .setHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+                .setBody(getBlockResponse())
         )
         externalServer1.enqueue(
             MockResponse()
@@ -300,6 +345,50 @@ internal class HaEthereumTransportProviderTest {
         ).awaitSingle()
 
         assertThat(response.result().get()).isEqualTo("response1")
+    }
+
+    private fun getBlockNumberResponse(number: Long): String {
+        return """
+            {
+                "jsonrpc": "2.0",
+                "id": 1,
+                "result": "${Uint32Type.encode(BigInteger.valueOf(number)).slice(28, 32).prefixed()}"
+            }
+        """.trimIndent()
+    }
+
+
+
+    private fun getBlockResponse(timestamp: Long = Instant.now().epochSecond): String {
+        return """
+            {
+                "jsonrpc": "2.0",
+                "id": 1,
+                "result": {
+                    "difficulty": "0x0",
+                    "extraData": "0x",
+                    "gasLimit": "0x112a8800",
+                    "gasUsed": "0x0",
+                    "hash": "0xe0594250efac73640aeff78ec40aaaaa87f91edb54e5af926ee71a32ef32da34",
+                    "l1BlockNumber": "0x0",
+                    "logsBloom": "0x00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000",
+                    "miner": "0x0000000000000000000000000000000000000000",
+                    "mixHash": "0x0000000000000000000000000000000000000000000000000000000000000000",
+                    "nonce": "0x0000000000000000",
+                    "number": "0x1",
+                    "parentHash": "0x7ee576b35482195fc49205cec9af72ce14f003b9ae69f6ba0faef4514be8b442",
+                    "receiptsRoot": "0x56e81f171bcc55a6ff8345e692c0f86e5b48e01b996cadc001622fb5e363b421",
+                    "sha3Uncles": "0x1dcc4de8dec75d7aab85b567b6ccd41ad312451b948a7413f0a142fd40d49347",
+                    "size": "0x1fd",
+                    "stateRoot": "0x0000000000000000000000000000000000000000000000000000000000000000",
+                    "timestamp": "${Uint32Type.encode(BigInteger.valueOf(timestamp)).slice(28, 32).prefixed()}",
+                    "totalDifficulty": "0x0",
+                    "transactions": [],
+                    "transactionsRoot": "0x56e81f171bcc55a6ff8345e692c0f86e5b48e01b996cadc001622fb5e363b421",
+                    "uncles": []
+                }
+            }
+        """.trimIndent()
     }
 
     companion object {

@@ -41,6 +41,10 @@
             <version>${scalether.version}</version>
         </dependency>
         <dependency>
+            <groupId>com.michael-bull.kotlin-retry</groupId>
+            <artifactId>kotlin-retry</artifactId>
+        </dependency>
+        <dependency>
             <groupId>org.junit.jupiter</groupId>
             <artifactId>junit-jupiter-engine</artifactId>
             <scope>test</scope>
@@ -63,6 +67,12 @@
         <dependency>
             <groupId>org.junit.jupiter</groupId>
             <artifactId>junit-jupiter-params</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>io.daonomic.scalether</groupId>
+            <artifactId>abi_${scala.major.version}</artifactId>
+            <version>${scalether.version}</version>
             <scope>test</scope>
         </dependency>
     </dependencies>

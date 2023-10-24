@@ -33,6 +33,7 @@ class EthereumTransportConfiguration(
                 retryMaxAttempts = ethereumProperties.retryMaxAttempts,
                 retryBackoffDelay = ethereumProperties.retryBackoffDelay,
                 monitoringThreadInterval = ethereumProperties.monitoringThreadInterval,
+                maxBlockDelay = ethereumProperties.maxBlockDelay
             )
         } else {
             LegacyEthereumTransportProvider(

@@ -65,5 +65,11 @@
             <artifactId>junit-jupiter-params</artifactId>
             <scope>test</scope>
         </dependency>
+        <dependency>
+            <groupId>io.daonomic.scalether</groupId>
+            <artifactId>abi_${scala.major.version}</artifactId>
+            <version>${scalether.version}</version>
+            <scope>test</scope>
+        </dependency>
     </dependencies>
 </project>

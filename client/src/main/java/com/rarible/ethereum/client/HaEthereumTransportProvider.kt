@@ -1,13 +1,17 @@
 package com.rarible.ethereum.client
 
 import io.daonomic.rpc.mono.WebClientTransport
+import kotlinx.coroutines.reactive.awaitFirstOrNull
 import kotlinx.coroutines.reactive.awaitSingle
 import kotlinx.coroutines.runBlocking
 import scalether.core.MonoEthereum
 import scalether.transport.WebSocketPubSubTransport
 import java.time.Duration
+import java.time.Instant
 import java.util.concurrent.CopyOnWriteArrayList
 import java.util.concurrent.atomic.AtomicReference
+import kotlinx.coroutines.delay
+import java.util.concurrent.atomic.AtomicLong
 
 class HaEthereumTransportProvider(
     private val localNodes: List<EthereumNode>,
@@ -18,6 +22,7 @@ class HaEthereumTransportProvider(
     private val retryMaxAttempts: Long,
     private val retryBackoffDelay: Long,
     private val monitoringThreadInterval: Duration,
+    private val maxBlockDelay: Duration,
 ) : AutoCloseable,
     EthereumTransportProvider() {
     private val websocketNode: AtomicReference<EthereumTransport> = AtomicReference()
@@ -119,13 +124,26 @@ class HaEthereumTransportProvider(
         retryBackoffDelay = retryBackoffDelay,
     )
 
-    private suspend fun nodeAvailable(rpcUrl: String, rpcTransport: WebClientTransport): Boolean =
-        try {
-            MonoEthereum(rpcTransport).netListening().awaitSingle() as Boolean
-        } catch (e: Exception) {
-            logger.warn("Error while calling node {}. Trying next node...", rpcUrl, e)
-            false
+    private suspend fun nodeAvailable(rpcUrl: String, rpcTransport: WebClientTransport): Boolean {
+        val attempt = AtomicLong(0)
+        while (attempt.getAndIncrement() < retryMaxAttempts) {
+            try {
+                val ethereum = MonoEthereum(rpcTransport)
+                val currentBlockNumber = ethereum.ethBlockNumber().awaitSingle()
+                val block = ethereum.ethGetBlockByNumber(currentBlockNumber).awaitFirstOrNull()
+                if (block == null) {
+                    logger.warn("Can't get block by number for node $rpcUrl, retry...")
+                    delay(retryBackoffDelay)
+                    continue
+                }
+                return Instant.now().epochSecond - block.timestamp().toLong() < maxBlockDelay.seconds
+            } catch (ex: Throwable) {
+                logger.warn("Error while calling node {}. Trying next node...", rpcUrl, ex)
+                break
+            }
         }
+        return false
+    }
 
     override fun close() {
         monitoringThread.close()

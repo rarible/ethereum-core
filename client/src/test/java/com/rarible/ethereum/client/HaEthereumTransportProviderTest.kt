@@ -20,8 +20,11 @@ import scala.Option
 import scala.collection.Map
 import scala.jdk.javaapi.CollectionConverters
 import scala.reflect.Manifest
+import scalether.abi.Uint32Type
+import java.math.BigInteger
 import java.net.ServerSocket
 import java.time.Duration
+import java.time.Instant
 import java.util.UUID
 import java.util.concurrent.LinkedBlockingQueue
 import java.util.concurrent.TimeUnit
@@ -67,41 +70,65 @@ internal class HaEthereumTransportProviderTest {
             |External server: rpcPort=${rpcExternalServer.port}, wsPort=${externalServer.port}
         """.trimMargin()
         )
+
         rpcInternalServer.enqueue(
             MockResponse()
                 .setHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
-                .setBody("""{"jsonrpc": "2.0","id": 1,"result": true}""")
+                .setBody(getBlockNumberResponse(1))
+        )
+        rpcInternalServer.enqueue(
+            MockResponse()
+                .setHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+                .setBody(getBlockResponse())
         )
         rpcInternalServer.enqueue(
             MockResponse()
                 .setHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
                 .setBody("""{"jsonrpc": "2.0","id": 2,"result": "response1"}""")
         )
+
         rpcInternalServer2.enqueue(
             MockResponse()
                 .setHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
-                .setBody("""{"jsonrpc": "2.0","id": 1,"result": true}""")
+                .setBody(getBlockNumberResponse(2))
         )
         rpcInternalServer2.enqueue(
             MockResponse()
                 .setHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
-                .setBody("""{"jsonrpc": "2.0","id": 1,"result": true}""")
+                .setBody(getBlockResponse())
+        )
+        rpcInternalServer2.enqueue(
+            MockResponse()
+                .setHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+                .setBody(getBlockNumberResponse(3))
+        )
+        rpcInternalServer2.enqueue(
+            MockResponse()
+                .setHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+                .setBody(getBlockResponse())
         )
         rpcInternalServer2.enqueue(
             MockResponse()
                 .setHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
                 .setBody("""{"jsonrpc": "2.0","id": 2,"result": "response3"}""")
         )
+
         rpcExternalServer.enqueue(
             MockResponse()
                 .setHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
-                .setBody("""{"jsonrpc": "2.0","id": 1,"result": true}""")
+                .setBody(getBlockNumberResponse(4))
+        )
+        rpcExternalServer.enqueue(
+            MockResponse()
+                .setHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+                .setBody(getBlockResponse())
         )
         rpcExternalServer.enqueue(
             MockResponse()
                 .setHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
                 .setBody("""{"jsonrpc": "2.0","id": 2,"result": "response2"}""")
         )
+
         val provider = HaEthereumTransportProvider(
             monitoringThreadInterval = Duration.ofMillis(100),
             localNodes = listOf(
@@ -122,9 +149,10 @@ internal class HaEthereumTransportProviderTest {
             ),
             maxFrameSize = 1024 * 1024,
             retryMaxAttempts = 5,
-            retryBackoffDelay = 100,
-            requestTimeoutMs = 10000,
+            retryBackoffDelay = 0,
+            requestTimeoutMs = 0,
             readWriteTimeoutMs = 10000,
+            maxBlockDelay = Duration.ofSeconds(10),
         )
 
         // Should receive event from server1
@@ -184,6 +212,164 @@ internal class HaEthereumTransportProviderTest {
     }
 
     @Test
+    fun `retry if no block return`() = runBlocking<Unit> {
+        val internalServer = MockWebServer()
+        internalServer.start()
+
+        internalServer.enqueue(
+            MockResponse().withWebSocketUpgrade(
+                MockWebsocketListener(
+                    response = "request1"
+                )
+            )
+        )
+        val rpcInternalServer = MockWebServer()
+        rpcInternalServer.start()
+        logger.info(
+            """Internal server 1: rpcPort=${rpcInternalServer.port}, wsPort=${internalServer.port}
+        """.trimMargin()
+        )
+
+        rpcInternalServer.enqueue(
+            MockResponse()
+                .setHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+                .setBody(getBlockNumberResponse(1))
+        )
+        rpcInternalServer.enqueue(
+            MockResponse()
+                .setHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+                .setBody(getNullResponse())
+        )
+        rpcInternalServer.enqueue(
+            MockResponse()
+                .setHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+                .setBody(getBlockNumberResponse(1))
+        )
+        rpcInternalServer.enqueue(
+            MockResponse()
+                .setHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+                .setBody(getBlockResponse())
+        )
+
+        val provider = HaEthereumTransportProvider(
+            monitoringThreadInterval = Duration.ofMillis(100),
+            localNodes = listOf(
+                EthereumNode(
+                    httpUrl = "http://127.0.0.1:${rpcInternalServer.port}",
+                    websocketUrl = "ws://127.0.0.1:${internalServer.port}"
+                ),
+            ),
+            externalNodes = emptyList(),
+            maxFrameSize = 1024 * 1024,
+            retryMaxAttempts = 5,
+            retryBackoffDelay = 0,
+            requestTimeoutMs = 0,
+            readWriteTimeoutMs = 10000,
+            maxBlockDelay = Duration.ofSeconds(10),
+        )
+
+        // Should receive event from server1
+        val receivedEvents = LinkedBlockingQueue<Any>()
+        val subscription = FailoverPubSubTransport(provider).subscribe("test", Option.empty(), Manifest.Object())
+            .doOnNext {
+                receivedEvents.add((it as Map<String, String>).get("data").get())
+            }
+            .then(Mono.error<Void>(IllegalStateException("disconnected")))
+            .retryWhen(
+                Retry.backoff(Long.MAX_VALUE, Duration.ofMillis(300))
+                    .maxBackoff(Duration.ofMillis(2000))
+            )
+            .subscribe()
+        assertThat(receivedEvents.poll(20, TimeUnit.SECONDS)).isEqualTo("request1")
+    }
+
+    @Test
+    fun `fallback to external if block delay`() = runBlocking<Unit> {
+        val internalServer = MockWebServer()
+        internalServer.start()
+        val externalServer = MockWebServer()
+        externalServer.start()
+
+        val externalServerListener = MockWebsocketListener(
+            response = "request1"
+        )
+        externalServer.enqueue(MockResponse().withWebSocketUpgrade(externalServerListener))
+
+        val rpcInternalServer = MockWebServer()
+        rpcInternalServer.start()
+        val rpcExternalServer = MockWebServer()
+        rpcExternalServer.start()
+        logger.info(
+            """Internal server 1: rpcPort=${rpcInternalServer.port}, wsPort=${internalServer.port}
+            |External server: rpcPort=${rpcExternalServer.port}, wsPort=${externalServer.port}
+        """.trimMargin()
+        )
+
+        rpcInternalServer.enqueue(
+            MockResponse()
+                .setHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+                .setBody(getBlockNumberResponse(1))
+        )
+        rpcInternalServer.enqueue(
+            MockResponse()
+                .setHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+                .setBody(getBlockResponse(Instant.MIN.epochSecond))
+        )
+        rpcExternalServer.enqueue(
+            MockResponse()
+                .setHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+                .setBody(getBlockNumberResponse(4))
+        )
+        rpcExternalServer.enqueue(
+            MockResponse()
+                .setHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+                .setBody(getBlockResponse())
+        )
+        rpcExternalServer.enqueue(
+            MockResponse()
+                .setHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+                .setBody("""{"jsonrpc": "2.0","id": 2,"result": "response2"}""")
+        )
+
+        val provider = HaEthereumTransportProvider(
+            monitoringThreadInterval = Duration.ofMillis(100),
+            localNodes = listOf(
+                EthereumNode(
+                    httpUrl = "http://127.0.0.1:${rpcInternalServer.port}",
+                    websocketUrl = "ws://127.0.0.1:${internalServer.port}"
+                ),
+            ),
+            externalNodes = listOf(
+                EthereumNode(
+                    httpUrl = "http://127.0.0.1:${rpcExternalServer.port}",
+                    websocketUrl = "ws://127.0.0.1:${externalServer.port}"
+                )
+            ),
+            maxFrameSize = 1024 * 1024,
+            retryMaxAttempts = 5,
+            retryBackoffDelay = 0,
+            requestTimeoutMs = 0,
+            readWriteTimeoutMs = 10000,
+            maxBlockDelay = Duration.ofSeconds(10),
+        )
+
+        // Should receive event from server1
+        val receivedEvents = LinkedBlockingQueue<Any>()
+        val subscription = FailoverPubSubTransport(provider).subscribe("test", Option.empty(), Manifest.Object())
+            .doOnNext {
+                receivedEvents.add((it as Map<String, String>).get("data").get())
+            }
+            .then(Mono.error<Void>(IllegalStateException("disconnected")))
+            .retryWhen(
+                Retry.backoff(Long.MAX_VALUE, Duration.ofMillis(300))
+                    .maxBackoff(Duration.ofMillis(2000))
+            )
+            .subscribe()
+
+        assertThat(receivedEvents.poll(20, TimeUnit.SECONDS)).isEqualTo("request1")
+    }
+
+    @Test
     fun `rpc failover to external node`() = runBlocking<Unit> {
         val internalServer = MockWebServer()
         internalServer.start()
@@ -209,12 +395,18 @@ internal class HaEthereumTransportProviderTest {
             retryBackoffDelay = 100,
             requestTimeoutMs = 10000,
             readWriteTimeoutMs = 10000,
+            maxBlockDelay = Duration.ofSeconds(10),
         )
 
         internalServer.enqueue(
             MockResponse()
                 .setHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
-                .setBody("""{"jsonrpc": "2.0","id": 1,"result": true}""")
+                .setBody(getBlockNumberResponse(1))
+        )
+        internalServer.enqueue(
+            MockResponse()
+                .setHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+                .setBody(getBlockResponse())
         )
         internalServer.enqueue(
             MockResponse()
@@ -268,12 +460,18 @@ internal class HaEthereumTransportProviderTest {
             retryBackoffDelay = 100,
             requestTimeoutMs = 10000,
             readWriteTimeoutMs = 10000,
+            maxBlockDelay = Duration.ofSeconds(10),
         )
 
         externalServer1.enqueue(
             MockResponse()
                 .setHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
-                .setBody("""{"jsonrpc": "2.0","id": 1,"result": true}""")
+                .setBody(getBlockNumberResponse(1))
+        )
+        externalServer1.enqueue(
+            MockResponse()
+                .setHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+                .setBody(getBlockResponse())
         )
         externalServer1.enqueue(
             MockResponse()
@@ -300,6 +498,58 @@ internal class HaEthereumTransportProviderTest {
         ).awaitSingle()
 
         assertThat(response.result().get()).isEqualTo("response1")
+    }
+
+    private fun getBlockNumberResponse(number: Long): String {
+        return """
+            {
+                "jsonrpc": "2.0",
+                "id": 1,
+                "result": "${Uint32Type.encode(BigInteger.valueOf(number)).slice(28, 32).prefixed()}"
+            }
+        """.trimIndent()
+    }
+
+    private fun getNullResponse(): String {
+        return """
+            {
+                "jsonrpc": "2.0",
+                "id": 1,
+                "result": null
+            }
+        """.trimIndent()
+    }
+
+    private fun getBlockResponse(timestamp: Long = Instant.now().epochSecond): String {
+        return """
+            {
+                "jsonrpc": "2.0",
+                "id": 1,
+                "result": {
+                    "difficulty": "0x0",
+                    "extraData": "0x",
+                    "gasLimit": "0x112a8800",
+                    "gasUsed": "0x0",
+                    "hash": "0xe0594250efac73640aeff78ec40aaaaa87f91edb54e5af926ee71a32ef32da34",
+                    "l1BlockNumber": "0x0",
+                    "logsBloom": "0x00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000",
+                    "miner": "0x0000000000000000000000000000000000000000",
+                    "mixHash": "0x0000000000000000000000000000000000000000000000000000000000000000",
+                    "nonce": "0x0000000000000000",
+                    "number": "0x1",
+                    "parentHash": "0x7ee576b35482195fc49205cec9af72ce14f003b9ae69f6ba0faef4514be8b442",
+                    "receiptsRoot": "0x56e81f171bcc55a6ff8345e692c0f86e5b48e01b996cadc001622fb5e363b421",
+                    "sha3Uncles": "0x1dcc4de8dec75d7aab85b567b6ccd41ad312451b948a7413f0a142fd40d49347",
+                    "size": "0x1fd",
+                    "stateRoot": "0x0000000000000000000000000000000000000000000000000000000000000000",
+                    "timestamp": "${Uint32Type.encode(BigInteger.valueOf(timestamp)).slice(28, 32).prefixed()}",
+                    "totalDifficulty": "0x0",
+                    "transactions": [],
+                    "transactionsRoot": "0x56e81f171bcc55a6ff8345e692c0f86e5b48e01b996cadc001622fb5e363b421",
+                    "uncles": []
+                }
+            }
+        """.trimIndent()
     }
 
     companion object {

@@ -113,7 +113,6 @@ internal class HaEthereumTransportProviderTest {
                 .setBody("""{"jsonrpc": "2.0","id": 2,"result": "response3"}""")
         )
 
-
         rpcExternalServer.enqueue(
             MockResponse()
                 .setHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)

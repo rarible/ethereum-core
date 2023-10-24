@@ -136,7 +136,15 @@ class HaEthereumTransportProvider(
                     delay(retryBackoffDelay)
                     continue
                 }
-                return Instant.now().epochSecond - block.timestamp().toLong() < maxBlockDelay.seconds
+                val timestamp = Instant.ofEpochSecond(block.timestamp().toLong())
+                val now = Instant.now()
+                val result = now.epochSecond - timestamp.epochSecond < maxBlockDelay.seconds
+                if (!result) {
+                    logger.warn("Node {} is not available. Last block is too old. block: {}, timestamp: {}, now: {}",
+                        rpcUrl, currentBlockNumber, timestamp, now
+                    )
+                }
+                return result
             } catch (ex: Throwable) {
                 logger.warn("Error while calling node {}. Trying next node...", rpcUrl, ex)
                 break

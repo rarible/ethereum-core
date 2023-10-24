@@ -37,7 +37,6 @@
         <rarible-core.version>2.6.7</rarible-core.version>
         <mockserver-netty.version>5.11.2</mockserver-netty.version>
         <mockserver.version>4.11.0</mockserver.version>
-        <retry.version>1.0.9</retry.version>
     </properties>
 
     <dependencyManagement>
@@ -129,11 +128,6 @@
                 <groupId>net.java.dev.jna</groupId>
                 <artifactId>jna</artifactId>
                 <version>5.7.0</version>
-            </dependency>
-            <dependency>
-                <groupId>com.michael-bull.kotlin-retry</groupId>
-                <artifactId>kotlin-retry</artifactId>
-                <version>${retry.version}</version>
             </dependency>
         </dependencies>
     </dependencyManagement>

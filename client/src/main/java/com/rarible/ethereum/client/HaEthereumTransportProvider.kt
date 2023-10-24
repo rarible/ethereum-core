@@ -1,9 +1,5 @@
 package com.rarible.ethereum.client
 
-import com.github.michaelbull.retry.ContinueRetrying
-import com.github.michaelbull.retry.StopRetrying
-import com.github.michaelbull.retry.policy.RetryPolicy
-import com.github.michaelbull.retry.policy.constantDelay
 import io.daonomic.rpc.mono.WebClientTransport
 import kotlinx.coroutines.reactive.awaitFirstOrNull
 import kotlinx.coroutines.reactive.awaitSingle
@@ -14,10 +10,9 @@ import java.time.Duration
 import java.time.Instant
 import java.util.concurrent.CopyOnWriteArrayList
 import java.util.concurrent.atomic.AtomicReference
-import com.github.michaelbull.retry.policy.limitAttempts
-import com.github.michaelbull.retry.policy.plus
-import com.github.michaelbull.retry.retry
+import kotlinx.coroutines.delay
 import java.lang.RuntimeException
+import java.util.concurrent.atomic.AtomicLong
 
 class HaEthereumTransportProvider(
     private val localNodes: List<EthereumNode>,
@@ -131,23 +126,24 @@ class HaEthereumTransportProvider(
     )
 
     private suspend fun nodeAvailable(rpcUrl: String, rpcTransport: WebClientTransport): Boolean {
-        return retry(retryExceptionFilter + limitAttempts(retryMaxAttempts.toInt())) {
+        val attempt = AtomicLong(0)
+        while (attempt.getAndIncrement() < retryMaxAttempts) {
             try {
                 val ethereum = MonoEthereum(rpcTransport)
                 val currentBlockNumber = ethereum.ethBlockNumber().awaitSingle()
-                val block = ethereum
-                    .ethGetBlockByNumber(currentBlockNumber).awaitFirstOrNull()
+                val block = ethereum.ethGetBlockByNumber(currentBlockNumber).awaitFirstOrNull()
                     ?: throw GetBlockException("Block $currentBlockNumber is null for node $rpcUrl")
 
-                Instant.now().epochSecond - block.timestamp().toLong() < maxBlockDelay.seconds
+                return Instant.now().epochSecond - block.timestamp().toLong() < maxBlockDelay.seconds
             } catch (ex: GetBlockException) {
                 logger.warn("Can't get block by number for node $rpcUrl, retry...")
-                throw ex
+                delay(retryBackoffDelay)
             } catch (ex: Throwable) {
                 logger.warn("Error while calling node {}. Trying next node...", rpcUrl, ex)
-                false
+                break
             }
         }
+        return false
     }
 
     override fun close() {
@@ -194,18 +190,6 @@ class HaEthereumTransportProvider(
             shouldRun = false
             interrupt()
         }
-    }
-
-    private val retryExceptionFilter: RetryPolicy<Throwable> = {
-        if (isRetryableException(reason)) {
-            ContinueRetrying
-        } else {
-            StopRetrying
-        }
-    }
-
-    private fun isRetryableException(e: Throwable): Boolean {
-        return e is GetBlockException
     }
 
     private class GetBlockException(message: String) : RuntimeException(message)

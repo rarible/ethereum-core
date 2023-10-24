@@ -2,7 +2,6 @@ package com.rarible.ethereum.client
 
 import com.rarible.ethereum.client.failover.NoopFailoverPredicate
 import com.rarible.ethereum.client.failover.SimplePredicate
-import io.daonomic.rpc.domain.Binary
 import io.daonomic.rpc.domain.Request
 import kotlinx.coroutines.reactive.awaitSingle
 import kotlinx.coroutines.runBlocking
@@ -21,10 +20,7 @@ import scala.Option
 import scala.collection.Map
 import scala.jdk.javaapi.CollectionConverters
 import scala.reflect.Manifest
-import scalether.abi.Int8Type
-import scalether.abi.IntType
 import scalether.abi.Uint32Type
-import scalether.abi.Uint8Type
 import java.math.BigInteger
 import java.net.ServerSocket
 import java.time.Duration
@@ -217,6 +213,164 @@ internal class HaEthereumTransportProviderTest {
     }
 
     @Test
+    fun `retry if no block return`() = runBlocking<Unit> {
+        val internalServer = MockWebServer()
+        internalServer.start()
+
+        internalServer.enqueue(
+            MockResponse().withWebSocketUpgrade(
+                MockWebsocketListener(
+                    response = "request1"
+                )
+            )
+        )
+        val rpcInternalServer = MockWebServer()
+        rpcInternalServer.start()
+        logger.info(
+            """Internal server 1: rpcPort=${rpcInternalServer.port}, wsPort=${internalServer.port}
+        """.trimMargin()
+        )
+
+        rpcInternalServer.enqueue(
+            MockResponse()
+                .setHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+                .setBody(getBlockNumberResponse(1))
+        )
+        rpcInternalServer.enqueue(
+            MockResponse()
+                .setHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+                .setBody(getNullResponse())
+        )
+        rpcInternalServer.enqueue(
+            MockResponse()
+                .setHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+                .setBody(getBlockNumberResponse(1))
+        )
+        rpcInternalServer.enqueue(
+            MockResponse()
+                .setHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+                .setBody(getBlockResponse())
+        )
+
+        val provider = HaEthereumTransportProvider(
+            monitoringThreadInterval = Duration.ofMillis(100),
+            localNodes = listOf(
+                EthereumNode(
+                    httpUrl = "http://127.0.0.1:${rpcInternalServer.port}",
+                    websocketUrl = "ws://127.0.0.1:${internalServer.port}"
+                ),
+            ),
+            externalNodes = emptyList(),
+            maxFrameSize = 1024 * 1024,
+            retryMaxAttempts = 5,
+            retryBackoffDelay = 0,
+            requestTimeoutMs = 0,
+            readWriteTimeoutMs = 10000,
+            maxBlockDelay = Duration.ofSeconds(10),
+        )
+
+        // Should receive event from server1
+        val receivedEvents = LinkedBlockingQueue<Any>()
+        val subscription = FailoverPubSubTransport(provider).subscribe("test", Option.empty(), Manifest.Object())
+            .doOnNext {
+                receivedEvents.add((it as Map<String, String>).get("data").get())
+            }
+            .then(Mono.error<Void>(IllegalStateException("disconnected")))
+            .retryWhen(
+                Retry.backoff(Long.MAX_VALUE, Duration.ofMillis(300))
+                    .maxBackoff(Duration.ofMillis(2000))
+            )
+            .subscribe()
+        assertThat(receivedEvents.poll(20, TimeUnit.SECONDS)).isEqualTo("request1")
+    }
+
+    @Test
+    fun `fallback to external if block delay`() = runBlocking<Unit> {
+        val internalServer = MockWebServer()
+        internalServer.start()
+        val externalServer = MockWebServer()
+        externalServer.start()
+
+        val externalServerListener = MockWebsocketListener(
+            response = "request1"
+        )
+        externalServer.enqueue(MockResponse().withWebSocketUpgrade(externalServerListener))
+
+        val rpcInternalServer = MockWebServer()
+        rpcInternalServer.start()
+        val rpcExternalServer = MockWebServer()
+        rpcExternalServer.start()
+        logger.info(
+            """Internal server 1: rpcPort=${rpcInternalServer.port}, wsPort=${internalServer.port}
+            |External server: rpcPort=${rpcExternalServer.port}, wsPort=${externalServer.port}
+        """.trimMargin()
+        )
+
+        rpcInternalServer.enqueue(
+            MockResponse()
+                .setHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+                .setBody(getBlockNumberResponse(1))
+        )
+        rpcInternalServer.enqueue(
+            MockResponse()
+                .setHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+                .setBody(getBlockResponse(Instant.MIN.epochSecond))
+        )
+        rpcExternalServer.enqueue(
+            MockResponse()
+                .setHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+                .setBody(getBlockNumberResponse(4))
+        )
+        rpcExternalServer.enqueue(
+            MockResponse()
+                .setHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+                .setBody(getBlockResponse())
+        )
+        rpcExternalServer.enqueue(
+            MockResponse()
+                .setHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+                .setBody("""{"jsonrpc": "2.0","id": 2,"result": "response2"}""")
+        )
+
+        val provider = HaEthereumTransportProvider(
+            monitoringThreadInterval = Duration.ofMillis(100),
+            localNodes = listOf(
+                EthereumNode(
+                    httpUrl = "http://127.0.0.1:${rpcInternalServer.port}",
+                    websocketUrl = "ws://127.0.0.1:${internalServer.port}"
+                ),
+            ),
+            externalNodes = listOf(
+                EthereumNode(
+                    httpUrl = "http://127.0.0.1:${rpcExternalServer.port}",
+                    websocketUrl = "ws://127.0.0.1:${externalServer.port}"
+                )
+            ),
+            maxFrameSize = 1024 * 1024,
+            retryMaxAttempts = 5,
+            retryBackoffDelay = 0,
+            requestTimeoutMs = 0,
+            readWriteTimeoutMs = 10000,
+            maxBlockDelay = Duration.ofSeconds(10),
+        )
+
+        // Should receive event from server1
+        val receivedEvents = LinkedBlockingQueue<Any>()
+        val subscription = FailoverPubSubTransport(provider).subscribe("test", Option.empty(), Manifest.Object())
+            .doOnNext {
+                receivedEvents.add((it as Map<String, String>).get("data").get())
+            }
+            .then(Mono.error<Void>(IllegalStateException("disconnected")))
+            .retryWhen(
+                Retry.backoff(Long.MAX_VALUE, Duration.ofMillis(300))
+                    .maxBackoff(Duration.ofMillis(2000))
+            )
+            .subscribe()
+
+        assertThat(receivedEvents.poll(20, TimeUnit.SECONDS)).isEqualTo("request1")
+    }
+
+    @Test
     fun `rpc failover to external node`() = runBlocking<Unit> {
         val internalServer = MockWebServer()
         internalServer.start()
@@ -357,7 +511,15 @@ internal class HaEthereumTransportProviderTest {
         """.trimIndent()
     }
 
-
+    private fun getNullResponse(): String {
+        return """
+            {
+                "jsonrpc": "2.0",
+                "id": 1,
+                "result": null
+            }
+        """.trimIndent()
+    }
 
     private fun getBlockResponse(timestamp: Long = Instant.now().epochSecond): String {
         return """

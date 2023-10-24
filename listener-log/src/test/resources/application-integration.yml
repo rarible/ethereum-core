@@ -2,3 +2,6 @@ logging:
   level:
     com.rarible.ethereum.listener: DEBUG
     org.springframework.test.context.cache: DEBUG
+rarible:
+  ethereum:
+    max-block-delay: 100d

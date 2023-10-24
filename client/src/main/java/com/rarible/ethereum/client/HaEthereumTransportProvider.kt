@@ -11,7 +11,6 @@ import java.time.Instant
 import java.util.concurrent.CopyOnWriteArrayList
 import java.util.concurrent.atomic.AtomicReference
 import kotlinx.coroutines.delay
-import java.lang.RuntimeException
 import java.util.concurrent.atomic.AtomicLong
 
 class HaEthereumTransportProvider(
@@ -132,12 +131,12 @@ class HaEthereumTransportProvider(
                 val ethereum = MonoEthereum(rpcTransport)
                 val currentBlockNumber = ethereum.ethBlockNumber().awaitSingle()
                 val block = ethereum.ethGetBlockByNumber(currentBlockNumber).awaitFirstOrNull()
-                    ?: throw GetBlockException("Block $currentBlockNumber is null for node $rpcUrl")
-
+                if (block == null) {
+                    logger.warn("Can't get block by number for node $rpcUrl, retry...")
+                    delay(retryBackoffDelay)
+                    continue
+                }
                 return Instant.now().epochSecond - block.timestamp().toLong() < maxBlockDelay.seconds
-            } catch (ex: GetBlockException) {
-                logger.warn("Can't get block by number for node $rpcUrl, retry...")
-                delay(retryBackoffDelay)
             } catch (ex: Throwable) {
                 logger.warn("Error while calling node {}. Trying next node...", rpcUrl, ex)
                 break
@@ -191,8 +190,6 @@ class HaEthereumTransportProvider(
             interrupt()
         }
     }
-
-    private class GetBlockException(message: String) : RuntimeException(message)
 
     data class EthereumTransport(
         val rpcTransport: WebClientTransport,

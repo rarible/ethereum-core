@@ -4,4 +4,4 @@ logging:
     org.springframework.test.context.cache: DEBUG
 rarible:
   ethereum:
-    max-block-delay: 1000d
+    max-block-delay: 50000d

@@ -51,6 +51,11 @@
                             <packageName>com.rarible.contracts.test.erc1155</packageName>
                             <type>MONO</type>
                         </contract>
+                        <contract>
+                            <abi>src/main/truffle/ERC1155V1.json</abi>
+                            <packageName>com.rarible.contracts.test.erc1155v1</packageName>
+                            <type>MONO</type>
+                        </contract>
                     </contracts>
                 </configuration>
             </plugin>

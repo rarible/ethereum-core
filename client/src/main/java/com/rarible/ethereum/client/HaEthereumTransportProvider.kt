@@ -1,17 +1,21 @@
 package com.rarible.ethereum.client
 
 import io.daonomic.rpc.mono.WebClientTransport
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.reactive.awaitFirstOrNull
 import kotlinx.coroutines.reactive.awaitSingle
 import kotlinx.coroutines.runBlocking
+import scala.collection.immutable.Map
+import scala.collection.immutable.Map.from
+import scala.jdk.CollectionConverters
 import scalether.core.MonoEthereum
 import scalether.transport.WebSocketPubSubTransport
 import java.time.Duration
 import java.time.Instant
+import java.util.Base64
 import java.util.concurrent.CopyOnWriteArrayList
-import java.util.concurrent.atomic.AtomicReference
-import kotlinx.coroutines.delay
 import java.util.concurrent.atomic.AtomicLong
+import java.util.concurrent.atomic.AtomicReference
 
 class HaEthereumTransportProvider(
     private val localNodes: List<EthereumNode>,
@@ -97,17 +101,19 @@ class HaEthereumTransportProvider(
         logger.info("Will check nodes: $nodes")
         for (node in nodes) {
             logger.info("Checking node definition $node")
-            val httpTransport = WebClientTransport(
-                node.httpUrl,
+            val httpTransport = object : WebClientTransport(
+                node.rpcUrl,
                 MonoEthereum.mapper(),
                 requestTimeoutMs,
                 readWriteTimeoutMs
-            )
-            if (nodeAvailable(node.httpUrl, httpTransport)) {
+            ) {
+                override fun headers() = defaultHeaders(node) ?: super.headers()
+            }
+            if (nodeAvailable(node.rpcUrl, httpTransport)) {
                 logger.info("Node $node is available. Will use it")
                 return EthereumTransport(
                     rpcTransport = createHttpTransport(node),
-                    websocketTransport = WebSocketPubSubTransport(node.websocketUrl, maxFrameSize),
+                    websocketTransport = WebSocketPubSubTransport(node.wsUrl, maxFrameSize),
                     node = node,
                 )
             }
@@ -115,8 +121,27 @@ class HaEthereumTransportProvider(
         throw IllegalStateException("None of nodes $nodes are available")
     }
 
+    private fun defaultHeaders(node: EthereumNode): Map<String, String>? = node.rpcAuth?.let {
+        from(
+            CollectionConverters.MapHasAsScala(
+                mapOf(
+                    "Authorization" to createBasicAuthHeader(
+                        it.first,
+                        it.second
+                    )
+                )
+            ).asScala()
+        )
+    }
+    private fun createBasicAuthHeader(username: String, password: String): String {
+        val credentials = "$username:$password"
+        val base64Credentials = Base64.getEncoder().encodeToString(credentials.toByteArray())
+        return "Basic $base64Credentials"
+    }
+
     private fun createHttpTransport(node: EthereumNode) = httpTransport(
-        httpUrl = node.httpUrl,
+        httpUrl = node.rpcUrl,
+        headers = defaultHeaders(node),
         requestTimeoutMs = requestTimeoutMs,
         readWriteTimeoutMs = readWriteTimeoutMs,
         maxFrameSize = maxFrameSize,
@@ -140,7 +165,8 @@ class HaEthereumTransportProvider(
                 val now = Instant.now()
                 val result = now.epochSecond - timestamp.epochSecond < maxBlockDelay.seconds
                 if (!result) {
-                    logger.warn("Node {} is not available. Last block is too old. block: {}, timestamp: {}, now: {}",
+                    logger.warn(
+                        "Node {} is not available. Last block is too old. block: {}, timestamp: {}, now: {}",
                         rpcUrl, currentBlockNumber, timestamp, now
                     )
                 }

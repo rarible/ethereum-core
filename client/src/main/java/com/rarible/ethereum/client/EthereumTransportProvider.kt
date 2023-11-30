@@ -10,6 +10,7 @@ import org.slf4j.LoggerFactory
 import org.springframework.web.reactive.function.client.WebClientException
 import reactor.core.publisher.Mono
 import reactor.util.retry.Retry
+import scala.collection.immutable.Map
 import scala.reflect.Manifest
 import scalether.core.MonoEthereum
 import scalether.transport.WebSocketPubSubTransport
@@ -29,6 +30,7 @@ abstract class EthereumTransportProvider {
 
     protected fun httpTransport(
         httpUrl: String,
+        headers: Map<String, String>? = null,
         requestTimeoutMs: Int,
         readWriteTimeoutMs: Int,
         maxFrameSize: Int,
@@ -45,6 +47,7 @@ abstract class EthereumTransportProvider {
             requestTimeoutMs,
             readWriteTimeoutMs
         ) {
+            override fun headers() = headers ?: super.headers()
             override fun maxInMemorySize(): Int = maxFrameSize
             override fun <T : Any?> get(url: String?, manifest: Manifest<T>?): Mono<T> =
                 super.get(url, manifest)

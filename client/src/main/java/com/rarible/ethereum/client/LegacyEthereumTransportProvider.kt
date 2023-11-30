@@ -12,10 +12,10 @@ class LegacyEthereumTransportProvider(
     retryBackoffDelay: Long,
 ) :
     EthereumTransportProvider() {
-    private val webSocketPubSubTransport = WebSocketPubSubTransport(node.websocketUrl, maxFrameSize)
+    private val webSocketPubSubTransport = WebSocketPubSubTransport(node.wsUrl, maxFrameSize)
     private val rpcTransport =
         httpTransport(
-            httpUrl = node.httpUrl,
+            httpUrl = node.rpcUrl,
             requestTimeoutMs = requestTimeoutMs,
             readWriteTimeoutMs = readWriteTimeoutMs,
             maxFrameSize = maxFrameSize,

@@ -5,6 +5,7 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.reactive.awaitFirstOrNull
 import kotlinx.coroutines.reactive.awaitSingle
 import kotlinx.coroutines.runBlocking
+import org.springframework.http.HttpHeaders
 import scala.collection.immutable.Map
 import scala.collection.immutable.Map.from
 import scala.jdk.CollectionConverters
@@ -121,20 +122,17 @@ class HaEthereumTransportProvider(
         throw IllegalStateException("None of nodes $nodes are available")
     }
 
-    private fun defaultHeaders(node: EthereumNode): Map<String, String>? = node.rpcAuth?.let {
+    private fun defaultHeaders(node: EthereumNode): Map<String, String>? = node.basicAuth?.let {
         from(
             CollectionConverters.MapHasAsScala(
                 mapOf(
-                    "Authorization" to createBasicAuthHeader(
-                        it.first,
-                        it.second
-                    )
+                    HttpHeaders.AUTHORIZATION to createBasicAuthHeader(it)
                 )
             ).asScala()
         )
     }
-    private fun createBasicAuthHeader(username: String, password: String): String {
-        val credentials = "$username:$password"
+    private fun createBasicAuthHeader(auth: String): String {
+        val credentials = "$auth"
         val base64Credentials = Base64.getEncoder().encodeToString(credentials.toByteArray())
         return "Basic $base64Credentials"
     }

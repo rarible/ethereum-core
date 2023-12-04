@@ -132,8 +132,7 @@ class HaEthereumTransportProvider(
         )
     }
     private fun createBasicAuthHeader(auth: String): String {
-        val credentials = "$auth"
-        val base64Credentials = Base64.getEncoder().encodeToString(credentials.toByteArray())
+        val base64Credentials = Base64.getEncoder().encodeToString(auth.toByteArray())
         return "Basic $base64Credentials"
     }
 

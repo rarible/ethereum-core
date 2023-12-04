@@ -5,6 +5,7 @@ import com.rarible.ethereum.client.failover.SimplePredicate
 import io.daonomic.rpc.domain.Request
 import kotlinx.coroutines.reactive.awaitSingle
 import kotlinx.coroutines.runBlocking
+import okhttp3.Credentials
 import okhttp3.WebSocket
 import okhttp3.WebSocketListener
 import okhttp3.mockwebserver.MockResponse
@@ -498,6 +499,66 @@ internal class HaEthereumTransportProviderTest {
         ).awaitSingle()
 
         assertThat(response.result().get()).isEqualTo("response1")
+    }
+
+    @Test
+    fun `rpc basic auth`() = runBlocking<Unit> {
+        val nodeServer = MockWebServer()
+        nodeServer.start()
+
+        val provider = HaEthereumTransportProvider(
+            monitoringThreadInterval = Duration.ofMillis(100),
+            localNodes = listOf(
+                EthereumNode(
+                    httpUrl = "http://user:password@127.0.0.1:${nodeServer.port}",
+                    websocketUrl = "ws://user:password@127.0.0.1:${nodeServer.port}"
+                )
+            ),
+            externalNodes = emptyList(),
+            maxFrameSize = 1024 * 1024,
+            retryMaxAttempts = 5,
+            retryBackoffDelay = 100,
+            requestTimeoutMs = 10000,
+            readWriteTimeoutMs = 10000,
+            maxBlockDelay = Duration.ofSeconds(10),
+        )
+        nodeServer.enqueue(
+            MockResponse()
+                .setHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+                .setBody(getBlockNumberResponse(1))
+        )
+        nodeServer.enqueue(
+            MockResponse()
+                .setHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+                .setBody(getBlockResponse())
+        )
+        nodeServer.enqueue(
+            MockResponse()
+                .setHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+                .setBody("""{"jsonrpc": "2.0","id": 1,"result": "0xa4b1"}""")
+        )
+
+        val response = FailoverRpcTransport(
+            ethereumTransportProvider = provider,
+            failoverPredicate = SimplePredicate(code = -32000, errorMessagePrefix = "test"),
+        ).send(
+            Request(
+                1L,
+                "eth_chainId",
+                CollectionConverters.asScala(emptyList<Any>()).toList(),
+                "2.0"
+            ),
+            Manifest.Any(),
+        ).awaitSingle()
+
+        assertThat(response.result().get()).isEqualTo("0xa4b1")
+
+        repeat(3) {
+            val recordedRequest = nodeServer.takeRequest()
+            val expectedCredentials = Credentials.basic("user", "password")
+            val actualCredentials = recordedRequest.getHeader("Authorization")
+            assertThat(actualCredentials).isEqualTo(expectedCredentials)
+        }
     }
 
     private fun getBlockNumberResponse(number: Long): String {

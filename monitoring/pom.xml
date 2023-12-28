@@ -12,12 +12,8 @@
 
     <dependencies>
         <dependency>
-            <groupId>com.rarible.core</groupId>
-            <artifactId>rarible-core-daemon</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>com.rarible.ethereum</groupId>
-            <artifactId>rarible-ethereum-listener-log</artifactId>
+            <groupId>io.micrometer</groupId>
+            <artifactId>micrometer-core</artifactId>
         </dependency>
     </dependencies>
 </project>

@@ -37,6 +37,11 @@
                             <type>MONO</type>
                         </contract>
                         <contract>
+                            <truffle>src/main/truffle/TestERC721EX.json</truffle>
+                            <packageName>com.rarible.contracts.test.erc721.ex</packageName>
+                            <type>MONO</type>
+                        </contract>
+                        <contract>
                             <truffle>src/main/truffle/TestWETH9.json</truffle>
                             <packageName>com.rarible.contracts.test.weth</packageName>
                             <type>MONO</type>

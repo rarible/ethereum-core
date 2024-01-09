@@ -1,11 +1,14 @@
 package com.rarible.ethereum.client
 
+import io.daonomic.rpc.RpcCodeException
+import io.daonomic.rpc.domain.Error
 import io.daonomic.rpc.mono.WebClientTransport
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.reactive.awaitFirstOrNull
 import kotlinx.coroutines.reactive.awaitSingle
 import kotlinx.coroutines.runBlocking
 import org.springframework.http.HttpHeaders
+import scala.Option
 import scala.collection.immutable.Map
 import scala.collection.immutable.Map.from
 import scala.jdk.CollectionConverters
@@ -119,7 +122,10 @@ class HaEthereumTransportProvider(
                 )
             }
         }
-        throw IllegalStateException("None of nodes $nodes are available")
+        val message = "None of nodes $nodes are available"
+        // In most cases ethereum RPC client throws RpcCodeException, so here we throw similar exception
+        // in order to allow upper services to distinguish fail reasons
+        throw RpcCodeException(message, Error(0, message, Option.empty()))
     }
 
     private fun defaultHeaders(node: EthereumNode): Map<String, String>? = node.basicAuth?.let {

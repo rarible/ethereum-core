@@ -2,7 +2,6 @@ package com.rarible.ethereum.autoconfigure
 
 import com.rarible.ethereum.client.EthereumNode
 import com.rarible.ethereum.client.EthereumTransportProvider
-import com.rarible.ethereum.client.FailoverPubSubTransport
 import com.rarible.ethereum.client.FailoverRpcTransport
 import com.rarible.ethereum.client.HaEthereumTransportProvider
 import com.rarible.ethereum.client.LegacyEthereumTransportProvider
@@ -13,7 +12,6 @@ import io.daonomic.rpc.MonoRpcTransport
 import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
-import scalether.core.PubSubTransport
 
 @Configuration
 @EnableConfigurationProperties(EthereumProperties::class)
@@ -39,7 +37,6 @@ class EthereumTransportConfiguration(
             LegacyEthereumTransportProvider(
                 node = EthereumNode(
                     httpUrl = ethereumProperties.httpUrl!!,
-                    websocketUrl = ethereumProperties.websocketUrl!!,
                 ),
                 requestTimeoutMs = ethereumProperties.requestTimeoutMs,
                 readWriteTimeoutMs = ethereumProperties.readWriteTimeoutMs,
@@ -66,8 +63,4 @@ class EthereumTransportConfiguration(
             failoverPredicate = predicate
         )
     }
-
-    @Bean
-    fun ethereumPubSub(ethereumTransportProvider: EthereumTransportProvider): PubSubTransport =
-        FailoverPubSubTransport(ethereumTransportProvider)
 }

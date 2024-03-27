@@ -13,11 +13,9 @@ import scala.collection.immutable.Map
 import scala.collection.immutable.Map.from
 import scala.jdk.CollectionConverters
 import scalether.core.MonoEthereum
-import scalether.transport.WebSocketPubSubTransport
 import java.time.Duration
 import java.time.Instant
 import java.util.Base64
-import java.util.concurrent.CopyOnWriteArrayList
 import java.util.concurrent.atomic.AtomicLong
 import java.util.concurrent.atomic.AtomicReference
 
@@ -33,9 +31,7 @@ class HaEthereumTransportProvider(
     private val maxBlockDelay: Duration,
 ) : AutoCloseable,
     EthereumTransportProvider() {
-    private val websocketNode: AtomicReference<EthereumTransport> = AtomicReference()
     private val rpcNode: AtomicReference<EthereumTransport> = AtomicReference()
-    private val websocketSubscriptions = CopyOnWriteArrayList<() -> Unit>()
     private val monitoringThread = MonitoringThread()
 
     init {
@@ -43,47 +39,14 @@ class HaEthereumTransportProvider(
         monitoringThread.start()
     }
 
-    /**
-     * In case websocket is disconnected we rediscover new node
-     */
-    override fun websocketDisconnected() {
-        websocketNode.set(null)
+    override fun rpcError() {
         rpcNode.set(null)
     }
 
-    /**
-     * In case rpc error and there is a websocket connection we still use websocket connection. If there is no
-     * websocket connection we wil rediscover
-     */
-    override fun rpcError() {
-        rpcNode.set(websocketNode.get())
-    }
-
-    override fun registerWebsocketSubscription(reconnect: () -> Unit) {
-        websocketSubscriptions.add(reconnect)
-    }
-
-    override fun unregisterWebsocketSubscription(reconnect: () -> Unit) {
-        websocketSubscriptions.removeIf { it == reconnect }
-    }
-
-    override suspend fun getWebsocketTransport(): WebSocketPubSubTransport {
-        val cachedNode = websocketNode.get()
-        if (cachedNode == null) {
-            val aliveNode = aliveNode()
-            websocketNode.set(aliveNode)
-            rpcNode.set(aliveNode)
-            return aliveNode.websocketTransport
-        }
-        return cachedNode.websocketTransport
-    }
-
     override suspend fun getRpcTransport(): WebClientTransport {
-        // Always prefer current websocket connection over rpc
-        val cachedNode = websocketNode.get() ?: rpcNode.get()
+        val cachedNode = rpcNode.get()
         if (cachedNode == null) {
             val aliveNode = aliveNode()
-            // Could be updated also from getWebsocketTransport. We prefer one from websocket
             val nodeToUse = rpcNode.accumulateAndGet(aliveNode) { prev, next ->
                 prev ?: next
             }
@@ -117,7 +80,6 @@ class HaEthereumTransportProvider(
                 logger.info("Node $node is available. Will use it")
                 return EthereumTransport(
                     rpcTransport = createHttpTransport(node),
-                    websocketTransport = WebSocketPubSubTransport(node.wsUrl, maxFrameSize),
                     node = node,
                 )
             }
@@ -158,7 +120,13 @@ class HaEthereumTransportProvider(
             try {
                 val ethereum = MonoEthereum(rpcTransport)
                 val currentBlockNumber = ethereum.ethBlockNumber().awaitSingle()
-                val block = ethereum.ethGetBlockByNumber(currentBlockNumber).awaitFirstOrNull()
+                val block = try {
+                    ethereum.ethGetBlockByNumber(currentBlockNumber).awaitFirstOrNull()
+                } catch (e: Exception) {
+                    logger.warn("Can't get block by number for node $rpcUrl, retry...", e)
+                    delay(retryBackoffDelay)
+                    continue
+                }
                 if (block == null) {
                     logger.warn("Can't get block by number for node $rpcUrl, retry...")
                     delay(retryBackoffDelay)
@@ -206,19 +174,11 @@ class HaEthereumTransportProvider(
         }
 
         private suspend fun checkNode() {
-            val nodeInUse = websocketNode.get() ?: rpcNode.get() ?: return
+            val nodeInUse = rpcNode.get() ?: return
             if (nodeInUse.node in externalNodes) {
                 val node = aliveNode(localNodes)
                 logger.info("Found alive node ${node.node}")
                 rpcNode.set(node)
-                websocketNode.accumulateAndGet(node) { prev, next ->
-                    if (prev != null) {
-                        next
-                    } else {
-                        null
-                    }
-                }
-                websocketSubscriptions.forEach { it() }
             }
         }
 
@@ -230,7 +190,6 @@ class HaEthereumTransportProvider(
 
     data class EthereumTransport(
         val rpcTransport: WebClientTransport,
-        val websocketTransport: WebSocketPubSubTransport,
         val node: EthereumNode,
     )
 }

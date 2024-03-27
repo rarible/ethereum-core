@@ -11,7 +11,6 @@ internal const val RARIBLE_ETHEREUM = "rarible.ethereum"
 @ConstructorBinding
 data class EthereumProperties(
     val httpUrl: String?,
-    val websocketUrl: String?,
     val nodes: List<EthereumNode> = emptyList(),
     val externalNodes: List<EthereumNode> = emptyList(),
     val requestTimeoutMs: Int = 10000,

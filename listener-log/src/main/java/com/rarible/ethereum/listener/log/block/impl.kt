@@ -17,7 +17,6 @@ import org.springframework.data.mongodb.core.query.Query
 import org.springframework.stereotype.Component
 import reactor.core.publisher.Flux
 import reactor.core.publisher.Mono
-import scalether.core.EthPubSub
 import scalether.core.MonoEthereum
 import scalether.domain.response.Block
 import java.math.BigInteger
@@ -27,13 +26,10 @@ import java.time.Duration
 @ExperimentalCoroutinesApi
 class EthereumBlockchain(
     private val ethereum: MonoEthereum,
-    ethPubSub: EthPubSub,
-    @Value("\${ethereumBlockchainPollerEnabled:false}") ethereumBlockchainPollerEnabled: Boolean,
     @Value("\${ethereumBlockchainPollerPeriod:1s}") ethereumBlockchainPollerPeriod: Duration,
 ) : Blockchain<SimpleBlock> {
 
-    private val subscriber = if (ethereumBlockchainPollerEnabled)
-        NewBlockPoller(ethereum, ethereumBlockchainPollerPeriod) else NewBlockPubSub(ethPubSub)
+    private val subscriber = NewBlockPoller(ethereum, ethereumBlockchainPollerPeriod)
 
     override fun getBlock(hash: Bytes): Mono<SimpleBlock> {
         return ethereum.ethGetBlockByHash(Word.apply(hash))
@@ -94,7 +90,12 @@ data class SimpleBlock(
     val timestamp: Long
 ) : com.rarible.ethereum.block.Block {
 
-    constructor(block: Block<*>) : this(block.hash(), block.parentHash(), block.number().toLong(), block.timestamp().toLong())
+    constructor(block: Block<*>) : this(
+        block.hash(),
+        block.parentHash(),
+        block.number().toLong(),
+        block.timestamp().toLong()
+    )
 
     override val blockHash: Bytes
         get() = hash

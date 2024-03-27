@@ -13,18 +13,13 @@ import reactor.util.retry.Retry
 import scala.collection.immutable.Map
 import scala.reflect.Manifest
 import scalether.core.MonoEthereum
-import scalether.transport.WebSocketPubSubTransport
 import java.io.IOException
 import java.time.Duration
 
 abstract class EthereumTransportProvider {
     protected val logger: Logger = LoggerFactory.getLogger(javaClass)
 
-    abstract fun websocketDisconnected()
     abstract fun rpcError()
-    abstract fun registerWebsocketSubscription(reconnect: () -> Unit)
-    abstract fun unregisterWebsocketSubscription(reconnect: () -> Unit)
-    abstract suspend fun getWebsocketTransport(): WebSocketPubSubTransport
     abstract suspend fun getRpcTransport(): WebClientTransport
     abstract suspend fun getFailoverRpcTransport(): WebClientTransport?
 

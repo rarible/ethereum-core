@@ -123,7 +123,7 @@ class HaEthereumTransportProvider(
                 val block = try {
                     ethereum.ethGetBlockByNumber(currentBlockNumber).awaitFirstOrNull()
                 } catch (e: Exception) {
-                    logger.warn("Can't get block by number for node $rpcUrl, retry...")
+                    logger.warn("Can't get block by number for node $rpcUrl, retry...", e)
                     delay(retryBackoffDelay)
                     continue
                 }

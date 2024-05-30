@@ -15,9 +15,9 @@
 
     <repositories>
         <repository>
-            <id>nexus-ext-maven-public</id>
-            <name>nexus-ext-maven-public</name>
-            <url>https://repo.rarible.org/repository/maven-public/</url>
+            <id>nexus</id>
+            <name>nexus</name>
+            <url>http://nexus.rarible.int/repository/maven-public/</url>
         </repository>
     </repositories>
 
@@ -33,8 +33,9 @@
     </distributionManagement>
 
     <properties>
-        <revision>1.8.2</revision>
+        <revision>1.8.3</revision>
         <rarible-core.version>2.7.1</rarible-core.version>
+        <rarible.ethereum.contracts.version>1.0.62</rarible.ethereum.contracts.version>
         <mockserver-netty.version>5.11.2</mockserver-netty.version>
         <mockserver.version>4.11.0</mockserver.version>
     </properties>
@@ -58,6 +59,11 @@
                 <artifactId>rarible-ethereum-contracts-test</artifactId>
                 <version>${project.version}</version>
                 <scope>test</scope>
+            </dependency>
+            <dependency>
+                <groupId>com.rarible.protocol.contracts</groupId>
+                <artifactId>protocol-ethereum-contracts-order</artifactId>
+                <version>${rarible.ethereum.contracts.version}</version>
             </dependency>
             <dependency>
                 <groupId>com.rarible.ethereum</groupId>

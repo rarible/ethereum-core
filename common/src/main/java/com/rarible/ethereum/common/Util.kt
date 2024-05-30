@@ -28,6 +28,26 @@ fun keccak256(str: String): Word = keccak256(str.toByteArray(Charsets.US_ASCII))
 
 fun Sign.SignatureData.toBinary(): Binary = Binary.apply(this.r).add(this.s).add(byteArrayOf(this.v))
 
+fun Binary.methodSignatureId(): Binary? = if (length() >= 4) slice(0, 4) else null
+
+fun String.fromHexToBigInteger(): BigInteger? {
+    val binary = paddingHex().toBinary()
+    return if (binary != Binary.empty()) binary.toBigInteger() else null
+}
+
+fun String.toBinary(): Binary = Binary.apply(this)
+
+fun String.paddingHex(): String {
+    return if (this == "0x") {
+        this
+    } else if (this.length % 2 != 0) {
+        val wrongHex = this.removePrefix("0x")
+        "0x0$wrongHex"
+    } else {
+        this
+    }
+}
+
 fun generateNewKeys(): NewKeys {
     val privateKey = Numeric.toBigInt(RandomUtils.nextBytes(32))
     val publicKey = Sign.publicKeyFromPrivate(privateKey)

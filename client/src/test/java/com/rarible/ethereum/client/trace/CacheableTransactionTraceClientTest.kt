@@ -38,8 +38,8 @@ class CacheableTransactionTraceClientTest {
             "2.0"
         )
 
-        client.getTrance(request)
-        client.getTrance(request)
+        client.getTrace(request)
+        client.getTrace(request)
 
         verify(exactly = 1) { ethereum.executeRaw(request) }
     }
@@ -54,9 +54,9 @@ class CacheableTransactionTraceClientTest {
             "2.0"
         )
 
-        client.getTrance(request)
+        client.getTrace(request)
         delay(1100)
-        client.getTrance(request)
+        client.getTrace(request)
 
         verify(exactly = 2) { ethereum.executeRaw(request) }
     }

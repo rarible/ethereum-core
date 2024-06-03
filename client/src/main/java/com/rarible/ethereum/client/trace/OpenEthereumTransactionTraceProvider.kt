@@ -48,7 +48,7 @@ class OpenEthereumTransactionTraceProvider(
 
     private suspend fun traces(transactionHash: Word): Array<Trace> {
         val request = Request(1, "trace_transaction", Lists.toScala(transactionHash.toString()), "2.0")
-        val result = traceClient.getTrance(request)
+        val result = traceClient.getTrace(request)
 
         if (result.error().isDefined) {
             val error = result.error().get()

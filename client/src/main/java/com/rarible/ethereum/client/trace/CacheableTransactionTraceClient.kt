@@ -25,7 +25,7 @@ class CacheableTransactionTraceClient(
             execute(key).toFuture()
         }
 
-    suspend fun getTrance(request: Request): Response<JsonNode> {
+    suspend fun getTrace(request: Request): Response<JsonNode> {
         if (!cacheEnabled) {
             return execute(request).awaitSingle()
         }

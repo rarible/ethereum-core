@@ -46,7 +46,7 @@ class GethTransactionTraceProvider(
     }
 
     suspend fun trace(transactionHash: Word): TraceResult {
-        val result = traceClient.getTrance(
+        val result = traceClient.getTrace(
             Request(
                 1, "debug_traceTransaction", Lists.toScala(
                     transactionHash.toString(),

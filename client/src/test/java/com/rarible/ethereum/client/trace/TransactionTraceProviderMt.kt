@@ -10,6 +10,7 @@ import org.junit.jupiter.api.Tag
 import org.junit.jupiter.api.Test
 import scalether.core.MonoEthereum
 import scalether.domain.Address
+import java.time.Duration
 
 @Tag("manual")
 @Disabled
@@ -26,9 +27,16 @@ class TransactionTraceProviderMt {
         override fun maxInMemorySize(): Int = 100000000
     })
 
+    private val traceClient = CacheableTransactionTraceClient(
+        ethereum = ethereum,
+        cacheEnabled = false,
+        cacheSize = 1,
+        cacheTtl = Duration.ofSeconds(1)
+    )
+
     @Test
     fun `find all traces - geth`() = runBlocking<Unit> {
-        val provider = GethTransactionTraceProvider(ethereum)
+        val provider = GethTransactionTraceProvider(traceClient)
         val traceResult = provider.traceAndFindAllCallsTo(
             Word.apply("0x3163b526e47333c9e66affb3124544e963ef0126bf9c6a3abfdaf30dd47efd7f"),
             Address.apply("0x7f268357a8c2552623316e2562d90e642bb538e5"),
@@ -40,7 +48,7 @@ class TransactionTraceProviderMt {
 
     @Test
     fun `find all traces - openethereum`() = runBlocking<Unit> {
-        val provider = OpenEthereumTransactionTraceProvider(ethereum)
+        val provider = OpenEthereumTransactionTraceProvider(traceClient)
         val traceResult = provider.traceAndFindAllCallsTo(
             Word.apply("0x3163b526e47333c9e66affb3124544e963ef0126bf9c6a3abfdaf30dd47efd7f"),
             Address.apply("0x7f268357a8c2552623316e2562d90e642bb538e5"),
@@ -51,7 +59,7 @@ class TransactionTraceProviderMt {
 
     @Test
     fun `find traces of type - geth`() = runBlocking<Unit> {
-        val provider = GethTransactionTraceProvider(ethereum)
+        val provider = GethTransactionTraceProvider(traceClient)
         val traceResult = provider.traceAndFindAllCallsOfType(
             transactionHash = Word.apply("0xdc74e760e588dc74310fe2da04860e069173c4f6b30980d9970066c3dea8ef3d"),
             callTypes = setOf("create", "create2")
@@ -64,7 +72,7 @@ class TransactionTraceProviderMt {
 
     @Test
     fun `find traces of type - openethereum`() = runBlocking<Unit> {
-        val provider = OpenEthereumTransactionTraceProvider(ethereum)
+        val provider = OpenEthereumTransactionTraceProvider(traceClient)
         val traceResult = provider.traceAndFindAllCallsOfType(
             transactionHash = Word.apply("0xdc74e760e588dc74310fe2da04860e069173c4f6b30980d9970066c3dea8ef3d"),
             callTypes = setOf("create", "create2")

@@ -12,16 +12,14 @@ import io.daonomic.rpc.domain.Binary
 import io.daonomic.rpc.domain.Error
 import io.daonomic.rpc.domain.Request
 import io.daonomic.rpc.domain.Word
-import kotlinx.coroutines.reactive.awaitFirst
 import org.slf4j.LoggerFactory
 import scala.Option
 import scala.collection.JavaConverters
-import scalether.core.MonoEthereum
 import scalether.domain.Address
 import scalether.java.Lists
 
 class GethTransactionTraceProvider(
-    private val ethereum: MonoEthereum
+    private val traceClient: CacheableTransactionTraceClient
 ) : TransactionTraceProvider {
 
     private val mapper = ObjectMapper().apply {
@@ -48,14 +46,14 @@ class GethTransactionTraceProvider(
     }
 
     suspend fun trace(transactionHash: Word): TraceResult {
-        val result = ethereum.executeRaw(
+        val result = traceClient.getTrance(
             Request(
                 1, "debug_traceTransaction", Lists.toScala(
                     transactionHash.toString(),
                     JavaConverters.asScala(mapOf("tracer" to "callTracer"))
                 ), "2.0"
             )
-        ).awaitFirst()
+        )
 
         if (result.error().isDefined) {
             val error = result.error().get()

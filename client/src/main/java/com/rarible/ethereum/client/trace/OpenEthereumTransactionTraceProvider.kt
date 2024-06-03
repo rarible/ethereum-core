@@ -12,14 +12,12 @@ import io.daonomic.rpc.RpcCodeException
 import io.daonomic.rpc.domain.Binary
 import io.daonomic.rpc.domain.Request
 import io.daonomic.rpc.domain.Word
-import kotlinx.coroutines.reactive.awaitFirst
 import org.slf4j.LoggerFactory
-import scalether.core.MonoEthereum
 import scalether.domain.Address
 import scalether.java.Lists
 
 class OpenEthereumTransactionTraceProvider(
-    private val ethereum: MonoEthereum
+    private val traceClient: CacheableTransactionTraceClient
 ) : TransactionTraceProvider {
     private val mapper = ObjectMapper().apply {
         registerModule(KotlinModule())
@@ -50,7 +48,7 @@ class OpenEthereumTransactionTraceProvider(
 
     private suspend fun traces(transactionHash: Word): Array<Trace> {
         val request = Request(1, "trace_transaction", Lists.toScala(transactionHash.toString()), "2.0")
-        val result = ethereum.executeRaw(request).awaitFirst()
+        val result = traceClient.getTrance(request)
 
         if (result.error().isDefined) {
             val error = result.error().get()

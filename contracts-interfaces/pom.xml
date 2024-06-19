@@ -71,6 +71,11 @@
                             <packageName>com.rarible.contracts.pausable</packageName>
                             <type>MONO</type>
                         </contract>
+                        <contract>
+                            <abi>src/main/abi/IERC4906.json</abi>
+                            <packageName>com.rarible.contracts.erc4906</packageName>
+                            <type>MONO</type>
+                        </contract>
                     </contracts>
                 </configuration>
             </plugin>

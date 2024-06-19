@@ -1,0 +1,2425 @@
+{
+  "contractName": "MoonbirdsRenderer",
+  "abi": [
+    {
+      "inputs": [
+        {
+          "internalType": "uint256",
+          "name": "tokenId",
+          "type": "uint256"
+        }
+      ],
+      "name": "tokenURI",
+      "outputs": [
+        {
+          "internalType": "string",
+          "name": "",
+          "type": "string"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "uint256",
+          "name": "tokenId",
+          "type": "uint256"
+        }
+      ],
+      "name": "attributesJson",
+      "outputs": [
+        {
+          "internalType": "string",
+          "name": "",
+          "type": "string"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "uint256",
+          "name": "tokenId",
+          "type": "uint256"
+        }
+      ],
+      "name": "artworkUri",
+      "outputs": [
+        {
+          "internalType": "string",
+          "name": "",
+          "type": "string"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "uint256",
+          "name": "tokenId",
+          "type": "uint256"
+        }
+      ],
+      "name": "alternateArtworkUri",
+      "outputs": [
+        {
+          "internalType": "string",
+          "name": "",
+          "type": "string"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "uint256",
+          "name": "tokenId",
+          "type": "uint256"
+        }
+      ],
+      "name": "animationUri",
+      "outputs": [
+        {
+          "internalType": "string",
+          "name": "",
+          "type": "string"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "uint256",
+          "name": "tokenId",
+          "type": "uint256"
+        }
+      ],
+      "name": "useNewArtwork",
+      "outputs": [
+        {
+          "internalType": "bool",
+          "name": "",
+          "type": "bool"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    }
+  ],
+  "metadata": "{\"compiler\":{\"version\":\"0.7.6+commit.7338295f\"},\"language\":\"Solidity\",\"output\":{\"abi\":[{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"tokenId\",\"type\":\"uint256\"}],\"name\":\"alternateArtworkUri\",\"outputs\":[{\"internalType\":\"string\",\"name\":\"\",\"type\":\"string\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"tokenId\",\"type\":\"uint256\"}],\"name\":\"animationUri\",\"outputs\":[{\"internalType\":\"string\",\"name\":\"\",\"type\":\"string\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"tokenId\",\"type\":\"uint256\"}],\"name\":\"artworkUri\",\"outputs\":[{\"internalType\":\"string\",\"name\":\"\",\"type\":\"string\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"tokenId\",\"type\":\"uint256\"}],\"name\":\"attributesJson\",\"outputs\":[{\"internalType\":\"string\",\"name\":\"\",\"type\":\"string\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"tokenId\",\"type\":\"uint256\"}],\"name\":\"tokenURI\",\"outputs\":[{\"internalType\":\"string\",\"name\":\"\",\"type\":\"string\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"tokenId\",\"type\":\"uint256\"}],\"name\":\"useNewArtwork\",\"outputs\":[{\"internalType\":\"bool\",\"name\":\"\",\"type\":\"bool\"}],\"stateMutability\":\"view\",\"type\":\"function\"}],\"devdoc\":{\"kind\":\"dev\",\"methods\":{},\"version\":1},\"userdoc\":{\"kind\":\"user\",\"methods\":{},\"version\":1}},\"settings\":{\"compilationTarget\":{\"project:/contracts/MoonbirdsRenderer.sol\":\"MoonbirdsRenderer\"},\"evmVersion\":\"istanbul\",\"libraries\":{},\"metadata\":{\"bytecodeHash\":\"ipfs\"},\"optimizer\":{\"enabled\":true,\"runs\":200},\"remappings\":[]},\"sources\":{\"@openzeppelin/contracts/utils/Strings.sol\":{\"keccak256\":\"0x08e38e034333372aea8cb1b8846085b7fbab42c6b77a0af464d2c6827827c4f0\",\"license\":\"MIT\",\"urls\":[\"bzz-raw://22746e9348187309fb4fbd3f79f6ad88787103eac10f24bd18f67257fafdd8ad\",\"dweb:/ipfs/QmSLXfXg8b27Xstq58DFGvCpqgtTqpfrGbLMq19PtEKQJS\"]},\"project:/contracts/MoonbirdsRenderer.sol\":{\"keccak256\":\"0x96d241288535a896bbe39737f835fcdfbab8730343339c5a268d62089f6db314\",\"license\":\"MIT\",\"urls\":[\"bzz-raw://84c2b0d8577efb9a9fd2877a3d93b43845850f25c0b6617416b6744a1fc873e0\",\"dweb:/ipfs/QmQqep3XhPx1pbiPz9NSZ7WWGbi8S3ejAwQJau5fF6BtZ2\"]}},\"version\":1}",
+  "bytecode": "0x608060405234801561001057600080fd5b50610579806100206000396000f3fe608060405234801561001057600080fd5b50600436106100625760003560e01c80630dbc4e74146100675780631db6151a146100f957806327b3a84b146101165780636b1e676b146101335780636c24a45714610164578063c87b56dd14610067575b600080fd5b6100846004803603602081101561007d57600080fd5b5035610181565b6040805160208082528351818301528351919283929083019185019080838360005b838110156100be5781810151838201526020016100a6565b50505050905090810190601f1680156100eb5780820380516001836020036101000a031916815260200191505b509250505060405180910390f35b6100846004803603602081101561010f57600080fd5b5035610196565b6100846004803603602081101561012c57600080fd5b5035610225565b6101506004803603602081101561014957600080fd5b5035610247565b604080519115158252519081900360200190f35b6100846004803603602081101561017a57600080fd5b503561024d565b6040805160208101909152600081525b919050565b60606101a1826102ff565b6040516020018060356103db823960350182805190602001908083835b602083106101dd5780518252601f1990920191602091820191016101be565b5181516020939093036101000a6000190180199091169216919091179052632e706e6760e01b92019182525060408051808303601b1901815260049092019052949350505050565b606060405180610120016040528060fc815260200161041060fc913992915050565b50600190565b6060610258826102ff565b60405160200180603861050c823960380180683f746f6b656e49643d60b81b81525060090182805190602001908083835b602083106102a85780518252601f199092019160209182019101610289565b5181516020939093036101000a600019018019909116921691909117905272267573654e6577417274776f726b3d7472756560681b92019182525060408051808303600c1901815260139092019052949350505050565b60608161032457506040805180820190915260018152600360fc1b6020820152610191565b8160005b811561033c57600101600a82049150610328565b60008167ffffffffffffffff8111801561035557600080fd5b506040519080825280601f01601f191660200182016040528015610380576020820181803683370190505b50859350905060001982015b83156103d157600a840660300160f81b828280600190039350815181106103af57fe5b60200101906001600160f81b031916908160001a905350600a8404935061038c565b5094935050505056fe68747470733a2f2f636f6c6c656374696f6e2d6173736574732e70726f6f662e78797a2f6d6f6f6e62697264732f696d616765732f5b7b2274726169745f74797065223a224261636b67726f756e64222c2276616c7565223a22426c7565227d2c7b2274726169745f74797065223a224265616b222c2276616c7565223a2253686f7274227d2c7b2274726169745f74797065223a22426f6479222c2276616c7565223a224372657363656e74227d2c7b2274726169745f74797065223a224665617468657273222c2276616c7565223a22507572706c65227d2c7b2274726169745f74797065223a2245796573222c2276616c7565223a224f70656e227d2c7b2274726169745f74797065223a224865616477656172222c2276616c7565223a2253706163652048656c6d6574227d5d68747470733a2f2f636f6c6c656374696f6e2d6173736574732e70726f6f662e78797a2f6d6f6f6e62697264732f656d6265642e68746d6ca264697066735822122047c429711e02061f5bf49499d7300b67130236e882d217f54abc2705a7b906f764736f6c63430007060033",
+  "deployedBytecode": "0x608060405234801561001057600080fd5b50600436106100625760003560e01c80630dbc4e74146100675780631db6151a146100f957806327b3a84b146101165780636b1e676b146101335780636c24a45714610164578063c87b56dd14610067575b600080fd5b6100846004803603602081101561007d57600080fd5b5035610181565b6040805160208082528351818301528351919283929083019185019080838360005b838110156100be5781810151838201526020016100a6565b50505050905090810190601f1680156100eb5780820380516001836020036101000a031916815260200191505b509250505060405180910390f35b6100846004803603602081101561010f57600080fd5b5035610196565b6100846004803603602081101561012c57600080fd5b5035610225565b6101506004803603602081101561014957600080fd5b5035610247565b604080519115158252519081900360200190f35b6100846004803603602081101561017a57600080fd5b503561024d565b6040805160208101909152600081525b919050565b60606101a1826102ff565b6040516020018060356103db823960350182805190602001908083835b602083106101dd5780518252601f1990920191602091820191016101be565b5181516020939093036101000a6000190180199091169216919091179052632e706e6760e01b92019182525060408051808303601b1901815260049092019052949350505050565b606060405180610120016040528060fc815260200161041060fc913992915050565b50600190565b6060610258826102ff565b60405160200180603861050c823960380180683f746f6b656e49643d60b81b81525060090182805190602001908083835b602083106102a85780518252601f199092019160209182019101610289565b5181516020939093036101000a600019018019909116921691909117905272267573654e6577417274776f726b3d7472756560681b92019182525060408051808303600c1901815260139092019052949350505050565b60608161032457506040805180820190915260018152600360fc1b6020820152610191565b8160005b811561033c57600101600a82049150610328565b60008167ffffffffffffffff8111801561035557600080fd5b506040519080825280601f01601f191660200182016040528015610380576020820181803683370190505b50859350905060001982015b83156103d157600a840660300160f81b828280600190039350815181106103af57fe5b60200101906001600160f81b031916908160001a905350600a8404935061038c565b5094935050505056fe68747470733a2f2f636f6c6c656374696f6e2d6173736574732e70726f6f662e78797a2f6d6f6f6e62697264732f696d616765732f5b7b2274726169745f74797065223a224261636b67726f756e64222c2276616c7565223a22426c7565227d2c7b2274726169745f74797065223a224265616b222c2276616c7565223a2253686f7274227d2c7b2274726169745f74797065223a22426f6479222c2276616c7565223a224372657363656e74227d2c7b2274726169745f74797065223a224665617468657273222c2276616c7565223a22507572706c65227d2c7b2274726169745f74797065223a2245796573222c2276616c7565223a224f70656e227d2c7b2274726169745f74797065223a224865616477656172222c2276616c7565223a2253706163652048656c6d6574227d5d68747470733a2f2f636f6c6c656374696f6e2d6173736574732e70726f6f662e78797a2f6d6f6f6e62697264732f656d6265642e68746d6ca264697066735822122047c429711e02061f5bf49499d7300b67130236e882d217f54abc2705a7b906f764736f6c63430007060033",
+  "immutableReferences": {},
+  "generatedSources": [],
+  "deployedGeneratedSources": [],
+  "sourceMap": "109:1350:1:-:0;;;;;;;;;;;;;;;;;;;",
+  "deployedSourceMap": "109:1350:1:-:0;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;665:96;;;;;;;;;;;;;;;;-1:-1:-1;665:96:1;;:::i;:::-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;767:233;;;;;;;;;;;;;;;;-1:-1:-1;767:233:1;;:::i;245:414::-;;;;;;;;;;;;;;;;-1:-1:-1;245:414:1;;:::i;1363:94::-;;;;;;;;;;;;;;;;-1:-1:-1;1363:94:1;;:::i;:::-;;;;;;;;;;;;;;;;;;1006:351;;;;;;;;;;;;;;;;-1:-1:-1;1006:351:1;;:::i;665:96::-;745:9;;;;;;;;;-1:-1:-1;745:9:1;;665:96;;;;:::o;767:233::-;845:13;958:25;975:7;958:16;:25::i;:::-;884:108;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;-1:-1:-1;;884:108:1;;;;;;;;;;;;;;;;;;;;;;;-1:-1:-1;;884:108:1;;;;;;;;;;;;;;-1:-1:-1;;;884:108:1;;;;;-1:-1:-1;884:108:1;;;;;;-1:-1:-1;;884:108:1;;;;;;;;;;;-1:-1:-1;;;;767:233:1:o;245:414::-;318:13;343:309;;;;;;;;;;;;;;;;;;245:414;-1:-1:-1;;245:414:1:o;1363:94::-;-1:-1:-1;1446:4:1;;1363:94::o;1006:351::-;1063:13;1262:25;1279:7;1262:16;:25::i;:::-;1123:217;;;;;;;;;;;;-1:-1:-1;;;1123:217:1;;;;;;;;;;;;;;;;;;;;;;;;;-1:-1:-1;;1123:217:1;;;;;;;;;;;;;;;;;;;;;;;-1:-1:-1;;1123:217:1;;;;;;;;;;;;;;-1:-1:-1;;;1123:217:1;;;;;-1:-1:-1;1123:217:1;;;;;;-1:-1:-1;;1123:217:1;;;;;;;;;;;-1:-1:-1;;;;1006:351:1:o;202:725:0:-;258:13;475:10;471:51;;-1:-1:-1;501:10:0;;;;;;;;;;;;-1:-1:-1;;;501:10:0;;;;;;471:51;546:5;531:12;585:75;592:9;;585:75;;617:8;;647:2;639:10;;;;585:75;;;669:19;701:6;691:17;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;-1:-1:-1;691:17:0;-1:-1:-1;761:5:0;;-1:-1:-1;669:39:0;-1:-1:-1;;;734:10:0;;776:114;783:9;;776:114;;851:2;844:4;:9;839:2;:14;826:29;;808:6;815:7;;;;;;;808:15;;;;;;;;;;;:47;-1:-1:-1;;;;;808:47:0;;;;;;;;-1:-1:-1;877:2:0;869:10;;;;776:114;;;-1:-1:-1;913:6:0;202:725;-1:-1:-1;;;;202:725:0:o",
+  "source": "// SPDX-License-Identifier: MIT\npragma solidity 0.7.6;\n\nimport \"@openzeppelin/contracts/utils/Strings.sol\";\n\ncontract MoonbirdsRenderer {\n\n    function tokenURI(uint tokenId) external view returns (string memory) {\n        return \"\";\n    }\n\n    function attributesJson(\n        uint tokenId\n    ) public view returns (string memory) {\n        return \"[{\\\"trait_type\\\":\\\"Background\\\",\\\"value\\\":\\\"Blue\\\"},{\\\"trait_type\\\":\\\"Beak\\\",\\\"value\\\":\\\"Short\\\"},{\\\"trait_type\\\":\\\"Body\\\",\\\"value\\\":\\\"Crescent\\\"},{\\\"trait_type\\\":\\\"Feathers\\\",\\\"value\\\":\\\"Purple\\\"},{\\\"trait_type\\\":\\\"Eyes\\\",\\\"value\\\":\\\"Open\\\"},{\\\"trait_type\\\":\\\"Headwear\\\",\\\"value\\\":\\\"Space Helmet\\\"}]\";\n    }\n\n    function artworkUri(uint tokenId) public view returns (string memory) {\n        return \"\";\n    }\n\n    function alternateArtworkUri(\n        uint tokenId\n    ) public view returns (string memory) {\n        return string(abi.encodePacked(\"https://collection-assets.proof.xyz/moonbirds/images/\", Strings.toString(tokenId), \".png\"));\n    }\n\n    function animationUri(uint tokenId) public view returns (string memory) {\n        return\n        string(\n            abi.encodePacked(\n                \"https://collection-assets.proof.xyz/moonbirds/embed.html\",\n                \"?tokenId=\",\n                Strings.toString(tokenId),\n                \"&useNewArtwork=true\"\n            )\n        );\n    }\n\n    function useNewArtwork(uint tokenId) external view returns (bool) {\n        return true;\n    }\n}",
+  "sourcePath": "/Users/dmitry/workspaces/workspace-rarible/protocol-contracts/projects/tokens-test/contracts/MoonbirdsRenderer.sol",
+  "ast": {
+    "absolutePath": "project:/contracts/MoonbirdsRenderer.sol",
+    "exportedSymbols": {
+      "MoonbirdsRenderer": [
+        173
+      ],
+      "Strings": [
+        86
+      ]
+    },
+    "id": 174,
+    "license": "MIT",
+    "nodeType": "SourceUnit",
+    "nodes": [
+      {
+        "id": 88,
+        "literals": [
+          "solidity",
+          "0.7",
+          ".6"
+        ],
+        "nodeType": "PragmaDirective",
+        "src": "32:22:1"
+      },
+      {
+        "absolutePath": "@openzeppelin/contracts/utils/Strings.sol",
+        "file": "@openzeppelin/contracts/utils/Strings.sol",
+        "id": 89,
+        "nodeType": "ImportDirective",
+        "scope": 174,
+        "sourceUnit": 87,
+        "src": "56:51:1",
+        "symbolAliases": [],
+        "unitAlias": ""
+      },
+      {
+        "abstract": false,
+        "baseContracts": [],
+        "contractDependencies": [],
+        "contractKind": "contract",
+        "fullyImplemented": true,
+        "id": 173,
+        "linearizedBaseContracts": [
+          173
+        ],
+        "name": "MoonbirdsRenderer",
+        "nodeType": "ContractDefinition",
+        "nodes": [
+          {
+            "body": {
+              "id": 98,
+              "nodeType": "Block",
+              "src": "213:26:1",
+              "statements": [
+                {
+                  "expression": {
+                    "hexValue": "",
+                    "id": 96,
+                    "isConstant": false,
+                    "isLValue": false,
+                    "isPure": true,
+                    "kind": "string",
+                    "lValueRequested": false,
+                    "nodeType": "Literal",
+                    "src": "230:2:1",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_stringliteral_c5d2460186f7233c927e7db2dcc703c0e500b653ca82273b7bfad8045d85a470",
+                      "typeString": "literal_string \"\""
+                    },
+                    "value": ""
+                  },
+                  "functionReturnParameters": 95,
+                  "id": 97,
+                  "nodeType": "Return",
+                  "src": "223:9:1"
+                }
+              ]
+            },
+            "functionSelector": "c87b56dd",
+            "id": 99,
+            "implemented": true,
+            "kind": "function",
+            "modifiers": [],
+            "name": "tokenURI",
+            "nodeType": "FunctionDefinition",
+            "parameters": {
+              "id": 92,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 91,
+                  "mutability": "mutable",
+                  "name": "tokenId",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 99,
+                  "src": "161:12:1",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_uint256",
+                    "typeString": "uint256"
+                  },
+                  "typeName": {
+                    "id": 90,
+                    "name": "uint",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "161:4:1",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_uint256",
+                      "typeString": "uint256"
+                    }
+                  },
+                  "visibility": "internal"
+                }
+              ],
+              "src": "160:14:1"
+            },
+            "returnParameters": {
+              "id": 95,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 94,
+                  "mutability": "mutable",
+                  "name": "",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 99,
+                  "src": "198:13:1",
+                  "stateVariable": false,
+                  "storageLocation": "memory",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_string_memory_ptr",
+                    "typeString": "string"
+                  },
+                  "typeName": {
+                    "id": 93,
+                    "name": "string",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "198:6:1",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_string_storage_ptr",
+                      "typeString": "string"
+                    }
+                  },
+                  "visibility": "internal"
+                }
+              ],
+              "src": "197:15:1"
+            },
+            "scope": 173,
+            "src": "143:96:1",
+            "stateMutability": "view",
+            "virtual": false,
+            "visibility": "external"
+          },
+          {
+            "body": {
+              "id": 108,
+              "nodeType": "Block",
+              "src": "333:326:1",
+              "statements": [
+                {
+                  "expression": {
+                    "hexValue": "5b7b2274726169745f74797065223a224261636b67726f756e64222c2276616c7565223a22426c7565227d2c7b2274726169745f74797065223a224265616b222c2276616c7565223a2253686f7274227d2c7b2274726169745f74797065223a22426f6479222c2276616c7565223a224372657363656e74227d2c7b2274726169745f74797065223a224665617468657273222c2276616c7565223a22507572706c65227d2c7b2274726169745f74797065223a2245796573222c2276616c7565223a224f70656e227d2c7b2274726169745f74797065223a224865616477656172222c2276616c7565223a2253706163652048656c6d6574227d5d",
+                    "id": 106,
+                    "isConstant": false,
+                    "isLValue": false,
+                    "isPure": true,
+                    "kind": "string",
+                    "lValueRequested": false,
+                    "nodeType": "Literal",
+                    "src": "350:302:1",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_stringliteral_1fd274a5b1c6d312784c2de1817ecbd909e05bb2f2dee7fc69575543a6ed7928",
+                      "typeString": "literal_string \"[{\"trait_type\":\"Background\",\"value\":\"Blue\"},{\"trait_type\":\"Beak\",\"value\":\"Short\"},{\"trait_type\":\"Body\",\"value\":\"Crescent\"},{\"trait_type\":\"Feathers\",\"value\":\"Purple\"},{\"trait_type\":\"Eyes\",\"value\":\"Open\"},{\"trait_type\":\"Headwear\",\"value\":\"Space Helmet\"}]\""
+                    },
+                    "value": "[{\"trait_type\":\"Background\",\"value\":\"Blue\"},{\"trait_type\":\"Beak\",\"value\":\"Short\"},{\"trait_type\":\"Body\",\"value\":\"Crescent\"},{\"trait_type\":\"Feathers\",\"value\":\"Purple\"},{\"trait_type\":\"Eyes\",\"value\":\"Open\"},{\"trait_type\":\"Headwear\",\"value\":\"Space Helmet\"}]"
+                  },
+                  "functionReturnParameters": 105,
+                  "id": 107,
+                  "nodeType": "Return",
+                  "src": "343:309:1"
+                }
+              ]
+            },
+            "functionSelector": "27b3a84b",
+            "id": 109,
+            "implemented": true,
+            "kind": "function",
+            "modifiers": [],
+            "name": "attributesJson",
+            "nodeType": "FunctionDefinition",
+            "parameters": {
+              "id": 102,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 101,
+                  "mutability": "mutable",
+                  "name": "tokenId",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 109,
+                  "src": "278:12:1",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_uint256",
+                    "typeString": "uint256"
+                  },
+                  "typeName": {
+                    "id": 100,
+                    "name": "uint",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "278:4:1",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_uint256",
+                      "typeString": "uint256"
+                    }
+                  },
+                  "visibility": "internal"
+                }
+              ],
+              "src": "268:28:1"
+            },
+            "returnParameters": {
+              "id": 105,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 104,
+                  "mutability": "mutable",
+                  "name": "",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 109,
+                  "src": "318:13:1",
+                  "stateVariable": false,
+                  "storageLocation": "memory",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_string_memory_ptr",
+                    "typeString": "string"
+                  },
+                  "typeName": {
+                    "id": 103,
+                    "name": "string",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "318:6:1",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_string_storage_ptr",
+                      "typeString": "string"
+                    }
+                  },
+                  "visibility": "internal"
+                }
+              ],
+              "src": "317:15:1"
+            },
+            "scope": 173,
+            "src": "245:414:1",
+            "stateMutability": "view",
+            "virtual": false,
+            "visibility": "public"
+          },
+          {
+            "body": {
+              "id": 118,
+              "nodeType": "Block",
+              "src": "735:26:1",
+              "statements": [
+                {
+                  "expression": {
+                    "hexValue": "",
+                    "id": 116,
+                    "isConstant": false,
+                    "isLValue": false,
+                    "isPure": true,
+                    "kind": "string",
+                    "lValueRequested": false,
+                    "nodeType": "Literal",
+                    "src": "752:2:1",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_stringliteral_c5d2460186f7233c927e7db2dcc703c0e500b653ca82273b7bfad8045d85a470",
+                      "typeString": "literal_string \"\""
+                    },
+                    "value": ""
+                  },
+                  "functionReturnParameters": 115,
+                  "id": 117,
+                  "nodeType": "Return",
+                  "src": "745:9:1"
+                }
+              ]
+            },
+            "functionSelector": "0dbc4e74",
+            "id": 119,
+            "implemented": true,
+            "kind": "function",
+            "modifiers": [],
+            "name": "artworkUri",
+            "nodeType": "FunctionDefinition",
+            "parameters": {
+              "id": 112,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 111,
+                  "mutability": "mutable",
+                  "name": "tokenId",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 119,
+                  "src": "685:12:1",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_uint256",
+                    "typeString": "uint256"
+                  },
+                  "typeName": {
+                    "id": 110,
+                    "name": "uint",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "685:4:1",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_uint256",
+                      "typeString": "uint256"
+                    }
+                  },
+                  "visibility": "internal"
+                }
+              ],
+              "src": "684:14:1"
+            },
+            "returnParameters": {
+              "id": 115,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 114,
+                  "mutability": "mutable",
+                  "name": "",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 119,
+                  "src": "720:13:1",
+                  "stateVariable": false,
+                  "storageLocation": "memory",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_string_memory_ptr",
+                    "typeString": "string"
+                  },
+                  "typeName": {
+                    "id": 113,
+                    "name": "string",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "720:6:1",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_string_storage_ptr",
+                      "typeString": "string"
+                    }
+                  },
+                  "visibility": "internal"
+                }
+              ],
+              "src": "719:15:1"
+            },
+            "scope": 173,
+            "src": "665:96:1",
+            "stateMutability": "view",
+            "virtual": false,
+            "visibility": "public"
+          },
+          {
+            "body": {
+              "id": 139,
+              "nodeType": "Block",
+              "src": "860:140:1",
+              "statements": [
+                {
+                  "expression": {
+                    "arguments": [
+                      {
+                        "arguments": [
+                          {
+                            "hexValue": "68747470733a2f2f636f6c6c656374696f6e2d6173736574732e70726f6f662e78797a2f6d6f6f6e62697264732f696d616765732f",
+                            "id": 130,
+                            "isConstant": false,
+                            "isLValue": false,
+                            "isPure": true,
+                            "kind": "string",
+                            "lValueRequested": false,
+                            "nodeType": "Literal",
+                            "src": "901:55:1",
+                            "typeDescriptions": {
+                              "typeIdentifier": "t_stringliteral_0aa66e8d29a37a2f22d106dd5d14e76c01e97bf20b236041868ae7b9e34a443e",
+                              "typeString": "literal_string \"https://collection-assets.proof.xyz/moonbirds/images/\""
+                            },
+                            "value": "https://collection-assets.proof.xyz/moonbirds/images/"
+                          },
+                          {
+                            "arguments": [
+                              {
+                                "id": 133,
+                                "name": "tokenId",
+                                "nodeType": "Identifier",
+                                "overloadedDeclarations": [],
+                                "referencedDeclaration": 121,
+                                "src": "975:7:1",
+                                "typeDescriptions": {
+                                  "typeIdentifier": "t_uint256",
+                                  "typeString": "uint256"
+                                }
+                              }
+                            ],
+                            "expression": {
+                              "argumentTypes": [
+                                {
+                                  "typeIdentifier": "t_uint256",
+                                  "typeString": "uint256"
+                                }
+                              ],
+                              "expression": {
+                                "id": 131,
+                                "name": "Strings",
+                                "nodeType": "Identifier",
+                                "overloadedDeclarations": [],
+                                "referencedDeclaration": 86,
+                                "src": "958:7:1",
+                                "typeDescriptions": {
+                                  "typeIdentifier": "t_type$_t_contract$_Strings_$86_$",
+                                  "typeString": "type(library Strings)"
+                                }
+                              },
+                              "id": 132,
+                              "isConstant": false,
+                              "isLValue": false,
+                              "isPure": false,
+                              "lValueRequested": false,
+                              "memberName": "toString",
+                              "nodeType": "MemberAccess",
+                              "referencedDeclaration": 85,
+                              "src": "958:16:1",
+                              "typeDescriptions": {
+                                "typeIdentifier": "t_function_internal_pure$_t_uint256_$returns$_t_string_memory_ptr_$",
+                                "typeString": "function (uint256) pure returns (string memory)"
+                              }
+                            },
+                            "id": 134,
+                            "isConstant": false,
+                            "isLValue": false,
+                            "isPure": false,
+                            "kind": "functionCall",
+                            "lValueRequested": false,
+                            "names": [],
+                            "nodeType": "FunctionCall",
+                            "src": "958:25:1",
+                            "tryCall": false,
+                            "typeDescriptions": {
+                              "typeIdentifier": "t_string_memory_ptr",
+                              "typeString": "string memory"
+                            }
+                          },
+                          {
+                            "hexValue": "2e706e67",
+                            "id": 135,
+                            "isConstant": false,
+                            "isLValue": false,
+                            "isPure": true,
+                            "kind": "string",
+                            "lValueRequested": false,
+                            "nodeType": "Literal",
+                            "src": "985:6:1",
+                            "typeDescriptions": {
+                              "typeIdentifier": "t_stringliteral_37dc0bc31da9c9a2987f66319867b061a881cc348000601df903375b9187e0c8",
+                              "typeString": "literal_string \".png\""
+                            },
+                            "value": ".png"
+                          }
+                        ],
+                        "expression": {
+                          "argumentTypes": [
+                            {
+                              "typeIdentifier": "t_stringliteral_0aa66e8d29a37a2f22d106dd5d14e76c01e97bf20b236041868ae7b9e34a443e",
+                              "typeString": "literal_string \"https://collection-assets.proof.xyz/moonbirds/images/\""
+                            },
+                            {
+                              "typeIdentifier": "t_string_memory_ptr",
+                              "typeString": "string memory"
+                            },
+                            {
+                              "typeIdentifier": "t_stringliteral_37dc0bc31da9c9a2987f66319867b061a881cc348000601df903375b9187e0c8",
+                              "typeString": "literal_string \".png\""
+                            }
+                          ],
+                          "expression": {
+                            "id": 128,
+                            "name": "abi",
+                            "nodeType": "Identifier",
+                            "overloadedDeclarations": [],
+                            "referencedDeclaration": 4294967295,
+                            "src": "884:3:1",
+                            "typeDescriptions": {
+                              "typeIdentifier": "t_magic_abi",
+                              "typeString": "abi"
+                            }
+                          },
+                          "id": 129,
+                          "isConstant": false,
+                          "isLValue": false,
+                          "isPure": true,
+                          "lValueRequested": false,
+                          "memberName": "encodePacked",
+                          "nodeType": "MemberAccess",
+                          "src": "884:16:1",
+                          "typeDescriptions": {
+                            "typeIdentifier": "t_function_abiencodepacked_pure$__$returns$_t_bytes_memory_ptr_$",
+                            "typeString": "function () pure returns (bytes memory)"
+                          }
+                        },
+                        "id": 136,
+                        "isConstant": false,
+                        "isLValue": false,
+                        "isPure": false,
+                        "kind": "functionCall",
+                        "lValueRequested": false,
+                        "names": [],
+                        "nodeType": "FunctionCall",
+                        "src": "884:108:1",
+                        "tryCall": false,
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_bytes_memory_ptr",
+                          "typeString": "bytes memory"
+                        }
+                      }
+                    ],
+                    "expression": {
+                      "argumentTypes": [
+                        {
+                          "typeIdentifier": "t_bytes_memory_ptr",
+                          "typeString": "bytes memory"
+                        }
+                      ],
+                      "id": 127,
+                      "isConstant": false,
+                      "isLValue": false,
+                      "isPure": true,
+                      "lValueRequested": false,
+                      "nodeType": "ElementaryTypeNameExpression",
+                      "src": "877:6:1",
+                      "typeDescriptions": {
+                        "typeIdentifier": "t_type$_t_string_storage_ptr_$",
+                        "typeString": "type(string storage pointer)"
+                      },
+                      "typeName": {
+                        "id": 126,
+                        "name": "string",
+                        "nodeType": "ElementaryTypeName",
+                        "src": "877:6:1",
+                        "typeDescriptions": {}
+                      }
+                    },
+                    "id": 137,
+                    "isConstant": false,
+                    "isLValue": false,
+                    "isPure": false,
+                    "kind": "typeConversion",
+                    "lValueRequested": false,
+                    "names": [],
+                    "nodeType": "FunctionCall",
+                    "src": "877:116:1",
+                    "tryCall": false,
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_string_memory_ptr",
+                      "typeString": "string memory"
+                    }
+                  },
+                  "functionReturnParameters": 125,
+                  "id": 138,
+                  "nodeType": "Return",
+                  "src": "870:123:1"
+                }
+              ]
+            },
+            "functionSelector": "1db6151a",
+            "id": 140,
+            "implemented": true,
+            "kind": "function",
+            "modifiers": [],
+            "name": "alternateArtworkUri",
+            "nodeType": "FunctionDefinition",
+            "parameters": {
+              "id": 122,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 121,
+                  "mutability": "mutable",
+                  "name": "tokenId",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 140,
+                  "src": "805:12:1",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_uint256",
+                    "typeString": "uint256"
+                  },
+                  "typeName": {
+                    "id": 120,
+                    "name": "uint",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "805:4:1",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_uint256",
+                      "typeString": "uint256"
+                    }
+                  },
+                  "visibility": "internal"
+                }
+              ],
+              "src": "795:28:1"
+            },
+            "returnParameters": {
+              "id": 125,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 124,
+                  "mutability": "mutable",
+                  "name": "",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 140,
+                  "src": "845:13:1",
+                  "stateVariable": false,
+                  "storageLocation": "memory",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_string_memory_ptr",
+                    "typeString": "string"
+                  },
+                  "typeName": {
+                    "id": 123,
+                    "name": "string",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "845:6:1",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_string_storage_ptr",
+                      "typeString": "string"
+                    }
+                  },
+                  "visibility": "internal"
+                }
+              ],
+              "src": "844:15:1"
+            },
+            "scope": 173,
+            "src": "767:233:1",
+            "stateMutability": "view",
+            "virtual": false,
+            "visibility": "public"
+          },
+          {
+            "body": {
+              "id": 161,
+              "nodeType": "Block",
+              "src": "1078:279:1",
+              "statements": [
+                {
+                  "expression": {
+                    "arguments": [
+                      {
+                        "arguments": [
+                          {
+                            "hexValue": "68747470733a2f2f636f6c6c656374696f6e2d6173736574732e70726f6f662e78797a2f6d6f6f6e62697264732f656d6265642e68746d6c",
+                            "id": 151,
+                            "isConstant": false,
+                            "isLValue": false,
+                            "isPure": true,
+                            "kind": "string",
+                            "lValueRequested": false,
+                            "nodeType": "Literal",
+                            "src": "1157:58:1",
+                            "typeDescriptions": {
+                              "typeIdentifier": "t_stringliteral_e538abb4930043330d5bda30aba4132484d947b3714bebdcc928b5b96e7e1bc4",
+                              "typeString": "literal_string \"https://collection-assets.proof.xyz/moonbirds/embed.html\""
+                            },
+                            "value": "https://collection-assets.proof.xyz/moonbirds/embed.html"
+                          },
+                          {
+                            "hexValue": "3f746f6b656e49643d",
+                            "id": 152,
+                            "isConstant": false,
+                            "isLValue": false,
+                            "isPure": true,
+                            "kind": "string",
+                            "lValueRequested": false,
+                            "nodeType": "Literal",
+                            "src": "1233:11:1",
+                            "typeDescriptions": {
+                              "typeIdentifier": "t_stringliteral_db9dc7289e81e3952ab4692ca07bef3a7e9abea3611ad475f477d1ef24a45571",
+                              "typeString": "literal_string \"?tokenId=\""
+                            },
+                            "value": "?tokenId="
+                          },
+                          {
+                            "arguments": [
+                              {
+                                "id": 155,
+                                "name": "tokenId",
+                                "nodeType": "Identifier",
+                                "overloadedDeclarations": [],
+                                "referencedDeclaration": 142,
+                                "src": "1279:7:1",
+                                "typeDescriptions": {
+                                  "typeIdentifier": "t_uint256",
+                                  "typeString": "uint256"
+                                }
+                              }
+                            ],
+                            "expression": {
+                              "argumentTypes": [
+                                {
+                                  "typeIdentifier": "t_uint256",
+                                  "typeString": "uint256"
+                                }
+                              ],
+                              "expression": {
+                                "id": 153,
+                                "name": "Strings",
+                                "nodeType": "Identifier",
+                                "overloadedDeclarations": [],
+                                "referencedDeclaration": 86,
+                                "src": "1262:7:1",
+                                "typeDescriptions": {
+                                  "typeIdentifier": "t_type$_t_contract$_Strings_$86_$",
+                                  "typeString": "type(library Strings)"
+                                }
+                              },
+                              "id": 154,
+                              "isConstant": false,
+                              "isLValue": false,
+                              "isPure": false,
+                              "lValueRequested": false,
+                              "memberName": "toString",
+                              "nodeType": "MemberAccess",
+                              "referencedDeclaration": 85,
+                              "src": "1262:16:1",
+                              "typeDescriptions": {
+                                "typeIdentifier": "t_function_internal_pure$_t_uint256_$returns$_t_string_memory_ptr_$",
+                                "typeString": "function (uint256) pure returns (string memory)"
+                              }
+                            },
+                            "id": 156,
+                            "isConstant": false,
+                            "isLValue": false,
+                            "isPure": false,
+                            "kind": "functionCall",
+                            "lValueRequested": false,
+                            "names": [],
+                            "nodeType": "FunctionCall",
+                            "src": "1262:25:1",
+                            "tryCall": false,
+                            "typeDescriptions": {
+                              "typeIdentifier": "t_string_memory_ptr",
+                              "typeString": "string memory"
+                            }
+                          },
+                          {
+                            "hexValue": "267573654e6577417274776f726b3d74727565",
+                            "id": 157,
+                            "isConstant": false,
+                            "isLValue": false,
+                            "isPure": true,
+                            "kind": "string",
+                            "lValueRequested": false,
+                            "nodeType": "Literal",
+                            "src": "1305:21:1",
+                            "typeDescriptions": {
+                              "typeIdentifier": "t_stringliteral_d65f850cfff07df7ff69ff12f181f989c7261d71600ff1abc45550aeaf22d3f3",
+                              "typeString": "literal_string \"&useNewArtwork=true\""
+                            },
+                            "value": "&useNewArtwork=true"
+                          }
+                        ],
+                        "expression": {
+                          "argumentTypes": [
+                            {
+                              "typeIdentifier": "t_stringliteral_e538abb4930043330d5bda30aba4132484d947b3714bebdcc928b5b96e7e1bc4",
+                              "typeString": "literal_string \"https://collection-assets.proof.xyz/moonbirds/embed.html\""
+                            },
+                            {
+                              "typeIdentifier": "t_stringliteral_db9dc7289e81e3952ab4692ca07bef3a7e9abea3611ad475f477d1ef24a45571",
+                              "typeString": "literal_string \"?tokenId=\""
+                            },
+                            {
+                              "typeIdentifier": "t_string_memory_ptr",
+                              "typeString": "string memory"
+                            },
+                            {
+                              "typeIdentifier": "t_stringliteral_d65f850cfff07df7ff69ff12f181f989c7261d71600ff1abc45550aeaf22d3f3",
+                              "typeString": "literal_string \"&useNewArtwork=true\""
+                            }
+                          ],
+                          "expression": {
+                            "id": 149,
+                            "name": "abi",
+                            "nodeType": "Identifier",
+                            "overloadedDeclarations": [],
+                            "referencedDeclaration": 4294967295,
+                            "src": "1123:3:1",
+                            "typeDescriptions": {
+                              "typeIdentifier": "t_magic_abi",
+                              "typeString": "abi"
+                            }
+                          },
+                          "id": 150,
+                          "isConstant": false,
+                          "isLValue": false,
+                          "isPure": true,
+                          "lValueRequested": false,
+                          "memberName": "encodePacked",
+                          "nodeType": "MemberAccess",
+                          "src": "1123:16:1",
+                          "typeDescriptions": {
+                            "typeIdentifier": "t_function_abiencodepacked_pure$__$returns$_t_bytes_memory_ptr_$",
+                            "typeString": "function () pure returns (bytes memory)"
+                          }
+                        },
+                        "id": 158,
+                        "isConstant": false,
+                        "isLValue": false,
+                        "isPure": false,
+                        "kind": "functionCall",
+                        "lValueRequested": false,
+                        "names": [],
+                        "nodeType": "FunctionCall",
+                        "src": "1123:217:1",
+                        "tryCall": false,
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_bytes_memory_ptr",
+                          "typeString": "bytes memory"
+                        }
+                      }
+                    ],
+                    "expression": {
+                      "argumentTypes": [
+                        {
+                          "typeIdentifier": "t_bytes_memory_ptr",
+                          "typeString": "bytes memory"
+                        }
+                      ],
+                      "id": 148,
+                      "isConstant": false,
+                      "isLValue": false,
+                      "isPure": true,
+                      "lValueRequested": false,
+                      "nodeType": "ElementaryTypeNameExpression",
+                      "src": "1103:6:1",
+                      "typeDescriptions": {
+                        "typeIdentifier": "t_type$_t_string_storage_ptr_$",
+                        "typeString": "type(string storage pointer)"
+                      },
+                      "typeName": {
+                        "id": 147,
+                        "name": "string",
+                        "nodeType": "ElementaryTypeName",
+                        "src": "1103:6:1",
+                        "typeDescriptions": {}
+                      }
+                    },
+                    "id": 159,
+                    "isConstant": false,
+                    "isLValue": false,
+                    "isPure": false,
+                    "kind": "typeConversion",
+                    "lValueRequested": false,
+                    "names": [],
+                    "nodeType": "FunctionCall",
+                    "src": "1103:247:1",
+                    "tryCall": false,
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_string_memory_ptr",
+                      "typeString": "string memory"
+                    }
+                  },
+                  "functionReturnParameters": 146,
+                  "id": 160,
+                  "nodeType": "Return",
+                  "src": "1088:262:1"
+                }
+              ]
+            },
+            "functionSelector": "6c24a457",
+            "id": 162,
+            "implemented": true,
+            "kind": "function",
+            "modifiers": [],
+            "name": "animationUri",
+            "nodeType": "FunctionDefinition",
+            "parameters": {
+              "id": 143,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 142,
+                  "mutability": "mutable",
+                  "name": "tokenId",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 162,
+                  "src": "1028:12:1",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_uint256",
+                    "typeString": "uint256"
+                  },
+                  "typeName": {
+                    "id": 141,
+                    "name": "uint",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "1028:4:1",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_uint256",
+                      "typeString": "uint256"
+                    }
+                  },
+                  "visibility": "internal"
+                }
+              ],
+              "src": "1027:14:1"
+            },
+            "returnParameters": {
+              "id": 146,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 145,
+                  "mutability": "mutable",
+                  "name": "",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 162,
+                  "src": "1063:13:1",
+                  "stateVariable": false,
+                  "storageLocation": "memory",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_string_memory_ptr",
+                    "typeString": "string"
+                  },
+                  "typeName": {
+                    "id": 144,
+                    "name": "string",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "1063:6:1",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_string_storage_ptr",
+                      "typeString": "string"
+                    }
+                  },
+                  "visibility": "internal"
+                }
+              ],
+              "src": "1062:15:1"
+            },
+            "scope": 173,
+            "src": "1006:351:1",
+            "stateMutability": "view",
+            "virtual": false,
+            "visibility": "public"
+          },
+          {
+            "body": {
+              "id": 171,
+              "nodeType": "Block",
+              "src": "1429:28:1",
+              "statements": [
+                {
+                  "expression": {
+                    "hexValue": "74727565",
+                    "id": 169,
+                    "isConstant": false,
+                    "isLValue": false,
+                    "isPure": true,
+                    "kind": "bool",
+                    "lValueRequested": false,
+                    "nodeType": "Literal",
+                    "src": "1446:4:1",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_bool",
+                      "typeString": "bool"
+                    },
+                    "value": "true"
+                  },
+                  "functionReturnParameters": 168,
+                  "id": 170,
+                  "nodeType": "Return",
+                  "src": "1439:11:1"
+                }
+              ]
+            },
+            "functionSelector": "6b1e676b",
+            "id": 172,
+            "implemented": true,
+            "kind": "function",
+            "modifiers": [],
+            "name": "useNewArtwork",
+            "nodeType": "FunctionDefinition",
+            "parameters": {
+              "id": 165,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 164,
+                  "mutability": "mutable",
+                  "name": "tokenId",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 172,
+                  "src": "1386:12:1",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_uint256",
+                    "typeString": "uint256"
+                  },
+                  "typeName": {
+                    "id": 163,
+                    "name": "uint",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "1386:4:1",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_uint256",
+                      "typeString": "uint256"
+                    }
+                  },
+                  "visibility": "internal"
+                }
+              ],
+              "src": "1385:14:1"
+            },
+            "returnParameters": {
+              "id": 168,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 167,
+                  "mutability": "mutable",
+                  "name": "",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 172,
+                  "src": "1423:4:1",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_bool",
+                    "typeString": "bool"
+                  },
+                  "typeName": {
+                    "id": 166,
+                    "name": "bool",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "1423:4:1",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_bool",
+                      "typeString": "bool"
+                    }
+                  },
+                  "visibility": "internal"
+                }
+              ],
+              "src": "1422:6:1"
+            },
+            "scope": 173,
+            "src": "1363:94:1",
+            "stateMutability": "view",
+            "virtual": false,
+            "visibility": "external"
+          }
+        ],
+        "scope": 174,
+        "src": "109:1350:1"
+      }
+    ],
+    "src": "32:1427:1"
+  },
+  "legacyAST": {
+    "attributes": {
+      "absolutePath": "project:/contracts/MoonbirdsRenderer.sol",
+      "exportedSymbols": {
+        "MoonbirdsRenderer": [
+          173
+        ],
+        "Strings": [
+          86
+        ]
+      },
+      "license": "MIT"
+    },
+    "children": [
+      {
+        "attributes": {
+          "literals": [
+            "solidity",
+            "0.7",
+            ".6"
+          ]
+        },
+        "id": 88,
+        "name": "PragmaDirective",
+        "src": "32:22:1"
+      },
+      {
+        "attributes": {
+          "SourceUnit": 87,
+          "absolutePath": "@openzeppelin/contracts/utils/Strings.sol",
+          "file": "@openzeppelin/contracts/utils/Strings.sol",
+          "scope": 174,
+          "symbolAliases": [
+            null
+          ],
+          "unitAlias": ""
+        },
+        "id": 89,
+        "name": "ImportDirective",
+        "src": "56:51:1"
+      },
+      {
+        "attributes": {
+          "abstract": false,
+          "baseContracts": [
+            null
+          ],
+          "contractDependencies": [
+            null
+          ],
+          "contractKind": "contract",
+          "fullyImplemented": true,
+          "linearizedBaseContracts": [
+            173
+          ],
+          "name": "MoonbirdsRenderer",
+          "scope": 174
+        },
+        "children": [
+          {
+            "attributes": {
+              "functionSelector": "c87b56dd",
+              "implemented": true,
+              "isConstructor": false,
+              "kind": "function",
+              "modifiers": [
+                null
+              ],
+              "name": "tokenURI",
+              "scope": 173,
+              "stateMutability": "view",
+              "virtual": false,
+              "visibility": "external"
+            },
+            "children": [
+              {
+                "children": [
+                  {
+                    "attributes": {
+                      "constant": false,
+                      "mutability": "mutable",
+                      "name": "tokenId",
+                      "scope": 99,
+                      "stateVariable": false,
+                      "storageLocation": "default",
+                      "type": "uint256",
+                      "visibility": "internal"
+                    },
+                    "children": [
+                      {
+                        "attributes": {
+                          "name": "uint",
+                          "type": "uint256"
+                        },
+                        "id": 90,
+                        "name": "ElementaryTypeName",
+                        "src": "161:4:1"
+                      }
+                    ],
+                    "id": 91,
+                    "name": "VariableDeclaration",
+                    "src": "161:12:1"
+                  }
+                ],
+                "id": 92,
+                "name": "ParameterList",
+                "src": "160:14:1"
+              },
+              {
+                "children": [
+                  {
+                    "attributes": {
+                      "constant": false,
+                      "mutability": "mutable",
+                      "name": "",
+                      "scope": 99,
+                      "stateVariable": false,
+                      "storageLocation": "memory",
+                      "type": "string",
+                      "visibility": "internal"
+                    },
+                    "children": [
+                      {
+                        "attributes": {
+                          "name": "string",
+                          "type": "string"
+                        },
+                        "id": 93,
+                        "name": "ElementaryTypeName",
+                        "src": "198:6:1"
+                      }
+                    ],
+                    "id": 94,
+                    "name": "VariableDeclaration",
+                    "src": "198:13:1"
+                  }
+                ],
+                "id": 95,
+                "name": "ParameterList",
+                "src": "197:15:1"
+              },
+              {
+                "children": [
+                  {
+                    "attributes": {
+                      "functionReturnParameters": 95
+                    },
+                    "children": [
+                      {
+                        "attributes": {
+                          "hexvalue": "",
+                          "isConstant": false,
+                          "isLValue": false,
+                          "isPure": true,
+                          "lValueRequested": false,
+                          "token": "string",
+                          "type": "literal_string \"\"",
+                          "value": ""
+                        },
+                        "id": 96,
+                        "name": "Literal",
+                        "src": "230:2:1"
+                      }
+                    ],
+                    "id": 97,
+                    "name": "Return",
+                    "src": "223:9:1"
+                  }
+                ],
+                "id": 98,
+                "name": "Block",
+                "src": "213:26:1"
+              }
+            ],
+            "id": 99,
+            "name": "FunctionDefinition",
+            "src": "143:96:1"
+          },
+          {
+            "attributes": {
+              "functionSelector": "27b3a84b",
+              "implemented": true,
+              "isConstructor": false,
+              "kind": "function",
+              "modifiers": [
+                null
+              ],
+              "name": "attributesJson",
+              "scope": 173,
+              "stateMutability": "view",
+              "virtual": false,
+              "visibility": "public"
+            },
+            "children": [
+              {
+                "children": [
+                  {
+                    "attributes": {
+                      "constant": false,
+                      "mutability": "mutable",
+                      "name": "tokenId",
+                      "scope": 109,
+                      "stateVariable": false,
+                      "storageLocation": "default",
+                      "type": "uint256",
+                      "visibility": "internal"
+                    },
+                    "children": [
+                      {
+                        "attributes": {
+                          "name": "uint",
+                          "type": "uint256"
+                        },
+                        "id": 100,
+                        "name": "ElementaryTypeName",
+                        "src": "278:4:1"
+                      }
+                    ],
+                    "id": 101,
+                    "name": "VariableDeclaration",
+                    "src": "278:12:1"
+                  }
+                ],
+                "id": 102,
+                "name": "ParameterList",
+                "src": "268:28:1"
+              },
+              {
+                "children": [
+                  {
+                    "attributes": {
+                      "constant": false,
+                      "mutability": "mutable",
+                      "name": "",
+                      "scope": 109,
+                      "stateVariable": false,
+                      "storageLocation": "memory",
+                      "type": "string",
+                      "visibility": "internal"
+                    },
+                    "children": [
+                      {
+                        "attributes": {
+                          "name": "string",
+                          "type": "string"
+                        },
+                        "id": 103,
+                        "name": "ElementaryTypeName",
+                        "src": "318:6:1"
+                      }
+                    ],
+                    "id": 104,
+                    "name": "VariableDeclaration",
+                    "src": "318:13:1"
+                  }
+                ],
+                "id": 105,
+                "name": "ParameterList",
+                "src": "317:15:1"
+              },
+              {
+                "children": [
+                  {
+                    "attributes": {
+                      "functionReturnParameters": 105
+                    },
+                    "children": [
+                      {
+                        "attributes": {
+                          "hexvalue": "5b7b2274726169745f74797065223a224261636b67726f756e64222c2276616c7565223a22426c7565227d2c7b2274726169745f74797065223a224265616b222c2276616c7565223a2253686f7274227d2c7b2274726169745f74797065223a22426f6479222c2276616c7565223a224372657363656e74227d2c7b2274726169745f74797065223a224665617468657273222c2276616c7565223a22507572706c65227d2c7b2274726169745f74797065223a2245796573222c2276616c7565223a224f70656e227d2c7b2274726169745f74797065223a224865616477656172222c2276616c7565223a2253706163652048656c6d6574227d5d",
+                          "isConstant": false,
+                          "isLValue": false,
+                          "isPure": true,
+                          "lValueRequested": false,
+                          "token": "string",
+                          "type": "literal_string \"[{\"trait_type\":\"Background\",\"value\":\"Blue\"},{\"trait_type\":\"Beak\",\"value\":\"Short\"},{\"trait_type\":\"Body\",\"value\":\"Crescent\"},{\"trait_type\":\"Feathers\",\"value\":\"Purple\"},{\"trait_type\":\"Eyes\",\"value\":\"Open\"},{\"trait_type\":\"Headwear\",\"value\":\"Space Helmet\"}]\"",
+                          "value": "[{\"trait_type\":\"Background\",\"value\":\"Blue\"},{\"trait_type\":\"Beak\",\"value\":\"Short\"},{\"trait_type\":\"Body\",\"value\":\"Crescent\"},{\"trait_type\":\"Feathers\",\"value\":\"Purple\"},{\"trait_type\":\"Eyes\",\"value\":\"Open\"},{\"trait_type\":\"Headwear\",\"value\":\"Space Helmet\"}]"
+                        },
+                        "id": 106,
+                        "name": "Literal",
+                        "src": "350:302:1"
+                      }
+                    ],
+                    "id": 107,
+                    "name": "Return",
+                    "src": "343:309:1"
+                  }
+                ],
+                "id": 108,
+                "name": "Block",
+                "src": "333:326:1"
+              }
+            ],
+            "id": 109,
+            "name": "FunctionDefinition",
+            "src": "245:414:1"
+          },
+          {
+            "attributes": {
+              "functionSelector": "0dbc4e74",
+              "implemented": true,
+              "isConstructor": false,
+              "kind": "function",
+              "modifiers": [
+                null
+              ],
+              "name": "artworkUri",
+              "scope": 173,
+              "stateMutability": "view",
+              "virtual": false,
+              "visibility": "public"
+            },
+            "children": [
+              {
+                "children": [
+                  {
+                    "attributes": {
+                      "constant": false,
+                      "mutability": "mutable",
+                      "name": "tokenId",
+                      "scope": 119,
+                      "stateVariable": false,
+                      "storageLocation": "default",
+                      "type": "uint256",
+                      "visibility": "internal"
+                    },
+                    "children": [
+                      {
+                        "attributes": {
+                          "name": "uint",
+                          "type": "uint256"
+                        },
+                        "id": 110,
+                        "name": "ElementaryTypeName",
+                        "src": "685:4:1"
+                      }
+                    ],
+                    "id": 111,
+                    "name": "VariableDeclaration",
+                    "src": "685:12:1"
+                  }
+                ],
+                "id": 112,
+                "name": "ParameterList",
+                "src": "684:14:1"
+              },
+              {
+                "children": [
+                  {
+                    "attributes": {
+                      "constant": false,
+                      "mutability": "mutable",
+                      "name": "",
+                      "scope": 119,
+                      "stateVariable": false,
+                      "storageLocation": "memory",
+                      "type": "string",
+                      "visibility": "internal"
+                    },
+                    "children": [
+                      {
+                        "attributes": {
+                          "name": "string",
+                          "type": "string"
+                        },
+                        "id": 113,
+                        "name": "ElementaryTypeName",
+                        "src": "720:6:1"
+                      }
+                    ],
+                    "id": 114,
+                    "name": "VariableDeclaration",
+                    "src": "720:13:1"
+                  }
+                ],
+                "id": 115,
+                "name": "ParameterList",
+                "src": "719:15:1"
+              },
+              {
+                "children": [
+                  {
+                    "attributes": {
+                      "functionReturnParameters": 115
+                    },
+                    "children": [
+                      {
+                        "attributes": {
+                          "hexvalue": "",
+                          "isConstant": false,
+                          "isLValue": false,
+                          "isPure": true,
+                          "lValueRequested": false,
+                          "token": "string",
+                          "type": "literal_string \"\"",
+                          "value": ""
+                        },
+                        "id": 116,
+                        "name": "Literal",
+                        "src": "752:2:1"
+                      }
+                    ],
+                    "id": 117,
+                    "name": "Return",
+                    "src": "745:9:1"
+                  }
+                ],
+                "id": 118,
+                "name": "Block",
+                "src": "735:26:1"
+              }
+            ],
+            "id": 119,
+            "name": "FunctionDefinition",
+            "src": "665:96:1"
+          },
+          {
+            "attributes": {
+              "functionSelector": "1db6151a",
+              "implemented": true,
+              "isConstructor": false,
+              "kind": "function",
+              "modifiers": [
+                null
+              ],
+              "name": "alternateArtworkUri",
+              "scope": 173,
+              "stateMutability": "view",
+              "virtual": false,
+              "visibility": "public"
+            },
+            "children": [
+              {
+                "children": [
+                  {
+                    "attributes": {
+                      "constant": false,
+                      "mutability": "mutable",
+                      "name": "tokenId",
+                      "scope": 140,
+                      "stateVariable": false,
+                      "storageLocation": "default",
+                      "type": "uint256",
+                      "visibility": "internal"
+                    },
+                    "children": [
+                      {
+                        "attributes": {
+                          "name": "uint",
+                          "type": "uint256"
+                        },
+                        "id": 120,
+                        "name": "ElementaryTypeName",
+                        "src": "805:4:1"
+                      }
+                    ],
+                    "id": 121,
+                    "name": "VariableDeclaration",
+                    "src": "805:12:1"
+                  }
+                ],
+                "id": 122,
+                "name": "ParameterList",
+                "src": "795:28:1"
+              },
+              {
+                "children": [
+                  {
+                    "attributes": {
+                      "constant": false,
+                      "mutability": "mutable",
+                      "name": "",
+                      "scope": 140,
+                      "stateVariable": false,
+                      "storageLocation": "memory",
+                      "type": "string",
+                      "visibility": "internal"
+                    },
+                    "children": [
+                      {
+                        "attributes": {
+                          "name": "string",
+                          "type": "string"
+                        },
+                        "id": 123,
+                        "name": "ElementaryTypeName",
+                        "src": "845:6:1"
+                      }
+                    ],
+                    "id": 124,
+                    "name": "VariableDeclaration",
+                    "src": "845:13:1"
+                  }
+                ],
+                "id": 125,
+                "name": "ParameterList",
+                "src": "844:15:1"
+              },
+              {
+                "children": [
+                  {
+                    "attributes": {
+                      "functionReturnParameters": 125
+                    },
+                    "children": [
+                      {
+                        "attributes": {
+                          "isConstant": false,
+                          "isLValue": false,
+                          "isPure": false,
+                          "isStructConstructorCall": false,
+                          "lValueRequested": false,
+                          "names": [
+                            null
+                          ],
+                          "tryCall": false,
+                          "type": "string memory",
+                          "type_conversion": true
+                        },
+                        "children": [
+                          {
+                            "attributes": {
+                              "argumentTypes": [
+                                {
+                                  "typeIdentifier": "t_bytes_memory_ptr",
+                                  "typeString": "bytes memory"
+                                }
+                              ],
+                              "isConstant": false,
+                              "isLValue": false,
+                              "isPure": true,
+                              "lValueRequested": false,
+                              "type": "type(string storage pointer)"
+                            },
+                            "children": [
+                              {
+                                "attributes": {
+                                  "name": "string"
+                                },
+                                "id": 126,
+                                "name": "ElementaryTypeName",
+                                "src": "877:6:1"
+                              }
+                            ],
+                            "id": 127,
+                            "name": "ElementaryTypeNameExpression",
+                            "src": "877:6:1"
+                          },
+                          {
+                            "attributes": {
+                              "isConstant": false,
+                              "isLValue": false,
+                              "isPure": false,
+                              "isStructConstructorCall": false,
+                              "lValueRequested": false,
+                              "names": [
+                                null
+                              ],
+                              "tryCall": false,
+                              "type": "bytes memory",
+                              "type_conversion": false
+                            },
+                            "children": [
+                              {
+                                "attributes": {
+                                  "argumentTypes": [
+                                    {
+                                      "typeIdentifier": "t_stringliteral_0aa66e8d29a37a2f22d106dd5d14e76c01e97bf20b236041868ae7b9e34a443e",
+                                      "typeString": "literal_string \"https://collection-assets.proof.xyz/moonbirds/images/\""
+                                    },
+                                    {
+                                      "typeIdentifier": "t_string_memory_ptr",
+                                      "typeString": "string memory"
+                                    },
+                                    {
+                                      "typeIdentifier": "t_stringliteral_37dc0bc31da9c9a2987f66319867b061a881cc348000601df903375b9187e0c8",
+                                      "typeString": "literal_string \".png\""
+                                    }
+                                  ],
+                                  "isConstant": false,
+                                  "isLValue": false,
+                                  "isPure": true,
+                                  "lValueRequested": false,
+                                  "member_name": "encodePacked",
+                                  "type": "function () pure returns (bytes memory)"
+                                },
+                                "children": [
+                                  {
+                                    "attributes": {
+                                      "overloadedDeclarations": [
+                                        null
+                                      ],
+                                      "referencedDeclaration": 4294967295,
+                                      "type": "abi",
+                                      "value": "abi"
+                                    },
+                                    "id": 128,
+                                    "name": "Identifier",
+                                    "src": "884:3:1"
+                                  }
+                                ],
+                                "id": 129,
+                                "name": "MemberAccess",
+                                "src": "884:16:1"
+                              },
+                              {
+                                "attributes": {
+                                  "hexvalue": "68747470733a2f2f636f6c6c656374696f6e2d6173736574732e70726f6f662e78797a2f6d6f6f6e62697264732f696d616765732f",
+                                  "isConstant": false,
+                                  "isLValue": false,
+                                  "isPure": true,
+                                  "lValueRequested": false,
+                                  "token": "string",
+                                  "type": "literal_string \"https://collection-assets.proof.xyz/moonbirds/images/\"",
+                                  "value": "https://collection-assets.proof.xyz/moonbirds/images/"
+                                },
+                                "id": 130,
+                                "name": "Literal",
+                                "src": "901:55:1"
+                              },
+                              {
+                                "attributes": {
+                                  "isConstant": false,
+                                  "isLValue": false,
+                                  "isPure": false,
+                                  "isStructConstructorCall": false,
+                                  "lValueRequested": false,
+                                  "names": [
+                                    null
+                                  ],
+                                  "tryCall": false,
+                                  "type": "string memory",
+                                  "type_conversion": false
+                                },
+                                "children": [
+                                  {
+                                    "attributes": {
+                                      "argumentTypes": [
+                                        {
+                                          "typeIdentifier": "t_uint256",
+                                          "typeString": "uint256"
+                                        }
+                                      ],
+                                      "isConstant": false,
+                                      "isLValue": false,
+                                      "isPure": false,
+                                      "lValueRequested": false,
+                                      "member_name": "toString",
+                                      "referencedDeclaration": 85,
+                                      "type": "function (uint256) pure returns (string memory)"
+                                    },
+                                    "children": [
+                                      {
+                                        "attributes": {
+                                          "overloadedDeclarations": [
+                                            null
+                                          ],
+                                          "referencedDeclaration": 86,
+                                          "type": "type(library Strings)",
+                                          "value": "Strings"
+                                        },
+                                        "id": 131,
+                                        "name": "Identifier",
+                                        "src": "958:7:1"
+                                      }
+                                    ],
+                                    "id": 132,
+                                    "name": "MemberAccess",
+                                    "src": "958:16:1"
+                                  },
+                                  {
+                                    "attributes": {
+                                      "overloadedDeclarations": [
+                                        null
+                                      ],
+                                      "referencedDeclaration": 121,
+                                      "type": "uint256",
+                                      "value": "tokenId"
+                                    },
+                                    "id": 133,
+                                    "name": "Identifier",
+                                    "src": "975:7:1"
+                                  }
+                                ],
+                                "id": 134,
+                                "name": "FunctionCall",
+                                "src": "958:25:1"
+                              },
+                              {
+                                "attributes": {
+                                  "hexvalue": "2e706e67",
+                                  "isConstant": false,
+                                  "isLValue": false,
+                                  "isPure": true,
+                                  "lValueRequested": false,
+                                  "token": "string",
+                                  "type": "literal_string \".png\"",
+                                  "value": ".png"
+                                },
+                                "id": 135,
+                                "name": "Literal",
+                                "src": "985:6:1"
+                              }
+                            ],
+                            "id": 136,
+                            "name": "FunctionCall",
+                            "src": "884:108:1"
+                          }
+                        ],
+                        "id": 137,
+                        "name": "FunctionCall",
+                        "src": "877:116:1"
+                      }
+                    ],
+                    "id": 138,
+                    "name": "Return",
+                    "src": "870:123:1"
+                  }
+                ],
+                "id": 139,
+                "name": "Block",
+                "src": "860:140:1"
+              }
+            ],
+            "id": 140,
+            "name": "FunctionDefinition",
+            "src": "767:233:1"
+          },
+          {
+            "attributes": {
+              "functionSelector": "6c24a457",
+              "implemented": true,
+              "isConstructor": false,
+              "kind": "function",
+              "modifiers": [
+                null
+              ],
+              "name": "animationUri",
+              "scope": 173,
+              "stateMutability": "view",
+              "virtual": false,
+              "visibility": "public"
+            },
+            "children": [
+              {
+                "children": [
+                  {
+                    "attributes": {
+                      "constant": false,
+                      "mutability": "mutable",
+                      "name": "tokenId",
+                      "scope": 162,
+                      "stateVariable": false,
+                      "storageLocation": "default",
+                      "type": "uint256",
+                      "visibility": "internal"
+                    },
+                    "children": [
+                      {
+                        "attributes": {
+                          "name": "uint",
+                          "type": "uint256"
+                        },
+                        "id": 141,
+                        "name": "ElementaryTypeName",
+                        "src": "1028:4:1"
+                      }
+                    ],
+                    "id": 142,
+                    "name": "VariableDeclaration",
+                    "src": "1028:12:1"
+                  }
+                ],
+                "id": 143,
+                "name": "ParameterList",
+                "src": "1027:14:1"
+              },
+              {
+                "children": [
+                  {
+                    "attributes": {
+                      "constant": false,
+                      "mutability": "mutable",
+                      "name": "",
+                      "scope": 162,
+                      "stateVariable": false,
+                      "storageLocation": "memory",
+                      "type": "string",
+                      "visibility": "internal"
+                    },
+                    "children": [
+                      {
+                        "attributes": {
+                          "name": "string",
+                          "type": "string"
+                        },
+                        "id": 144,
+                        "name": "ElementaryTypeName",
+                        "src": "1063:6:1"
+                      }
+                    ],
+                    "id": 145,
+                    "name": "VariableDeclaration",
+                    "src": "1063:13:1"
+                  }
+                ],
+                "id": 146,
+                "name": "ParameterList",
+                "src": "1062:15:1"
+              },
+              {
+                "children": [
+                  {
+                    "attributes": {
+                      "functionReturnParameters": 146
+                    },
+                    "children": [
+                      {
+                        "attributes": {
+                          "isConstant": false,
+                          "isLValue": false,
+                          "isPure": false,
+                          "isStructConstructorCall": false,
+                          "lValueRequested": false,
+                          "names": [
+                            null
+                          ],
+                          "tryCall": false,
+                          "type": "string memory",
+                          "type_conversion": true
+                        },
+                        "children": [
+                          {
+                            "attributes": {
+                              "argumentTypes": [
+                                {
+                                  "typeIdentifier": "t_bytes_memory_ptr",
+                                  "typeString": "bytes memory"
+                                }
+                              ],
+                              "isConstant": false,
+                              "isLValue": false,
+                              "isPure": true,
+                              "lValueRequested": false,
+                              "type": "type(string storage pointer)"
+                            },
+                            "children": [
+                              {
+                                "attributes": {
+                                  "name": "string"
+                                },
+                                "id": 147,
+                                "name": "ElementaryTypeName",
+                                "src": "1103:6:1"
+                              }
+                            ],
+                            "id": 148,
+                            "name": "ElementaryTypeNameExpression",
+                            "src": "1103:6:1"
+                          },
+                          {
+                            "attributes": {
+                              "isConstant": false,
+                              "isLValue": false,
+                              "isPure": false,
+                              "isStructConstructorCall": false,
+                              "lValueRequested": false,
+                              "names": [
+                                null
+                              ],
+                              "tryCall": false,
+                              "type": "bytes memory",
+                              "type_conversion": false
+                            },
+                            "children": [
+                              {
+                                "attributes": {
+                                  "argumentTypes": [
+                                    {
+                                      "typeIdentifier": "t_stringliteral_e538abb4930043330d5bda30aba4132484d947b3714bebdcc928b5b96e7e1bc4",
+                                      "typeString": "literal_string \"https://collection-assets.proof.xyz/moonbirds/embed.html\""
+                                    },
+                                    {
+                                      "typeIdentifier": "t_stringliteral_db9dc7289e81e3952ab4692ca07bef3a7e9abea3611ad475f477d1ef24a45571",
+                                      "typeString": "literal_string \"?tokenId=\""
+                                    },
+                                    {
+                                      "typeIdentifier": "t_string_memory_ptr",
+                                      "typeString": "string memory"
+                                    },
+                                    {
+                                      "typeIdentifier": "t_stringliteral_d65f850cfff07df7ff69ff12f181f989c7261d71600ff1abc45550aeaf22d3f3",
+                                      "typeString": "literal_string \"&useNewArtwork=true\""
+                                    }
+                                  ],
+                                  "isConstant": false,
+                                  "isLValue": false,
+                                  "isPure": true,
+                                  "lValueRequested": false,
+                                  "member_name": "encodePacked",
+                                  "type": "function () pure returns (bytes memory)"
+                                },
+                                "children": [
+                                  {
+                                    "attributes": {
+                                      "overloadedDeclarations": [
+                                        null
+                                      ],
+                                      "referencedDeclaration": 4294967295,
+                                      "type": "abi",
+                                      "value": "abi"
+                                    },
+                                    "id": 149,
+                                    "name": "Identifier",
+                                    "src": "1123:3:1"
+                                  }
+                                ],
+                                "id": 150,
+                                "name": "MemberAccess",
+                                "src": "1123:16:1"
+                              },
+                              {
+                                "attributes": {
+                                  "hexvalue": "68747470733a2f2f636f6c6c656374696f6e2d6173736574732e70726f6f662e78797a2f6d6f6f6e62697264732f656d6265642e68746d6c",
+                                  "isConstant": false,
+                                  "isLValue": false,
+                                  "isPure": true,
+                                  "lValueRequested": false,
+                                  "token": "string",
+                                  "type": "literal_string \"https://collection-assets.proof.xyz/moonbirds/embed.html\"",
+                                  "value": "https://collection-assets.proof.xyz/moonbirds/embed.html"
+                                },
+                                "id": 151,
+                                "name": "Literal",
+                                "src": "1157:58:1"
+                              },
+                              {
+                                "attributes": {
+                                  "hexvalue": "3f746f6b656e49643d",
+                                  "isConstant": false,
+                                  "isLValue": false,
+                                  "isPure": true,
+                                  "lValueRequested": false,
+                                  "token": "string",
+                                  "type": "literal_string \"?tokenId=\"",
+                                  "value": "?tokenId="
+                                },
+                                "id": 152,
+                                "name": "Literal",
+                                "src": "1233:11:1"
+                              },
+                              {
+                                "attributes": {
+                                  "isConstant": false,
+                                  "isLValue": false,
+                                  "isPure": false,
+                                  "isStructConstructorCall": false,
+                                  "lValueRequested": false,
+                                  "names": [
+                                    null
+                                  ],
+                                  "tryCall": false,
+                                  "type": "string memory",
+                                  "type_conversion": false
+                                },
+                                "children": [
+                                  {
+                                    "attributes": {
+                                      "argumentTypes": [
+                                        {
+                                          "typeIdentifier": "t_uint256",
+                                          "typeString": "uint256"
+                                        }
+                                      ],
+                                      "isConstant": false,
+                                      "isLValue": false,
+                                      "isPure": false,
+                                      "lValueRequested": false,
+                                      "member_name": "toString",
+                                      "referencedDeclaration": 85,
+                                      "type": "function (uint256) pure returns (string memory)"
+                                    },
+                                    "children": [
+                                      {
+                                        "attributes": {
+                                          "overloadedDeclarations": [
+                                            null
+                                          ],
+                                          "referencedDeclaration": 86,
+                                          "type": "type(library Strings)",
+                                          "value": "Strings"
+                                        },
+                                        "id": 153,
+                                        "name": "Identifier",
+                                        "src": "1262:7:1"
+                                      }
+                                    ],
+                                    "id": 154,
+                                    "name": "MemberAccess",
+                                    "src": "1262:16:1"
+                                  },
+                                  {
+                                    "attributes": {
+                                      "overloadedDeclarations": [
+                                        null
+                                      ],
+                                      "referencedDeclaration": 142,
+                                      "type": "uint256",
+                                      "value": "tokenId"
+                                    },
+                                    "id": 155,
+                                    "name": "Identifier",
+                                    "src": "1279:7:1"
+                                  }
+                                ],
+                                "id": 156,
+                                "name": "FunctionCall",
+                                "src": "1262:25:1"
+                              },
+                              {
+                                "attributes": {
+                                  "hexvalue": "267573654e6577417274776f726b3d74727565",
+                                  "isConstant": false,
+                                  "isLValue": false,
+                                  "isPure": true,
+                                  "lValueRequested": false,
+                                  "token": "string",
+                                  "type": "literal_string \"&useNewArtwork=true\"",
+                                  "value": "&useNewArtwork=true"
+                                },
+                                "id": 157,
+                                "name": "Literal",
+                                "src": "1305:21:1"
+                              }
+                            ],
+                            "id": 158,
+                            "name": "FunctionCall",
+                            "src": "1123:217:1"
+                          }
+                        ],
+                        "id": 159,
+                        "name": "FunctionCall",
+                        "src": "1103:247:1"
+                      }
+                    ],
+                    "id": 160,
+                    "name": "Return",
+                    "src": "1088:262:1"
+                  }
+                ],
+                "id": 161,
+                "name": "Block",
+                "src": "1078:279:1"
+              }
+            ],
+            "id": 162,
+            "name": "FunctionDefinition",
+            "src": "1006:351:1"
+          },
+          {
+            "attributes": {
+              "functionSelector": "6b1e676b",
+              "implemented": true,
+              "isConstructor": false,
+              "kind": "function",
+              "modifiers": [
+                null
+              ],
+              "name": "useNewArtwork",
+              "scope": 173,
+              "stateMutability": "view",
+              "virtual": false,
+              "visibility": "external"
+            },
+            "children": [
+              {
+                "children": [
+                  {
+                    "attributes": {
+                      "constant": false,
+                      "mutability": "mutable",
+                      "name": "tokenId",
+                      "scope": 172,
+                      "stateVariable": false,
+                      "storageLocation": "default",
+                      "type": "uint256",
+                      "visibility": "internal"
+                    },
+                    "children": [
+                      {
+                        "attributes": {
+                          "name": "uint",
+                          "type": "uint256"
+                        },
+                        "id": 163,
+                        "name": "ElementaryTypeName",
+                        "src": "1386:4:1"
+                      }
+                    ],
+                    "id": 164,
+                    "name": "VariableDeclaration",
+                    "src": "1386:12:1"
+                  }
+                ],
+                "id": 165,
+                "name": "ParameterList",
+                "src": "1385:14:1"
+              },
+              {
+                "children": [
+                  {
+                    "attributes": {
+                      "constant": false,
+                      "mutability": "mutable",
+                      "name": "",
+                      "scope": 172,
+                      "stateVariable": false,
+                      "storageLocation": "default",
+                      "type": "bool",
+                      "visibility": "internal"
+                    },
+                    "children": [
+                      {
+                        "attributes": {
+                          "name": "bool",
+                          "type": "bool"
+                        },
+                        "id": 166,
+                        "name": "ElementaryTypeName",
+                        "src": "1423:4:1"
+                      }
+                    ],
+                    "id": 167,
+                    "name": "VariableDeclaration",
+                    "src": "1423:4:1"
+                  }
+                ],
+                "id": 168,
+                "name": "ParameterList",
+                "src": "1422:6:1"
+              },
+              {
+                "children": [
+                  {
+                    "attributes": {
+                      "functionReturnParameters": 168
+                    },
+                    "children": [
+                      {
+                        "attributes": {
+                          "hexvalue": "74727565",
+                          "isConstant": false,
+                          "isLValue": false,
+                          "isPure": true,
+                          "lValueRequested": false,
+                          "token": "bool",
+                          "type": "bool",
+                          "value": "true"
+                        },
+                        "id": 169,
+                        "name": "Literal",
+                        "src": "1446:4:1"
+                      }
+                    ],
+                    "id": 170,
+                    "name": "Return",
+                    "src": "1439:11:1"
+                  }
+                ],
+                "id": 171,
+                "name": "Block",
+                "src": "1429:28:1"
+              }
+            ],
+            "id": 172,
+            "name": "FunctionDefinition",
+            "src": "1363:94:1"
+          }
+        ],
+        "id": 173,
+        "name": "ContractDefinition",
+        "src": "109:1350:1"
+      }
+    ],
+    "id": 174,
+    "name": "SourceUnit",
+    "src": "32:1427:1"
+  },
+  "compiler": {
+    "name": "solc",
+    "version": "0.7.6+commit.7338295f.Emscripten.clang"
+  },
+  "networks": {},
+  "schemaVersion": "3.4.14",
+  "updatedAt": "2024-06-19T07:57:22.328Z",
+  "devdoc": {
+    "kind": "dev",
+    "methods": {},
+    "version": 1
+  },
+  "userdoc": {
+    "kind": "user",
+    "methods": {},
+    "version": 1
+  }
+}

@@ -1,0 +1,646 @@
+{
+  "contractName": "RenderingContract",
+  "abi": [
+    {
+      "inputs": [],
+      "name": "renderingContract",
+      "outputs": [
+        {
+          "internalType": "contract ITokenURIGenerator",
+          "name": "",
+          "type": "address"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "contract ITokenURIGenerator",
+          "name": "_contract",
+          "type": "address"
+        }
+      ],
+      "name": "setRenderingContract",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    }
+  ],
+  "metadata": "{\"compiler\":{\"version\":\"0.7.6+commit.7338295f\"},\"language\":\"Solidity\",\"output\":{\"abi\":[{\"inputs\":[],\"name\":\"renderingContract\",\"outputs\":[{\"internalType\":\"contract ITokenURIGenerator\",\"name\":\"\",\"type\":\"address\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"contract ITokenURIGenerator\",\"name\":\"_contract\",\"type\":\"address\"}],\"name\":\"setRenderingContract\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"}],\"devdoc\":{\"kind\":\"dev\",\"methods\":{},\"version\":1},\"userdoc\":{\"kind\":\"user\",\"methods\":{},\"version\":1}},\"settings\":{\"compilationTarget\":{\"project:/contracts/dependencies/RenderingContract.sol\":\"RenderingContract\"},\"evmVersion\":\"istanbul\",\"libraries\":{},\"metadata\":{\"bytecodeHash\":\"ipfs\"},\"optimizer\":{\"enabled\":true,\"runs\":200},\"remappings\":[]},\"sources\":{\"project:/contracts/dependencies/RenderingContract.sol\":{\"keccak256\":\"0x564eead216953bad4786c5b49929b98743b5ebc42831cc81bbe8befc190b6adb\",\"license\":\"Apache-2.0\",\"urls\":[\"bzz-raw://43aaa60d71d48dc40a46148d77877c592ae4c02ef1b25ac62c30bd75a81b9c5e\",\"dweb:/ipfs/QmbTaszoMFEZrrofmaG8v4YJHbiSC7uQatzPeYyCMc3jCa\"]}},\"version\":1}",
+  "bytecode": "0x",
+  "deployedBytecode": "0x",
+  "immutableReferences": {},
+  "generatedSources": [],
+  "deployedGeneratedSources": [],
+  "sourceMap": "",
+  "deployedSourceMap": "",
+  "source": "// SPDX-License-Identifier: Apache-2.0\npragma solidity ^0.7.6;\n\ninterface ITokenURIGenerator {\n    function tokenURI(uint tokenId) external view returns (string memory);\n}\n\nabstract contract RenderingContract {\n    ITokenURIGenerator public renderingContract;\n\n    function setRenderingContract(ITokenURIGenerator _contract) external {\n        renderingContract = _contract;\n    }\n}",
+  "sourcePath": "/Users/dmitry/workspaces/workspace-rarible/protocol-contracts/projects/tokens-test/contracts/dependencies/RenderingContract.sol",
+  "ast": {
+    "absolutePath": "project:/contracts/dependencies/RenderingContract.sol",
+    "exportedSymbols": {
+      "ITokenURIGenerator": [
+        3430
+      ],
+      "RenderingContract": [
+        3443
+      ]
+    },
+    "id": 3444,
+    "license": "Apache-2.0",
+    "nodeType": "SourceUnit",
+    "nodes": [
+      {
+        "id": 3422,
+        "literals": [
+          "solidity",
+          "^",
+          "0.7",
+          ".6"
+        ],
+        "nodeType": "PragmaDirective",
+        "src": "39:23:18"
+      },
+      {
+        "abstract": false,
+        "baseContracts": [],
+        "contractDependencies": [],
+        "contractKind": "interface",
+        "fullyImplemented": false,
+        "id": 3430,
+        "linearizedBaseContracts": [
+          3430
+        ],
+        "name": "ITokenURIGenerator",
+        "nodeType": "ContractDefinition",
+        "nodes": [
+          {
+            "functionSelector": "c87b56dd",
+            "id": 3429,
+            "implemented": false,
+            "kind": "function",
+            "modifiers": [],
+            "name": "tokenURI",
+            "nodeType": "FunctionDefinition",
+            "parameters": {
+              "id": 3425,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 3424,
+                  "mutability": "mutable",
+                  "name": "tokenId",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 3429,
+                  "src": "117:12:18",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_uint256",
+                    "typeString": "uint256"
+                  },
+                  "typeName": {
+                    "id": 3423,
+                    "name": "uint",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "117:4:18",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_uint256",
+                      "typeString": "uint256"
+                    }
+                  },
+                  "visibility": "internal"
+                }
+              ],
+              "src": "116:14:18"
+            },
+            "returnParameters": {
+              "id": 3428,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 3427,
+                  "mutability": "mutable",
+                  "name": "",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 3429,
+                  "src": "154:13:18",
+                  "stateVariable": false,
+                  "storageLocation": "memory",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_string_memory_ptr",
+                    "typeString": "string"
+                  },
+                  "typeName": {
+                    "id": 3426,
+                    "name": "string",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "154:6:18",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_string_storage_ptr",
+                      "typeString": "string"
+                    }
+                  },
+                  "visibility": "internal"
+                }
+              ],
+              "src": "153:15:18"
+            },
+            "scope": 3430,
+            "src": "99:70:18",
+            "stateMutability": "view",
+            "virtual": false,
+            "visibility": "external"
+          }
+        ],
+        "scope": 3444,
+        "src": "64:107:18"
+      },
+      {
+        "abstract": true,
+        "baseContracts": [],
+        "contractDependencies": [],
+        "contractKind": "contract",
+        "fullyImplemented": true,
+        "id": 3443,
+        "linearizedBaseContracts": [
+          3443
+        ],
+        "name": "RenderingContract",
+        "nodeType": "ContractDefinition",
+        "nodes": [
+          {
+            "constant": false,
+            "functionSelector": "c7fecbcc",
+            "id": 3432,
+            "mutability": "mutable",
+            "name": "renderingContract",
+            "nodeType": "VariableDeclaration",
+            "scope": 3443,
+            "src": "215:43:18",
+            "stateVariable": true,
+            "storageLocation": "default",
+            "typeDescriptions": {
+              "typeIdentifier": "t_contract$_ITokenURIGenerator_$3430",
+              "typeString": "contract ITokenURIGenerator"
+            },
+            "typeName": {
+              "id": 3431,
+              "name": "ITokenURIGenerator",
+              "nodeType": "UserDefinedTypeName",
+              "referencedDeclaration": 3430,
+              "src": "215:18:18",
+              "typeDescriptions": {
+                "typeIdentifier": "t_contract$_ITokenURIGenerator_$3430",
+                "typeString": "contract ITokenURIGenerator"
+              }
+            },
+            "visibility": "public"
+          },
+          {
+            "body": {
+              "id": 3441,
+              "nodeType": "Block",
+              "src": "334:46:18",
+              "statements": [
+                {
+                  "expression": {
+                    "id": 3439,
+                    "isConstant": false,
+                    "isLValue": false,
+                    "isPure": false,
+                    "lValueRequested": false,
+                    "leftHandSide": {
+                      "id": 3437,
+                      "name": "renderingContract",
+                      "nodeType": "Identifier",
+                      "overloadedDeclarations": [],
+                      "referencedDeclaration": 3432,
+                      "src": "344:17:18",
+                      "typeDescriptions": {
+                        "typeIdentifier": "t_contract$_ITokenURIGenerator_$3430",
+                        "typeString": "contract ITokenURIGenerator"
+                      }
+                    },
+                    "nodeType": "Assignment",
+                    "operator": "=",
+                    "rightHandSide": {
+                      "id": 3438,
+                      "name": "_contract",
+                      "nodeType": "Identifier",
+                      "overloadedDeclarations": [],
+                      "referencedDeclaration": 3434,
+                      "src": "364:9:18",
+                      "typeDescriptions": {
+                        "typeIdentifier": "t_contract$_ITokenURIGenerator_$3430",
+                        "typeString": "contract ITokenURIGenerator"
+                      }
+                    },
+                    "src": "344:29:18",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_contract$_ITokenURIGenerator_$3430",
+                      "typeString": "contract ITokenURIGenerator"
+                    }
+                  },
+                  "id": 3440,
+                  "nodeType": "ExpressionStatement",
+                  "src": "344:29:18"
+                }
+              ]
+            },
+            "functionSelector": "b7f1d072",
+            "id": 3442,
+            "implemented": true,
+            "kind": "function",
+            "modifiers": [],
+            "name": "setRenderingContract",
+            "nodeType": "FunctionDefinition",
+            "parameters": {
+              "id": 3435,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 3434,
+                  "mutability": "mutable",
+                  "name": "_contract",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 3442,
+                  "src": "295:28:18",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_contract$_ITokenURIGenerator_$3430",
+                    "typeString": "contract ITokenURIGenerator"
+                  },
+                  "typeName": {
+                    "id": 3433,
+                    "name": "ITokenURIGenerator",
+                    "nodeType": "UserDefinedTypeName",
+                    "referencedDeclaration": 3430,
+                    "src": "295:18:18",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_contract$_ITokenURIGenerator_$3430",
+                      "typeString": "contract ITokenURIGenerator"
+                    }
+                  },
+                  "visibility": "internal"
+                }
+              ],
+              "src": "294:30:18"
+            },
+            "returnParameters": {
+              "id": 3436,
+              "nodeType": "ParameterList",
+              "parameters": [],
+              "src": "334:0:18"
+            },
+            "scope": 3443,
+            "src": "265:115:18",
+            "stateMutability": "nonpayable",
+            "virtual": false,
+            "visibility": "external"
+          }
+        ],
+        "scope": 3444,
+        "src": "173:209:18"
+      }
+    ],
+    "src": "39:343:18"
+  },
+  "legacyAST": {
+    "attributes": {
+      "absolutePath": "project:/contracts/dependencies/RenderingContract.sol",
+      "exportedSymbols": {
+        "ITokenURIGenerator": [
+          3430
+        ],
+        "RenderingContract": [
+          3443
+        ]
+      },
+      "license": "Apache-2.0"
+    },
+    "children": [
+      {
+        "attributes": {
+          "literals": [
+            "solidity",
+            "^",
+            "0.7",
+            ".6"
+          ]
+        },
+        "id": 3422,
+        "name": "PragmaDirective",
+        "src": "39:23:18"
+      },
+      {
+        "attributes": {
+          "abstract": false,
+          "baseContracts": [
+            null
+          ],
+          "contractDependencies": [
+            null
+          ],
+          "contractKind": "interface",
+          "fullyImplemented": false,
+          "linearizedBaseContracts": [
+            3430
+          ],
+          "name": "ITokenURIGenerator",
+          "scope": 3444
+        },
+        "children": [
+          {
+            "attributes": {
+              "functionSelector": "c87b56dd",
+              "implemented": false,
+              "isConstructor": false,
+              "kind": "function",
+              "modifiers": [
+                null
+              ],
+              "name": "tokenURI",
+              "scope": 3430,
+              "stateMutability": "view",
+              "virtual": false,
+              "visibility": "external"
+            },
+            "children": [
+              {
+                "children": [
+                  {
+                    "attributes": {
+                      "constant": false,
+                      "mutability": "mutable",
+                      "name": "tokenId",
+                      "scope": 3429,
+                      "stateVariable": false,
+                      "storageLocation": "default",
+                      "type": "uint256",
+                      "visibility": "internal"
+                    },
+                    "children": [
+                      {
+                        "attributes": {
+                          "name": "uint",
+                          "type": "uint256"
+                        },
+                        "id": 3423,
+                        "name": "ElementaryTypeName",
+                        "src": "117:4:18"
+                      }
+                    ],
+                    "id": 3424,
+                    "name": "VariableDeclaration",
+                    "src": "117:12:18"
+                  }
+                ],
+                "id": 3425,
+                "name": "ParameterList",
+                "src": "116:14:18"
+              },
+              {
+                "children": [
+                  {
+                    "attributes": {
+                      "constant": false,
+                      "mutability": "mutable",
+                      "name": "",
+                      "scope": 3429,
+                      "stateVariable": false,
+                      "storageLocation": "memory",
+                      "type": "string",
+                      "visibility": "internal"
+                    },
+                    "children": [
+                      {
+                        "attributes": {
+                          "name": "string",
+                          "type": "string"
+                        },
+                        "id": 3426,
+                        "name": "ElementaryTypeName",
+                        "src": "154:6:18"
+                      }
+                    ],
+                    "id": 3427,
+                    "name": "VariableDeclaration",
+                    "src": "154:13:18"
+                  }
+                ],
+                "id": 3428,
+                "name": "ParameterList",
+                "src": "153:15:18"
+              }
+            ],
+            "id": 3429,
+            "name": "FunctionDefinition",
+            "src": "99:70:18"
+          }
+        ],
+        "id": 3430,
+        "name": "ContractDefinition",
+        "src": "64:107:18"
+      },
+      {
+        "attributes": {
+          "abstract": true,
+          "baseContracts": [
+            null
+          ],
+          "contractDependencies": [
+            null
+          ],
+          "contractKind": "contract",
+          "fullyImplemented": true,
+          "linearizedBaseContracts": [
+            3443
+          ],
+          "name": "RenderingContract",
+          "scope": 3444
+        },
+        "children": [
+          {
+            "attributes": {
+              "constant": false,
+              "functionSelector": "c7fecbcc",
+              "mutability": "mutable",
+              "name": "renderingContract",
+              "scope": 3443,
+              "stateVariable": true,
+              "storageLocation": "default",
+              "type": "contract ITokenURIGenerator",
+              "visibility": "public"
+            },
+            "children": [
+              {
+                "attributes": {
+                  "name": "ITokenURIGenerator",
+                  "referencedDeclaration": 3430,
+                  "type": "contract ITokenURIGenerator"
+                },
+                "id": 3431,
+                "name": "UserDefinedTypeName",
+                "src": "215:18:18"
+              }
+            ],
+            "id": 3432,
+            "name": "VariableDeclaration",
+            "src": "215:43:18"
+          },
+          {
+            "attributes": {
+              "functionSelector": "b7f1d072",
+              "implemented": true,
+              "isConstructor": false,
+              "kind": "function",
+              "modifiers": [
+                null
+              ],
+              "name": "setRenderingContract",
+              "scope": 3443,
+              "stateMutability": "nonpayable",
+              "virtual": false,
+              "visibility": "external"
+            },
+            "children": [
+              {
+                "children": [
+                  {
+                    "attributes": {
+                      "constant": false,
+                      "mutability": "mutable",
+                      "name": "_contract",
+                      "scope": 3442,
+                      "stateVariable": false,
+                      "storageLocation": "default",
+                      "type": "contract ITokenURIGenerator",
+                      "visibility": "internal"
+                    },
+                    "children": [
+                      {
+                        "attributes": {
+                          "name": "ITokenURIGenerator",
+                          "referencedDeclaration": 3430,
+                          "type": "contract ITokenURIGenerator"
+                        },
+                        "id": 3433,
+                        "name": "UserDefinedTypeName",
+                        "src": "295:18:18"
+                      }
+                    ],
+                    "id": 3434,
+                    "name": "VariableDeclaration",
+                    "src": "295:28:18"
+                  }
+                ],
+                "id": 3435,
+                "name": "ParameterList",
+                "src": "294:30:18"
+              },
+              {
+                "attributes": {
+                  "parameters": [
+                    null
+                  ]
+                },
+                "children": [],
+                "id": 3436,
+                "name": "ParameterList",
+                "src": "334:0:18"
+              },
+              {
+                "children": [
+                  {
+                    "children": [
+                      {
+                        "attributes": {
+                          "isConstant": false,
+                          "isLValue": false,
+                          "isPure": false,
+                          "lValueRequested": false,
+                          "operator": "=",
+                          "type": "contract ITokenURIGenerator"
+                        },
+                        "children": [
+                          {
+                            "attributes": {
+                              "overloadedDeclarations": [
+                                null
+                              ],
+                              "referencedDeclaration": 3432,
+                              "type": "contract ITokenURIGenerator",
+                              "value": "renderingContract"
+                            },
+                            "id": 3437,
+                            "name": "Identifier",
+                            "src": "344:17:18"
+                          },
+                          {
+                            "attributes": {
+                              "overloadedDeclarations": [
+                                null
+                              ],
+                              "referencedDeclaration": 3434,
+                              "type": "contract ITokenURIGenerator",
+                              "value": "_contract"
+                            },
+                            "id": 3438,
+                            "name": "Identifier",
+                            "src": "364:9:18"
+                          }
+                        ],
+                        "id": 3439,
+                        "name": "Assignment",
+                        "src": "344:29:18"
+                      }
+                    ],
+                    "id": 3440,
+                    "name": "ExpressionStatement",
+                    "src": "344:29:18"
+                  }
+                ],
+                "id": 3441,
+                "name": "Block",
+                "src": "334:46:18"
+              }
+            ],
+            "id": 3442,
+            "name": "FunctionDefinition",
+            "src": "265:115:18"
+          }
+        ],
+        "id": 3443,
+        "name": "ContractDefinition",
+        "src": "173:209:18"
+      }
+    ],
+    "id": 3444,
+    "name": "SourceUnit",
+    "src": "39:343:18"
+  },
+  "compiler": {
+    "name": "solc",
+    "version": "0.7.6+commit.7338295f.Emscripten.clang"
+  },
+  "networks": {},
+  "schemaVersion": "3.4.14",
+  "updatedAt": "2024-06-19T08:21:40.858Z",
+  "devdoc": {
+    "kind": "dev",
+    "methods": {},
+    "version": 1
+  },
+  "userdoc": {
+    "kind": "user",
+    "methods": {},
+    "version": 1
+  }
+}

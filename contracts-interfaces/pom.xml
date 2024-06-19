@@ -74,6 +74,15 @@
                         <contract>
                             <abi>src/main/abi/IERC4906.json</abi>
                             <packageName>com.rarible.contracts.erc4906</packageName>
+                        </contract>
+                        <contract>
+                            <truffle>src/main/abi/MoonbirdsRenderer.json</truffle>
+                            <packageName>com.rarible.contracts.moonbirds</packageName>
+                            <type>MONO</type>
+                        </contract>
+                        <contract>
+                            <truffle>src/main/abi/RenderingContract.json</truffle>
+                            <packageName>com.rarible.contracts.moonbirds</packageName>
                             <type>MONO</type>
                         </contract>
                     </contracts>

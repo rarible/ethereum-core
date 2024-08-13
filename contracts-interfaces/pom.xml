@@ -85,6 +85,11 @@
                             <packageName>com.rarible.contracts.moonbirds</packageName>
                             <type>MONO</type>
                         </contract>
+                        <contract>
+                            <truffle>src/main/abi/ERC6492ValidateSigOffchain.json</truffle>
+                            <packageName>com.rarible.ethereum.sign.erc6492</packageName>
+                            <type>MONO</type>
+                        </contract>
                     </contracts>
                 </configuration>
             </plugin>

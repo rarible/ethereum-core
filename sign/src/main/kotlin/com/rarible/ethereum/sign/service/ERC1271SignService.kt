@@ -2,6 +2,8 @@ package com.rarible.ethereum.sign.service
 
 import com.rarible.contracts.erc1271.IERC1271
 import com.rarible.ethereum.common.keccak256
+import com.rarible.ethereum.sign.service.Signatures.START
+import com.rarible.ethereum.sign.service.Signatures.addStart
 import io.daonomic.rpc.RpcCodeException
 import io.daonomic.rpc.domain.Binary
 import io.daonomic.rpc.domain.Word
@@ -13,7 +15,6 @@ import org.web3jold.crypto.Sign
 import scalether.domain.Address
 import scalether.transaction.MonoTransactionSender
 import scalether.util.Hash
-import java.nio.charset.StandardCharsets
 
 class ERC1271SignService(
     private val sender: MonoTransactionSender
@@ -88,11 +89,5 @@ class ERC1271SignService(
     companion object {
         val logger: Logger = LoggerFactory.getLogger(ERC1271SignService::class.java)
         val MAGIC_VALUE: Binary = Binary.apply("0x1626ba7e")
-        private const val START = "\u0019Ethereum Signed Message:\n"
-
-        fun addStart(message: String): Binary {
-            val resultMessage = START + message.toByteArray(StandardCharsets.UTF_8).size + message
-            return Binary.apply(resultMessage.toByteArray(StandardCharsets.UTF_8))
-        }
     }
 }

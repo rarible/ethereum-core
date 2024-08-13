@@ -37,5 +37,32 @@
             <artifactId>jna</artifactId>
             <scope>test</scope>
         </dependency>
+        <dependency>
+            <groupId>io.daonomic.scalether</groupId>
+            <artifactId>contract-mono_${scala.major.version}</artifactId>
+            <version>${scalether.version}</version>
+        </dependency>
     </dependencies>
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>io.daonomic.scalether</groupId>
+                <artifactId>scalether-maven-plugin</artifactId>
+                <configuration>
+                    <contracts>
+                        <contract>
+                            <truffle>src/main/resources/ERC6492/ValidateSigOffchain.json</truffle>
+                            <packageName>com.rarible.ethereum.sign.erc6492</packageName>
+                            <type>MONO</type>
+                        </contract>
+                    </contracts>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>net.alchim31.maven</groupId>
+                <artifactId>scala-maven-plugin</artifactId>
+            </plugin>
+        </plugins>
+    </build>
 </project>

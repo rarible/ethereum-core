@@ -49,6 +49,12 @@
             <plugin>
                 <groupId>io.daonomic.scalether</groupId>
                 <artifactId>scalether-maven-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>generate-contracts</id>
+                        <phase>generate-sources</phase>
+                    </execution>
+                </executions>
                 <configuration>
                     <contracts>
                         <contract>

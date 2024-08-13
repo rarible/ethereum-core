@@ -43,32 +43,4 @@
             <version>${scalether.version}</version>
         </dependency>
     </dependencies>
-
-    <build>
-        <plugins>
-            <plugin>
-                <groupId>io.daonomic.scalether</groupId>
-                <artifactId>scalether-maven-plugin</artifactId>
-                <executions>
-                    <execution>
-                        <id>generate-contracts</id>
-                        <phase>generate-sources</phase>
-                    </execution>
-                </executions>
-                <configuration>
-                    <contracts>
-                        <contract>
-                            <truffle>src/main/resources/ERC6492/ValidateSigOffchain.json</truffle>
-                            <packageName>com.rarible.ethereum.sign.erc6492</packageName>
-                            <type>MONO</type>
-                        </contract>
-                    </contracts>
-                </configuration>
-            </plugin>
-            <plugin>
-                <groupId>net.alchim31.maven</groupId>
-                <artifactId>scala-maven-plugin</artifactId>
-            </plugin>
-        </plugins>
-    </build>
 </project>

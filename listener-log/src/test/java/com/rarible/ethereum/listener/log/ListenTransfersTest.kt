@@ -206,7 +206,11 @@ class ListenTransfersTest : AbstractIntegrationTest() {
         val numberEnd = ethereum.ethBlockNumber().block()!!.toLong()
         mongo.findAllAndRemove<Task>(Query()).then().block()
         mongo.findAllAndRemove<BlockHead>(Query(BlockHead::id lt numberEnd)).then().block()
-        val transfers = mongo.findAllAndRemove(Query(), LogEvent::class.java, "transfer").collectList().block()!!
+        val transfers = mongo.findAllAndRemove(Query(), LogEvent::class.java, "transfer")
+            .filter {
+                it.transactionHash == receipt.transactionHash()
+            }
+            .collectList().block()!!
         val newTask = Task(
             type = ReindexTopicTaskHandler.TOPIC,
             param = TransferEvent.id().toString(),
@@ -227,7 +231,11 @@ class ListenTransfersTest : AbstractIntegrationTest() {
                 .hasFieldOrPropertyWithValue(Task::lastStatus.name, TaskStatus.COMPLETED)
         }
 
-        assertThat(mongo.find<LogEvent>(Query(), "transfer").collectList().block())
+        assertThat(mongo.find<LogEvent>(Query(), "transfer")
+            .filter {
+                it.transactionHash == receipt.transactionHash()
+            }
+            .collectList().block())
             .hasSize(transfers.size)
     }
 

@@ -175,8 +175,21 @@ class HaEthereumTransportProvider(
 
         private suspend fun checkNode() {
             val nodeInUse = rpcNode.get() ?: return
-            if (nodeInUse.node in externalNodes) {
-                val node = aliveNode(localNodes)
+            try {
+                if (nodeInUse.node in externalNodes) {
+                    val node = aliveNode(localNodes)
+                    logger.info("Found alive node ${node.node}")
+                    rpcNode.set(node)
+                    return
+                }
+            } catch (e: RpcCodeException) {
+                logger.info("Local nodes are not available")
+            }
+            try {
+                aliveNode(listOf(nodeInUse.node))
+            } catch (e: RpcCodeException) {
+                logger.info("Current rpc node ${nodeInUse.node} is not alive")
+                val node = aliveNode()
                 logger.info("Found alive node ${node.node}")
                 rpcNode.set(node)
             }

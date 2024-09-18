@@ -113,7 +113,7 @@ internal class HaEthereumTransportProviderTest {
             retryBackoffDelay = 0,
             requestTimeoutMs = 0,
             readWriteTimeoutMs = 100,
-            maxBlockDelay = Duration.ofSeconds(10),
+            maxBlockDelay = Duration.ofSeconds(100),
         )
 
         val response1 = FailoverRpcTransport(

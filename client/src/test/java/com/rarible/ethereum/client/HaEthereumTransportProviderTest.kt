@@ -15,6 +15,7 @@ import org.mockserver.integration.ClientAndServer
 import org.mockserver.model.HttpRequest
 import org.mockserver.model.HttpResponse
 import org.mockserver.model.StringBody
+import org.slf4j.LoggerFactory
 import org.springframework.http.HttpHeaders
 import org.springframework.http.MediaType
 import scala.jdk.javaapi.CollectionConverters
@@ -32,6 +33,9 @@ internal class HaEthereumTransportProviderTest {
         val rpcInternalServer = ClientAndServer.startClientAndServer()
         val rpcInternalServer2Port = ServerSocket(0).use { it.localPort }
         val rpcExternalServer = ClientAndServer.startClientAndServer()
+        logger.info("rpcInternalServerPort = ${rpcInternalServer.localPort}, " +
+            "rpcInternalServer2Port=${rpcInternalServer2Port}, " +
+            "rpcExternalServerPort=${rpcExternalServer.localPort}")
 
         rpcInternalServer.`when`(
             HttpRequest.request()
@@ -97,7 +101,7 @@ internal class HaEthereumTransportProviderTest {
             monitoringThreadInterval = Duration.ofMillis(100),
             localNodes = listOf(
                 EthereumNode(
-                    httpUrl = "http://127.0.0.1:${rpcInternalServer.port}",
+                    httpUrl = "http://127.0.0.1:${rpcInternalServer.localPort}",
                 ),
                 EthereumNode(
                     httpUrl = "http://127.0.0.1:$rpcInternalServer2Port",
@@ -105,7 +109,7 @@ internal class HaEthereumTransportProviderTest {
             ),
             externalNodes = listOf(
                 EthereumNode(
-                    httpUrl = "http://127.0.0.1:${rpcExternalServer.port}",
+                    httpUrl = "http://127.0.0.1:${rpcExternalServer.localPort}",
                 )
             ),
             maxFrameSize = 1024 * 1024,
@@ -566,5 +570,9 @@ internal class HaEthereumTransportProviderTest {
                 }
             }
         """.trimIndent()
+    }
+
+    companion object {
+        private val logger = LoggerFactory.getLogger(HaEthereumTransportProviderTest::class.java)
     }
 }

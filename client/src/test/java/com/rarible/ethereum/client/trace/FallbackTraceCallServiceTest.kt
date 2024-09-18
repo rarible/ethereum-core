@@ -63,6 +63,20 @@ internal class FallbackTraceCallServiceTest {
         coVerify(exactly = 1) { otherProvider.traceAndFindAllCallsTo(any(), any(), any()) }
     }
 
+    @Test
+    fun `should fallback for exceptions`() = runBlocking {
+        val txn = randomHeadTransaction()
+        coEvery { defaultProvider.traceAndFindAllCallsTo(eq(txn.hash), any(), any()) } throws RuntimeException("error")
+        coEvery { otherProvider.traceAndFindAllCallsTo(eq(txn.hash), any(), any()) } returns listOf(
+            randomSimpleTrace()
+        )
+
+        fallbackTraceCallService.findAllRequiredCalls(txn, randomAddress(), randomBinary())
+
+        coVerify(exactly = 1) { defaultProvider.traceAndFindAllCallsTo(any(), any(), any()) }
+        coVerify(exactly = 1) { otherProvider.traceAndFindAllCallsTo(any(), any(), any()) }
+    }
+
     private fun randomSimpleTrace(): SimpleTraceResult {
         return SimpleTraceResult(
             from = randomAddress(),

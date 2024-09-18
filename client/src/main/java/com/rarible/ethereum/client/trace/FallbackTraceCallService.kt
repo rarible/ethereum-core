@@ -6,6 +6,7 @@ import com.rarible.ethereum.client.trace.model.SimpleTraceResult
 import com.rarible.ethereum.client.trace.model.TraceMethod
 import io.daonomic.rpc.domain.Binary
 import io.daonomic.rpc.domain.Word
+import org.slf4j.LoggerFactory
 import scalether.domain.Address
 
 class FallbackTraceCallService(
@@ -82,6 +83,7 @@ class FallbackTraceCallService(
     }
 
     private companion object {
+        private val logger = LoggerFactory.getLogger(FallbackTraceCallService::class.java)
 
         inline fun <T> findTraceCallsWithMethods(
             tx: Word,
@@ -109,7 +111,8 @@ class FallbackTraceCallService(
                 try {
                     val result = call(delegate)
                     if (result.isNotEmpty()) return result
-                } catch (_: TraceNotFoundException) {
+                } catch (e: Exception) {
+                    logger.warn("could not get trace using ${delegate.javaClass.simpleName}", e)
                 }
             }
             return onEmptyResult()

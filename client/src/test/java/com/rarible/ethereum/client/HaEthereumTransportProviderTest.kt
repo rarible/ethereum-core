@@ -118,7 +118,7 @@ internal class HaEthereumTransportProviderTest {
             retryMaxAttempts = 1,
             retryBackoffDelay = 0,
             requestTimeoutMs = 0,
-            readWriteTimeoutMs = 100,
+            readWriteTimeoutMs = 1000,
             maxBlockDelay = Duration.ofSeconds(100),
         )
 

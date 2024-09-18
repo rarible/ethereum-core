@@ -11,6 +11,10 @@ import okhttp3.mockwebserver.MockResponse
 import okhttp3.mockwebserver.MockWebServer
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
+import org.mockserver.integration.ClientAndServer
+import org.mockserver.model.HttpRequest
+import org.mockserver.model.HttpResponse
+import org.mockserver.model.StringBody
 import org.springframework.http.HttpHeaders
 import org.springframework.http.MediaType
 import scala.jdk.javaapi.CollectionConverters
@@ -25,60 +29,69 @@ internal class HaEthereumTransportProviderTest {
 
     @Test
     fun `fallback to external and then reconnect to internal`() = runBlocking<Unit> {
-        val rpcInternalServer = MockWebServer()
-        rpcInternalServer.start()
-        val rpcInternalServer2 = MockWebServer()
+        val rpcInternalServer = ClientAndServer.startClientAndServer()
         val rpcInternalServer2Port = ServerSocket(0).use { it.localPort }
-        val rpcExternalServer = MockWebServer()
-        rpcExternalServer.start()
+        val rpcExternalServer = ClientAndServer.startClientAndServer()
 
-        rpcInternalServer.enqueue(
-            MockResponse()
-                .setHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
-                .setBody(getBlockNumberResponse(1))
+        rpcInternalServer.`when`(
+            HttpRequest.request()
+                .withBody(StringBody.subString("eth_blockNumber"))
         )
-        rpcInternalServer.enqueue(
-            MockResponse()
-                .setHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
-                .setBody(getBlockResponse())
-        )
-        rpcInternalServer.enqueue(
-            MockResponse()
-                .setHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
-                .setBody("""{"jsonrpc": "2.0","id": 2,"result": "response1"}""")
-        )
+            .respond(
+                HttpResponse.response()
+                    .withHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+                    .withBody(getBlockNumberResponse(1))
+            )
 
-        rpcInternalServer2.enqueue(
-            MockResponse()
-                .setHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
-                .setBody(getBlockNumberResponse(2))
+        rpcInternalServer.`when`(
+            HttpRequest.request()
+                .withBody(StringBody.subString("eth_getBlockByNumber"))
         )
-        rpcInternalServer2.enqueue(
-            MockResponse()
-                .setHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
-                .setBody(getBlockResponse())
-        )
-        rpcInternalServer2.enqueue(
-            MockResponse()
-                .setHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
-                .setBody("""{"jsonrpc": "2.0","id": 2,"result": "response3"}""")
-        )
+            .respond(
+                HttpResponse.response()
+                    .withHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+                    .withBody(getBlockResponse())
+            )
 
-        rpcExternalServer.enqueue(
-            MockResponse()
-                .setHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
-                .setBody(getBlockNumberResponse(4))
+        rpcInternalServer.`when`(
+            HttpRequest.request()
+                .withBody(StringBody.subString("test"))
         )
-        rpcExternalServer.enqueue(
-            MockResponse()
-                .setHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
-                .setBody(getBlockResponse())
+            .respond(
+                HttpResponse.response()
+                    .withHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+                    .withBody("""{"jsonrpc": "2.0","id": 2,"result": "response1"}""")
+            )
+
+        rpcExternalServer.`when`(
+            HttpRequest.request()
+                .withBody(StringBody.subString("eth_blockNumber"))
         )
-        rpcExternalServer.enqueue(
-            MockResponse()
-                .setHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
-                .setBody("""{"jsonrpc": "2.0","id": 2,"result": "response2"}""")
+            .respond(
+                HttpResponse.response()
+                    .withHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+                    .withBody(getBlockNumberResponse(1))
+            )
+
+        rpcExternalServer.`when`(
+            HttpRequest.request()
+                .withBody(StringBody.subString("eth_getBlockByNumber"))
         )
+            .respond(
+                HttpResponse.response()
+                    .withHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+                    .withBody(getBlockResponse())
+            )
+
+        rpcExternalServer.`when`(
+            HttpRequest.request()
+                .withBody(StringBody.subString("test"))
+        )
+            .respond(
+                HttpResponse.response()
+                    .withHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+                    .withBody("""{"jsonrpc": "2.0","id": 2,"result": "response2"}""")
+            )
 
         val provider = HaEthereumTransportProvider(
             monitoringThreadInterval = Duration.ofMillis(100),
@@ -96,10 +109,10 @@ internal class HaEthereumTransportProviderTest {
                 )
             ),
             maxFrameSize = 1024 * 1024,
-            retryMaxAttempts = 5,
+            retryMaxAttempts = 1,
             retryBackoffDelay = 0,
             requestTimeoutMs = 0,
-            readWriteTimeoutMs = 10000,
+            readWriteTimeoutMs = 100,
             maxBlockDelay = Duration.ofSeconds(10),
         )
 
@@ -111,13 +124,13 @@ internal class HaEthereumTransportProviderTest {
                 1L,
                 "GET",
                 CollectionConverters.asScala(emptyList<Any>()).toList(),
-                ""
+                "test"
             ),
             Manifest.Any(),
         ).awaitSingle()
         assertThat(response1.result().get()).isEqualTo("response1")
         // Should receive event from server1
-        rpcInternalServer.shutdown()
+        rpcInternalServer.close()
 
         // Should get response from external server
         val response = FailoverRpcTransport(
@@ -128,7 +141,7 @@ internal class HaEthereumTransportProviderTest {
                 1L,
                 "GET",
                 CollectionConverters.asScala(emptyList<Any>()).toList(),
-                ""
+                "test"
             ),
             Manifest.Any(),
         )
@@ -137,9 +150,39 @@ internal class HaEthereumTransportProviderTest {
         assertThat(response.result().get()).isEqualTo("response2")
 
         // Starting internal server 2
-        rpcInternalServer2.start(rpcInternalServer2Port)
+        val rpcInternalServer2 = ClientAndServer.startClientAndServer(rpcInternalServer2Port)
 
-        delay(2000)
+        rpcInternalServer2.`when`(
+            HttpRequest.request()
+                .withBody(StringBody.subString("eth_blockNumber"))
+        )
+            .respond(
+                HttpResponse.response()
+                    .withHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+                    .withBody(getBlockNumberResponse(1))
+            )
+
+        rpcInternalServer2.`when`(
+            HttpRequest.request()
+                .withBody(StringBody.subString("eth_getBlockByNumber"))
+        )
+            .respond(
+                HttpResponse.response()
+                    .withHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+                    .withBody(getBlockResponse())
+            )
+
+        rpcInternalServer2.`when`(
+            HttpRequest.request()
+                .withBody(StringBody.subString("test"))
+        )
+            .respond(
+                HttpResponse.response()
+                    .withHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+                    .withBody("""{"jsonrpc": "2.0","id": 2,"result": "response3"}""")
+            )
+
+        delay(5000)
 
         // Should get response from internal server 2
         val response2 = FailoverRpcTransport(
@@ -150,7 +193,7 @@ internal class HaEthereumTransportProviderTest {
                 1L,
                 "GET",
                 CollectionConverters.asScala(emptyList<Any>()).toList(),
-                ""
+                "test"
             ),
             Manifest.Any(),
         ).awaitSingle()

@@ -33,9 +33,11 @@ internal class HaEthereumTransportProviderTest {
         val rpcInternalServer = ClientAndServer.startClientAndServer()
         val rpcInternalServer2Port = ServerSocket(0).use { it.localPort }
         val rpcExternalServer = ClientAndServer.startClientAndServer()
-        logger.info("rpcInternalServerPort = ${rpcInternalServer.localPort}, " +
-            "rpcInternalServer2Port=${rpcInternalServer2Port}, " +
-            "rpcExternalServerPort=${rpcExternalServer.localPort}")
+        logger.info(
+            "rpcInternalServerPort = ${rpcInternalServer.localPort}, " +
+                "rpcInternalServer2Port=${rpcInternalServer2Port}, " +
+                "rpcExternalServerPort=${rpcExternalServer.localPort}"
+        )
 
         rpcInternalServer.`when`(
             HttpRequest.request()

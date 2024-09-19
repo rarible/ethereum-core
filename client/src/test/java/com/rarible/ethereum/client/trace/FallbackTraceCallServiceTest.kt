@@ -16,6 +16,12 @@ import io.mockk.every
 import io.mockk.mockk
 import kotlinx.coroutines.runBlocking
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.assertThrows
+import org.junit.jupiter.params.ParameterizedTest
+import org.junit.jupiter.params.provider.MethodSource
+import org.springframework.http.HttpHeaders
+import org.springframework.web.reactive.function.client.WebClientResponseException
+import java.util.stream.Stream
 
 internal class FallbackTraceCallServiceTest {
     private val defaultProvider = mockk<TransactionTraceProvider>()
@@ -63,10 +69,11 @@ internal class FallbackTraceCallServiceTest {
         coVerify(exactly = 1) { otherProvider.traceAndFindAllCallsTo(any(), any(), any()) }
     }
 
-    @Test
-    fun `should fallback for exceptions`() = runBlocking {
+    @ParameterizedTest
+    @MethodSource("fallbackErrors")
+    fun `should fallback for specific exceptions`(ex: Exception) = runBlocking {
         val txn = randomHeadTransaction()
-        coEvery { defaultProvider.traceAndFindAllCallsTo(eq(txn.hash), any(), any()) } throws RuntimeException("error")
+        coEvery { defaultProvider.traceAndFindAllCallsTo(eq(txn.hash), any(), any()) } throws ex
         coEvery { otherProvider.traceAndFindAllCallsTo(eq(txn.hash), any(), any()) } returns listOf(
             randomSimpleTrace()
         )
@@ -75,6 +82,23 @@ internal class FallbackTraceCallServiceTest {
 
         coVerify(exactly = 1) { defaultProvider.traceAndFindAllCallsTo(any(), any(), any()) }
         coVerify(exactly = 1) { otherProvider.traceAndFindAllCallsTo(any(), any(), any()) }
+    }
+
+    @ParameterizedTest
+    @MethodSource("nonFallbackErrors")
+    fun `should not fallback for unknown exceptions`(ex: Exception) = runBlocking {
+        val txn = randomHeadTransaction()
+        coEvery { defaultProvider.traceAndFindAllCallsTo(eq(txn.hash), any(), any()) } throws ex
+        coEvery { otherProvider.traceAndFindAllCallsTo(eq(txn.hash), any(), any()) } returns listOf(
+            randomSimpleTrace()
+        )
+
+        assertThrows<Exception> {
+            fallbackTraceCallService.findAllRequiredCalls(txn, randomAddress(), randomBinary())
+        }
+
+        coVerify(exactly = 1) { defaultProvider.traceAndFindAllCallsTo(any(), any(), any()) }
+        coVerify(exactly = 0) { otherProvider.traceAndFindAllCallsTo(any(), any(), any()) }
     }
 
     private fun randomSimpleTrace(): SimpleTraceResult {
@@ -95,6 +119,21 @@ internal class FallbackTraceCallServiceTest {
             from = randomAddress(),
             to = randomAddress(),
             value = randomBigInt()
+        )
+    }
+
+    companion object {
+        @JvmStatic
+        fun fallbackErrors(): Stream<Exception> = Stream.of(
+            TraceNotFoundException("error"),
+            WebClientResponseException.create(400, "not found", HttpHeaders(), byteArrayOf(), null, null),
+        )
+
+        @JvmStatic
+        fun nonFallbackErrors(): Stream<Exception> = Stream.of(
+            RuntimeException("unknown"),
+            WebClientResponseException.create(500, "not found", HttpHeaders(), byteArrayOf(), null, null),
+            WebClientResponseException.create(401, "unauthorized", HttpHeaders(), byteArrayOf(), null, null),
         )
     }
 }

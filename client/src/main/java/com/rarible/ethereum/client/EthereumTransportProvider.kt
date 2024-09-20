@@ -8,6 +8,7 @@ import io.netty.channel.ChannelException
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.web.reactive.function.client.WebClientException
+import org.springframework.web.reactive.function.client.WebClientResponseException
 import reactor.core.publisher.Mono
 import reactor.util.retry.Retry
 import scala.collection.immutable.Map
@@ -23,6 +24,12 @@ abstract class EthereumTransportProvider {
     abstract suspend fun getRpcTransport(): WebClientTransport
     abstract suspend fun getFailoverRpcTransport(): WebClientTransport?
 
+    private fun shouldRetry(ex: Throwable): Boolean {
+        return !is4xxError(ex) && (ex is WebClientException || ex is IOException || ex is ChannelException)
+    }
+
+    private fun is4xxError(ex: Throwable) = ex is WebClientResponseException && ex.statusCode.is4xxClientError
+
     protected fun httpTransport(
         httpUrl: String,
         headers: Map<String, String>? = null,
@@ -32,8 +39,7 @@ abstract class EthereumTransportProvider {
         retryMaxAttempts: Long,
         retryBackoffDelay: Long,
     ): WebClientTransport {
-        val retry = Retry.backoff(retryMaxAttempts, Duration.ofMillis(retryBackoffDelay))
-            .filter { it is WebClientException || it is IOException || it is ChannelException }
+        val retry = Retry.backoff(retryMaxAttempts, Duration.ofMillis(retryBackoffDelay)).filter { shouldRetry(it) }
         val mapper = MonoEthereum.mapper()
         mapper.setSerializationInclusion(JsonInclude.Include.NON_EMPTY)
         return object : WebClientTransport(

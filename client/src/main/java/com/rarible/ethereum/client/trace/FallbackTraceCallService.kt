@@ -6,6 +6,9 @@ import com.rarible.ethereum.client.trace.model.SimpleTraceResult
 import com.rarible.ethereum.client.trace.model.TraceMethod
 import io.daonomic.rpc.domain.Binary
 import io.daonomic.rpc.domain.Word
+import org.slf4j.LoggerFactory
+import org.springframework.http.HttpStatus.BAD_REQUEST
+import org.springframework.web.reactive.function.client.WebClientResponseException
 import scalether.domain.Address
 
 class FallbackTraceCallService(
@@ -82,6 +85,7 @@ class FallbackTraceCallService(
     }
 
     private companion object {
+        private val logger = LoggerFactory.getLogger(FallbackTraceCallService::class.java)
 
         inline fun <T> findTraceCallsWithMethods(
             tx: Word,
@@ -109,7 +113,14 @@ class FallbackTraceCallService(
                 try {
                     val result = call(delegate)
                     if (result.isNotEmpty()) return result
-                } catch (_: TraceNotFoundException) {
+                } catch (e: TraceNotFoundException) {
+                    logger.warn("[${delegate.javaClass.simpleName}] trace not found", e)
+                } catch (e: WebClientResponseException) {
+                    if (e.statusCode == BAD_REQUEST) {
+                        logger.warn("[${delegate.javaClass.simpleName}] bad request", e)
+                    } else {
+                        throw e
+                    }
                 }
             }
             return onEmptyResult()

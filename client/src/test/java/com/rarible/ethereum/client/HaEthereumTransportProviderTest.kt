@@ -11,6 +11,9 @@ import okhttp3.mockwebserver.MockResponse
 import okhttp3.mockwebserver.MockWebServer
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.assertThrows
+import org.junit.jupiter.params.ParameterizedTest
+import org.junit.jupiter.params.provider.ValueSource
 import org.mockserver.integration.ClientAndServer
 import org.mockserver.model.HttpRequest
 import org.mockserver.model.HttpResponse
@@ -18,6 +21,7 @@ import org.mockserver.model.StringBody
 import org.slf4j.LoggerFactory
 import org.springframework.http.HttpHeaders
 import org.springframework.http.MediaType
+import org.springframework.web.reactive.function.client.WebClientResponseException
 import scala.jdk.javaapi.CollectionConverters
 import scala.reflect.Manifest
 import scalether.abi.Uint32Type
@@ -35,8 +39,8 @@ internal class HaEthereumTransportProviderTest {
         val rpcExternalServer = ClientAndServer.startClientAndServer()
         logger.info(
             "rpcInternalServerPort = ${rpcInternalServer.localPort}, " +
-                "rpcInternalServer2Port=$rpcInternalServer2Port, " +
-                "rpcExternalServerPort=${rpcExternalServer.localPort}"
+                    "rpcInternalServer2Port=$rpcInternalServer2Port, " +
+                    "rpcExternalServerPort=${rpcExternalServer.localPort}"
         )
 
         rpcInternalServer.`when`(
@@ -204,6 +208,73 @@ internal class HaEthereumTransportProviderTest {
             Manifest.Any(),
         ).awaitSingle()
         assertThat(response2.result().get()).isEqualTo("response3")
+    }
+
+    @ParameterizedTest
+    @ValueSource(ints = [400, 404, 415])
+    fun `should not retry for 4xx errors`(statusCode: Int) = runBlocking<Unit> {
+        // Given
+        val mockServer = MockWebServer()
+        mockServer.start()
+        mockServer.enqueue(
+            MockResponse()
+                .setHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+                .setBody(getBlockNumberResponse(1))
+        )
+        mockServer.enqueue(
+            MockResponse()
+                .setHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+                .setBody(getBlockResponse())
+        )
+        mockServer.enqueue(MockResponse().setResponseCode(statusCode))
+        mockServer.enqueue(
+            MockResponse()
+                .setHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+                .setBody("""{"jsonrpc": "2.0","id": 2,"result": "response"}""")
+        )
+
+        // And
+        val transport = rpcTransport(mockServer)
+
+        // Then
+        assertThrows<WebClientResponseException> {
+            val request = Request(1L, "GET", CollectionConverters.asScala(emptyList<Any>()).toList(), "")
+            transport.send(request, Manifest.Any()).awaitSingle()
+        }
+    }
+
+    @ParameterizedTest
+    @ValueSource(ints = [500, 504])
+    fun `should retry for server errors`(statusCode: Int) = runBlocking<Unit> {
+        // Given
+        val mockServer = MockWebServer()
+        mockServer.start()
+        mockServer.enqueue(
+            MockResponse()
+                .setHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+                .setBody(getBlockNumberResponse(1))
+        )
+        mockServer.enqueue(
+            MockResponse()
+                .setHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+                .setBody(getBlockResponse())
+        )
+        mockServer.enqueue(MockResponse().setResponseCode(statusCode))
+        mockServer.enqueue(
+            MockResponse()
+                .setHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+                .setBody("""{"jsonrpc": "2.0","id": 2,"result": "resp"}""")
+        )
+
+        // And
+        val transport = rpcTransport(mockServer)
+
+        // When
+        val request = Request(1L, "GET", CollectionConverters.asScala(emptyList<Any>()).toList(), "")
+        val response = transport.send(request, Manifest.Any()).awaitSingle()
+
+        // Then
+        assertThat(response.result().get()).isEqualTo("resp")
     }
 
     @Test
@@ -572,6 +643,27 @@ internal class HaEthereumTransportProviderTest {
                 }
             }
         """.trimIndent()
+    }
+
+    private fun rpcTransport(rpcInternalServer: MockWebServer): FailoverRpcTransport {
+        return FailoverRpcTransport(
+            ethereumTransportProvider = HaEthereumTransportProvider(
+                monitoringThreadInterval = Duration.ofMillis(100),
+                localNodes = listOf(
+                    EthereumNode(
+                        httpUrl = "http://127.0.0.1:${rpcInternalServer.port}",
+                    ),
+                ),
+                externalNodes = emptyList(),
+                maxFrameSize = 1024 * 1024,
+                retryMaxAttempts = 5,
+                retryBackoffDelay = 0,
+                requestTimeoutMs = 0,
+                readWriteTimeoutMs = 10000,
+                maxBlockDelay = Duration.ofSeconds(10),
+            ),
+            failoverPredicate = NoopFailoverPredicate(),
+        )
     }
 
     companion object {

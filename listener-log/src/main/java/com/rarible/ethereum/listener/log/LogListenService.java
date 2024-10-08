@@ -56,7 +56,7 @@ public class LogListenService {
     public LogListenService(
             LogEventRepository logEventRepository,
             BlockRepository blockRepository,
-            MonoEthereum ethereum,
+            MonoEthereum mainEthereum,
             List<LogEventsListener> logEventsListeners,
             List<LogEventDescriptor<?>> descriptors,
             List<OnLogEventListener> onLogEventListeners,
@@ -75,7 +75,7 @@ public class LogListenService {
         this.blockListeningDelay = blockListeningDelay;
         this.stopListeningBlock = stopListeningBlock;
         this.blockRepository = blockRepository;
-        this.ethereum = ethereum;
+        this.ethereum = mainEthereum;
         this.logEventsListeners = logEventsListeners;
         this.blockListenService = blockListenService;
         this.batchSize = batchSize;

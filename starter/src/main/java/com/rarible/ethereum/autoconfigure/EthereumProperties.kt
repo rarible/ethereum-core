@@ -13,6 +13,7 @@ data class EthereumProperties(
     val httpUrl: String?,
     val nodes: List<EthereumNode> = emptyList(),
     val externalNodes: List<EthereumNode> = emptyList(),
+    val reconciliationNodes: List<EthereumNode> = emptyList(),
     val requestTimeoutMs: Int = 10000,
     val readWriteTimeoutMs: Int = 10000,
     val maxFrameSize: Int = 1024 * 1024,

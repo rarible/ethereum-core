@@ -12,6 +12,7 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean
 import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
+import org.springframework.context.annotation.Primary
 import scalether.core.MonoEthereum
 
 @Configuration
@@ -21,14 +22,29 @@ class EthereumAutoConfiguration(
     private val ethereumProperties: EthereumProperties,
 ) {
 
+    @Primary
     @Bean
     @ConditionalOnMissingBean(MonoEthereum::class)
     @ConditionalOnBean(MonoRpcTransport::class)
-    fun ethereum(
-        rpcTransport: MonoRpcTransport,
+    fun mainEthereum(
+        mainEthereumRpc: MonoRpcTransport,
         @Autowired(required = false)
         monitoringCallback: MonitoringCallback?,
-    ) = with(ethereumProperties) {
+    ): MonoEthereum = ethereum(mainEthereumRpc, monitoringCallback)
+
+    @Bean
+    @ConditionalOnMissingBean(MonoEthereum::class)
+    @ConditionalOnBean(MonoRpcTransport::class)
+    fun reconciliationEthereum(
+        reconciliationEthereumRpc: MonoRpcTransport,
+        @Autowired(required = false)
+        monitoringCallback: MonitoringCallback?,
+    ): MonoEthereum = ethereum(reconciliationEthereumRpc, monitoringCallback)
+
+    private fun ethereum(
+        rpcTransport: MonoRpcTransport,
+        monitoringCallback: MonitoringCallback?,
+    ): MonoEthereum = with(ethereumProperties) {
         val client = MonoEthereum(rpcTransport)
         val monitoredClient = if (monitoringCallback != null) {
             logger.info("Will use MonitoredEthereum")

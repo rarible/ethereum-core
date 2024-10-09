@@ -47,7 +47,35 @@ class EthereumTransportConfiguration(
         }
 
     @Bean
-    fun ethereumRpc(ethereumTransportProvider: EthereumTransportProvider): MonoRpcTransport {
+    fun reconciliationEthereumTransportProvider(
+        ethereumTransportProvider: EthereumTransportProvider
+    ): EthereumTransportProvider {
+        return if (ethereumProperties.reconciliationNodes.isEmpty()) {
+            ethereumTransportProvider
+        } else {
+            HaEthereumTransportProvider(
+                localNodes = ethereumProperties.reconciliationNodes,
+                externalNodes = ethereumProperties.externalNodes,
+                requestTimeoutMs = ethereumProperties.requestTimeoutMs,
+                readWriteTimeoutMs = ethereumProperties.readWriteTimeoutMs,
+                maxFrameSize = ethereumProperties.maxFrameSize,
+                retryMaxAttempts = ethereumProperties.retryMaxAttempts,
+                retryBackoffDelay = ethereumProperties.retryBackoffDelay,
+                monitoringThreadInterval = ethereumProperties.monitoringThreadInterval,
+                maxBlockDelay = ethereumProperties.maxBlockDelay
+            )
+        }
+    }
+
+    @Bean
+    fun mainEthereumRpc(ethereumTransportProvider: EthereumTransportProvider): MonoRpcTransport =
+        ethereumRpc(ethereumTransportProvider)
+
+    @Bean
+    fun reconciliationEthereumRpc(reconciliationEthereumTransportProvider: EthereumTransportProvider): MonoRpcTransport =
+        ethereumRpc(reconciliationEthereumTransportProvider)
+
+    private fun ethereumRpc(ethereumTransportProvider: EthereumTransportProvider): MonoRpcTransport {
         val predicate = if (ethereumProperties.failoverEnabled) {
             CompositeFailoverPredicate(
                 failoverPredicates = listOf(

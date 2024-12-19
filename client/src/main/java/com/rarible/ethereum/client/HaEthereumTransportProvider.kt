@@ -65,9 +65,7 @@ class HaEthereumTransportProvider(
     private suspend fun aliveNode(
         nodes: List<EthereumNode> = localNodes + externalNodes
     ): EthereumTransport {
-        logger.info("Will check nodes: $nodes")
         for (node in nodes) {
-            logger.info("Checking node definition $node")
             val httpTransport = object : WebClientTransport(
                 node.rpcUrl,
                 MonoEthereum.mapper(),

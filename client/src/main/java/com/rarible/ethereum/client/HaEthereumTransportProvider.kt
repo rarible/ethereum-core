@@ -46,7 +46,7 @@ class HaEthereumTransportProvider(
     override suspend fun getRpcTransport(): WebClientTransport {
         val cachedNode = rpcNode.get()
         if (cachedNode == null) {
-            val aliveNode = aliveNode()
+            val aliveNode = aliveNode { "None of ${it.size} nodes are available" }
             val nodeToUse = rpcNode.accumulateAndGet(aliveNode) { prev, next ->
                 prev ?: next
             }
@@ -63,7 +63,8 @@ class HaEthereumTransportProvider(
         }
 
     private suspend fun aliveNode(
-        nodes: List<EthereumNode> = localNodes + externalNodes
+        nodes: List<EthereumNode> = localNodes + externalNodes,
+        errorMessageProvider: (List<EthereumNode>) -> String = { "None of nodes $it are available" }
     ): EthereumTransport {
         for (node in nodes) {
             val httpTransport = object : WebClientTransport(
@@ -82,7 +83,7 @@ class HaEthereumTransportProvider(
                 )
             }
         }
-        val message = "None of nodes $nodes are available"
+        val message = errorMessageProvider(nodes)
         // In most cases ethereum RPC client throws RpcCodeException, so here we throw similar exception
         // in order to allow upper services to distinguish fail reasons
         throw RpcCodeException(message, Error(0, message, Option.empty()))

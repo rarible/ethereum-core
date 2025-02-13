@@ -3,6 +3,7 @@ package com.rarible.ethereum.client
 import com.rarible.ethereum.client.failover.NoopFailoverPredicate
 import com.rarible.ethereum.client.failover.SimplePredicate
 import io.daonomic.rpc.domain.Request
+import io.daonomic.rpc.domain.Word
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.reactive.awaitSingle
 import kotlinx.coroutines.runBlocking
@@ -25,6 +26,7 @@ import org.springframework.web.reactive.function.client.WebClientResponseExcepti
 import scala.jdk.javaapi.CollectionConverters
 import scala.reflect.Manifest
 import scalether.abi.Uint32Type
+import scalether.core.MonoEthereum
 import java.math.BigInteger
 import java.net.ServerSocket
 import java.time.Duration
@@ -39,8 +41,8 @@ internal class HaEthereumTransportProviderTest {
         val rpcExternalServer = ClientAndServer.startClientAndServer()
         logger.info(
             "rpcInternalServerPort = ${rpcInternalServer.localPort}, " +
-                    "rpcInternalServer2Port=$rpcInternalServer2Port, " +
-                    "rpcExternalServerPort=${rpcExternalServer.localPort}"
+                "rpcInternalServer2Port=$rpcInternalServer2Port, " +
+                "rpcExternalServerPort=${rpcExternalServer.localPort}"
         )
 
         rpcInternalServer.`when`(
@@ -124,6 +126,7 @@ internal class HaEthereumTransportProviderTest {
             requestTimeoutMs = 0,
             readWriteTimeoutMs = 1000,
             maxBlockDelay = Duration.ofSeconds(100),
+            allowTransactionsWithoutHash = false,
         )
 
         val response1 = FailoverRpcTransport(
@@ -322,6 +325,7 @@ internal class HaEthereumTransportProviderTest {
             requestTimeoutMs = 0,
             readWriteTimeoutMs = 10000,
             maxBlockDelay = Duration.ofSeconds(10),
+            allowTransactionsWithoutHash = false,
         )
 
         val response1 = FailoverRpcTransport(
@@ -390,6 +394,7 @@ internal class HaEthereumTransportProviderTest {
             requestTimeoutMs = 0,
             readWriteTimeoutMs = 10000,
             maxBlockDelay = Duration.ofSeconds(10),
+            allowTransactionsWithoutHash = false,
         )
 
         val response1 = FailoverRpcTransport(
@@ -432,6 +437,7 @@ internal class HaEthereumTransportProviderTest {
             requestTimeoutMs = 10000,
             readWriteTimeoutMs = 10000,
             maxBlockDelay = Duration.ofSeconds(10),
+            allowTransactionsWithoutHash = false,
         )
 
         internalServer.enqueue(
@@ -495,6 +501,7 @@ internal class HaEthereumTransportProviderTest {
             requestTimeoutMs = 10000,
             readWriteTimeoutMs = 10000,
             maxBlockDelay = Duration.ofSeconds(10),
+            allowTransactionsWithoutHash = false,
         )
 
         externalServer1.enqueue(
@@ -553,6 +560,7 @@ internal class HaEthereumTransportProviderTest {
             requestTimeoutMs = 10000,
             readWriteTimeoutMs = 10000,
             maxBlockDelay = Duration.ofSeconds(10),
+            allowTransactionsWithoutHash = false,
         )
         nodeServer.enqueue(
             MockResponse()
@@ -591,6 +599,123 @@ internal class HaEthereumTransportProviderTest {
             val actualCredentials = recordedRequest.getHeader("Authorization")
             assertThat(actualCredentials).isEqualTo(expectedCredentials)
         }
+    }
+
+    @Test
+    fun `hedera invalid hash`() = runBlocking<Unit> {
+        val rpcInternalServer = ClientAndServer.startClientAndServer()
+        rpcInternalServer.`when`(
+            HttpRequest.request()
+                .withBody(StringBody.subString("eth_blockNumber"))
+        )
+            .respond(
+                HttpResponse.response()
+                    .withHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+                    .withBody(getBlockNumberResponse(1))
+            )
+        rpcInternalServer.`when`(
+            HttpRequest.request()
+                .withBody(StringBody.subString("eth_blockNumber"))
+        )
+            .respond(
+                HttpResponse.response()
+                    .withHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+                    .withBody(getBlockNumberResponse(1))
+            )
+
+        rpcInternalServer.`when`(
+            HttpRequest.request()
+                .withBody(StringBody.subString(""""method":"eth_getBlockByNumber","params":["0x1",false],"""))
+        )
+            .respond(
+                HttpResponse.response()
+                    .withHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+                    .withBody(getBlockResponse())
+            )
+        rpcInternalServer.`when`(
+            HttpRequest.request()
+                .withBody(StringBody.subString(""""method":"eth_getBlockByNumber","params":["0x4bde21",true],"""))
+        )
+            .respond(
+                HttpResponse.response()
+                    .withHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+                    .withBody(
+                        """{
+  "jsonrpc": "2.0",
+  "id": 8511,
+  "result": {
+    "timestamp": "0x665f24da",
+    "difficulty": "0x0",
+    "extraData": "0x",
+    "gasLimit": "0x1c9c380",
+    "baseFeePerGas": "0x5625b7f400",
+    "gasUsed": "0x0",
+    "logsBloom": "0x00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000",
+    "miner": "0x0000000000000000000000000000000000000000",
+    "mixHash": "0x0000000000000000000000000000000000000000000000000000000000000000",
+    "nonce": "0x0000000000000000",
+    "receiptsRoot": "0xcb2ce1552fce9c5895d12961dcdf68bfbda94009517ee72a5dfa11cba1609c1e",
+    "sha3Uncles": "0x1dcc4de8dec75d7aab85b567b6ccd41ad312451b948a7413f0a142fd40d49347",
+    "size": "0x656",
+    "stateRoot": "0x56e81f171bcc55a6ff8345e692c0f86e5b48e01b996cadc001622fb5e363b421",
+    "totalDifficulty": "0x0",
+    "transactions": [
+      {
+        "blockHash": "0xb01fbda672c38eb83b4e729e29ad03b84dcd397a391e1d0802a144d73dddc771",
+        "blockNumber": "0x4bde21",
+        "chainId": "0x128",
+        "from": "0x208b15dab9903be8d34336d0b7f930e5f0a76ec5",
+        "gas": "0x0",
+        "gasPrice": "0x0",
+        "hash": "0x",
+        "input": "0x",
+        "nonce": "0xdd4",
+        "r": "0xbf2556a8f536c0bab90c8bc209aaa7b462a5022550675995f1cd220408786185",
+        "s": "0x79096aacdc8a6cbe19711a577d01abfdc8fd743a3641e2868bef03071e872da",
+        "transactionIndex": "0x3",
+        "type": "0x2",
+        "v": "0x1",
+        "value": "0x0",
+        "yParity": "0x1",
+        "accessList": [],
+        "maxPriorityFeePerGas": "0x0",
+        "maxFeePerGas": "0x6b"
+      }
+    ],
+    "transactionsRoot": "0xb01fbda672c38eb83b4e729e29ad03b84dcd397a391e1d0802a144d73dddc771",
+    "uncles": [],
+    "withdrawals": [],
+    "withdrawalsRoot": "0x0000000000000000000000000000000000000000000000000000000000000000",
+    "number": "0x4bde21",
+    "hash": "0xb01fbda672c38eb83b4e729e29ad03b84dcd397a391e1d0802a144d73dddc771",
+    "parentHash": "0x043970b7830a7a0a992384cfda3dddd4d43178f32c31287b359b18400764d1a6"
+  }
+}"""
+                    )
+            )
+        val provider = HaEthereumTransportProvider(
+            monitoringThreadInterval = Duration.ofSeconds(100),
+            localNodes = listOf(
+                EthereumNode(
+                    httpUrl = "http://127.0.0.1:${rpcInternalServer.localPort}",
+                )
+            ),
+            externalNodes = emptyList(),
+            maxFrameSize = 1024 * 1024,
+            retryMaxAttempts = 5,
+            retryBackoffDelay = 100,
+            requestTimeoutMs = 10000,
+            readWriteTimeoutMs = 10000,
+            allowTransactionsWithoutHash = true,
+            maxBlockDelay = Duration.ofDays(100000)
+        )
+
+        val transport = provider.getRpcTransport()
+        val result = MonoEthereum(transport).ethGetFullBlockByNumber(4972065.toBigInteger()).awaitSingle()
+        assertThat(result.transactions().size()).isGreaterThan(0)
+        assertThat(
+            result.transactions().last().hash()
+        ).isEqualTo(Word.apply("0x0000000000000000000000000000000000000000000000000000000000000000"))
     }
 
     private fun getBlockNumberResponse(number: Long): String {
@@ -661,6 +786,7 @@ internal class HaEthereumTransportProviderTest {
                 requestTimeoutMs = 0,
                 readWriteTimeoutMs = 10000,
                 maxBlockDelay = Duration.ofSeconds(10),
+                allowTransactionsWithoutHash = false,
             ),
             failoverPredicate = NoopFailoverPredicate(),
         )

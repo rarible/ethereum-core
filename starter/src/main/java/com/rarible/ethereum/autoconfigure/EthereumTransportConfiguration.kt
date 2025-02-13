@@ -31,7 +31,8 @@ class EthereumTransportConfiguration(
                 retryMaxAttempts = ethereumProperties.retryMaxAttempts,
                 retryBackoffDelay = ethereumProperties.retryBackoffDelay,
                 monitoringThreadInterval = ethereumProperties.monitoringThreadInterval,
-                maxBlockDelay = ethereumProperties.maxBlockDelay
+                maxBlockDelay = ethereumProperties.maxBlockDelay,
+                allowTransactionsWithoutHash = ethereumProperties.allowTransactionsWithoutHash,
             )
         } else {
             LegacyEthereumTransportProvider(
@@ -43,6 +44,7 @@ class EthereumTransportConfiguration(
                 maxFrameSize = ethereumProperties.maxFrameSize,
                 retryMaxAttempts = ethereumProperties.retryMaxAttempts,
                 retryBackoffDelay = ethereumProperties.retryBackoffDelay,
+                allowTransactionsWithoutHash = ethereumProperties.allowTransactionsWithoutHash,
             )
         }
 
@@ -62,7 +64,8 @@ class EthereumTransportConfiguration(
                 retryMaxAttempts = ethereumProperties.retryMaxAttempts,
                 retryBackoffDelay = ethereumProperties.retryBackoffDelay,
                 monitoringThreadInterval = ethereumProperties.monitoringThreadInterval,
-                maxBlockDelay = ethereumProperties.maxBlockDelay
+                maxBlockDelay = ethereumProperties.maxBlockDelay,
+                allowTransactionsWithoutHash = ethereumProperties.allowTransactionsWithoutHash,
             )
         }
     }

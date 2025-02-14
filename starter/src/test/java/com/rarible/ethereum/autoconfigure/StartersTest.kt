@@ -12,7 +12,6 @@ import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.boot.test.context.TestConfiguration
 import org.springframework.context.annotation.Import
 import org.springframework.test.context.junit.jupiter.SpringExtension
-import scalether.core.MonoParity
 
 @ExtendWith(SpringExtension::class)
 @SpringBootTest(
@@ -33,15 +32,11 @@ class StartersTest {
     @Autowired
     private lateinit var stringToEthAddressConverter: StringToEthAddressConverter
 
-    @Autowired
-    private lateinit var monoParity: MonoParity
-
     @Test
     fun test() {
         assertThat(ethUInt256ToHexStringConverter).isNotNull
         assertThat(hexStringToEthUInt256Converter).isNotNull
         assertThat(stringToEthAddressConverter).isNotNull
-        assertThat(monoParity).isNotNull
     }
 
     @TestConfiguration

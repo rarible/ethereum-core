@@ -1,6 +1,7 @@
 package com.rarible.ethereum.client
 
 import com.fasterxml.jackson.annotation.JsonInclude
+import com.rarible.ethereum.client.mapper.registerWordDeserializer
 import io.daonomic.rpc.domain.Request
 import io.daonomic.rpc.domain.Response
 import io.daonomic.rpc.mono.WebClientTransport
@@ -38,10 +39,14 @@ abstract class EthereumTransportProvider {
         maxFrameSize: Int,
         retryMaxAttempts: Long,
         retryBackoffDelay: Long,
+        allowTransactionsWithoutHash: Boolean
     ): WebClientTransport {
         val retry = Retry.backoff(retryMaxAttempts, Duration.ofMillis(retryBackoffDelay)).filter { shouldRetry(it) }
         val mapper = MonoEthereum.mapper()
         mapper.setSerializationInclusion(JsonInclude.Include.NON_EMPTY)
+        if (allowTransactionsWithoutHash) {
+            mapper.registerWordDeserializer()
+        }
         return object : WebClientTransport(
             httpUrl,
             mapper,

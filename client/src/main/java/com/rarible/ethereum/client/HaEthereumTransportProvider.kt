@@ -29,6 +29,7 @@ class HaEthereumTransportProvider(
     private val retryBackoffDelay: Long,
     private val monitoringThreadInterval: Duration,
     private val maxBlockDelay: Duration,
+    private val allowTransactionsWithoutHash: Boolean,
 ) : AutoCloseable,
     EthereumTransportProvider() {
     private val rpcNode: AtomicReference<EthereumTransport> = AtomicReference()
@@ -98,6 +99,7 @@ class HaEthereumTransportProvider(
             ).asScala()
         )
     }
+
     private fun createBasicAuthHeader(auth: String): String {
         val base64Credentials = Base64.getEncoder().encodeToString(auth.toByteArray())
         return "Basic $base64Credentials"
@@ -111,6 +113,7 @@ class HaEthereumTransportProvider(
         maxFrameSize = maxFrameSize,
         retryMaxAttempts = retryMaxAttempts,
         retryBackoffDelay = retryBackoffDelay,
+        allowTransactionsWithoutHash = allowTransactionsWithoutHash,
     )
 
     private suspend fun nodeAvailable(rpcUrl: String, rpcTransport: WebClientTransport): Boolean {

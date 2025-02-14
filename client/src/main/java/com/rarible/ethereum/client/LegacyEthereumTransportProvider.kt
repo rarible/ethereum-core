@@ -9,6 +9,7 @@ class LegacyEthereumTransportProvider(
     maxFrameSize: Int,
     retryMaxAttempts: Long,
     retryBackoffDelay: Long,
+    allowTransactionsWithoutHash: Boolean,
 ) :
     EthereumTransportProvider() {
     private val rpcTransport =
@@ -19,6 +20,7 @@ class LegacyEthereumTransportProvider(
             maxFrameSize = maxFrameSize,
             retryMaxAttempts = retryMaxAttempts,
             retryBackoffDelay = retryBackoffDelay,
+            allowTransactionsWithoutHash = allowTransactionsWithoutHash
         )
 
     init {

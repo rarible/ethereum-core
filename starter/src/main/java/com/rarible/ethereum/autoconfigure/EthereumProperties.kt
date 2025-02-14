@@ -22,7 +22,8 @@ data class EthereumProperties(
     val monitoringThreadInterval: Duration = Duration.ofSeconds(30),
     val cache: CacheProperties = CacheProperties(),
     val failoverEnabled: Boolean = true,
-    val maxBlockDelay: Duration = Duration.ofMinutes(2)
+    val maxBlockDelay: Duration = Duration.ofMinutes(2),
+    val allowTransactionsWithoutHash: Boolean = false,
 )
 
 data class CacheProperties(

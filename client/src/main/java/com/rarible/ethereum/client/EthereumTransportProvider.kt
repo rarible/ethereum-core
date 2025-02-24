@@ -50,7 +50,7 @@ abstract class EthereumTransportProvider {
         if (allowTransactionsWithoutHash) {
             mapper.registerWordDeserializer()
         }
-        val result = object : EthereumWebClientTransport(
+        return object : EthereumWebClientTransport(
             httpUrl,
             mapper,
             requestTimeoutMs,
@@ -60,19 +60,18 @@ abstract class EthereumTransportProvider {
             override fun headers() = headers ?: super.headers()
             override fun maxInMemorySize(): Int = maxFrameSize
 
-            override fun <T> get(url: String?, `evidence$1`: Manifest<T>): Mono<T> =
-                super.get(url, `evidence$1`)
+            override fun <T> get(url: String?, manifest: Manifest<T>): Mono<T> =
+                super.get(url, manifest)
                     .logOnErrorAndRetry()
 
-            override fun <T> send(request: Request?, `evidence$1`: Manifest<T>): Mono<Response<T>> =
-                super.send(request, `evidence$1`)
+            override fun <T> send(request: Request?, manifest: Manifest<T>): Mono<Response<T>> =
+                super.send(request, manifest)
                     .logOnErrorAndRetry(request)
 
             private fun <T : Any?> Mono<T>.logOnErrorAndRetry(request: Request? = null): Mono<T> = doOnError {
                 val body = mapper.writeValueAsString(request)
                 logger.warn("Failed request: $body. ${it.message}", it)
             }.retryWhen(retry)
-        } as WebClientTransport
-        return result
+        }
     }
 }

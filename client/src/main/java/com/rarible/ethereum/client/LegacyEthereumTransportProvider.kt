@@ -1,6 +1,7 @@
 package com.rarible.ethereum.client
 
 import io.daonomic.rpc.mono.WebClientTransport
+import org.springframework.http.MediaType
 
 class LegacyEthereumTransportProvider(
     node: EthereumNode,
@@ -10,6 +11,7 @@ class LegacyEthereumTransportProvider(
     retryMaxAttempts: Long,
     retryBackoffDelay: Long,
     allowTransactionsWithoutHash: Boolean,
+    mediaType: MediaType,
 ) :
     EthereumTransportProvider() {
     private val rpcTransport =
@@ -20,7 +22,8 @@ class LegacyEthereumTransportProvider(
             maxFrameSize = maxFrameSize,
             retryMaxAttempts = retryMaxAttempts,
             retryBackoffDelay = retryBackoffDelay,
-            allowTransactionsWithoutHash = allowTransactionsWithoutHash
+            allowTransactionsWithoutHash = allowTransactionsWithoutHash,
+            mediaType = mediaType,
         )
 
     init {

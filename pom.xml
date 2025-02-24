@@ -33,7 +33,7 @@
     </distributionManagement>
 
     <properties>
-        <revision>1.8.15</revision>
+        <revision>1.8.16</revision>
         <rarible-core.version>2.7.1</rarible-core.version>
         <rarible.ethereum.contracts.version>1.0.62</rarible.ethereum.contracts.version>
         <mockserver-netty.version>5.11.2</mockserver-netty.version>

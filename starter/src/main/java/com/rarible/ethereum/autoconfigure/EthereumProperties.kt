@@ -3,6 +3,7 @@ package com.rarible.ethereum.autoconfigure
 import com.rarible.ethereum.client.EthereumNode
 import org.springframework.boot.context.properties.ConfigurationProperties
 import org.springframework.boot.context.properties.ConstructorBinding
+import org.springframework.http.MediaType
 import java.time.Duration
 
 internal const val RARIBLE_ETHEREUM = "rarible.ethereum"
@@ -24,6 +25,7 @@ data class EthereumProperties(
     val failoverEnabled: Boolean = true,
     val maxBlockDelay: Duration = Duration.ofMinutes(2),
     val allowTransactionsWithoutHash: Boolean = false,
+    val mediaType: MediaType = MediaType.APPLICATION_JSON,
 )
 
 data class CacheProperties(

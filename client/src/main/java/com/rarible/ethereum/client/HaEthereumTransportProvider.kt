@@ -1,5 +1,6 @@
 package com.rarible.ethereum.client
 
+import com.rarible.ethereum.client.transport.EthereumWebClientTransport
 import io.daonomic.rpc.RpcCodeException
 import io.daonomic.rpc.domain.Error
 import io.daonomic.rpc.mono.WebClientTransport
@@ -8,6 +9,7 @@ import kotlinx.coroutines.reactive.awaitFirstOrNull
 import kotlinx.coroutines.reactive.awaitSingle
 import kotlinx.coroutines.runBlocking
 import org.springframework.http.HttpHeaders
+import org.springframework.http.MediaType
 import scala.Option
 import scala.collection.immutable.Map
 import scala.collection.immutable.Map.from
@@ -30,6 +32,7 @@ class HaEthereumTransportProvider(
     private val monitoringThreadInterval: Duration,
     private val maxBlockDelay: Duration,
     private val allowTransactionsWithoutHash: Boolean,
+    private val mediaType: MediaType,
 ) : AutoCloseable,
     EthereumTransportProvider() {
     private val rpcNode: AtomicReference<EthereumTransport> = AtomicReference()
@@ -68,11 +71,12 @@ class HaEthereumTransportProvider(
         errorMessageProvider: (List<EthereumNode>) -> String = { "None of nodes $it are available" }
     ): EthereumTransport {
         for (node in nodes) {
-            val httpTransport = object : WebClientTransport(
+            val httpTransport = object : EthereumWebClientTransport(
                 node.rpcUrl,
                 MonoEthereum.mapper(),
                 requestTimeoutMs,
-                readWriteTimeoutMs
+                readWriteTimeoutMs,
+                mediaType,
             ) {
                 override fun headers() = defaultHeaders(node) ?: super.headers()
             }
@@ -114,6 +118,7 @@ class HaEthereumTransportProvider(
         retryMaxAttempts = retryMaxAttempts,
         retryBackoffDelay = retryBackoffDelay,
         allowTransactionsWithoutHash = allowTransactionsWithoutHash,
+        mediaType = mediaType,
     )
 
     private suspend fun nodeAvailable(rpcUrl: String, rpcTransport: WebClientTransport): Boolean {

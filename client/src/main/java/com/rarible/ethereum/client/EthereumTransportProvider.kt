@@ -2,12 +2,14 @@ package com.rarible.ethereum.client
 
 import com.fasterxml.jackson.annotation.JsonInclude
 import com.rarible.ethereum.client.mapper.registerWordDeserializer
+import com.rarible.ethereum.client.transport.EthereumWebClientTransport
 import io.daonomic.rpc.domain.Request
 import io.daonomic.rpc.domain.Response
 import io.daonomic.rpc.mono.WebClientTransport
 import io.netty.channel.ChannelException
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
+import org.springframework.http.MediaType
 import org.springframework.web.reactive.function.client.WebClientException
 import org.springframework.web.reactive.function.client.WebClientResponseException
 import reactor.core.publisher.Mono
@@ -39,7 +41,8 @@ abstract class EthereumTransportProvider {
         maxFrameSize: Int,
         retryMaxAttempts: Long,
         retryBackoffDelay: Long,
-        allowTransactionsWithoutHash: Boolean
+        allowTransactionsWithoutHash: Boolean,
+        mediaType: MediaType,
     ): WebClientTransport {
         val retry = Retry.backoff(retryMaxAttempts, Duration.ofMillis(retryBackoffDelay)).filter { shouldRetry(it) }
         val mapper = MonoEthereum.mapper()
@@ -47,19 +50,21 @@ abstract class EthereumTransportProvider {
         if (allowTransactionsWithoutHash) {
             mapper.registerWordDeserializer()
         }
-        return object : WebClientTransport(
+        return object : EthereumWebClientTransport(
             httpUrl,
             mapper,
             requestTimeoutMs,
-            readWriteTimeoutMs
+            readWriteTimeoutMs,
+            mediaType
         ) {
             override fun headers() = headers ?: super.headers()
             override fun maxInMemorySize(): Int = maxFrameSize
-            override fun <T : Any?> get(url: String?, manifest: Manifest<T>?): Mono<T> =
+
+            override fun <T> get(url: String?, manifest: Manifest<T>): Mono<T> =
                 super.get(url, manifest)
                     .logOnErrorAndRetry()
 
-            override fun <T : Any?> send(request: Request?, manifest: Manifest<T>?): Mono<Response<T>> =
+            override fun <T> send(request: Request?, manifest: Manifest<T>): Mono<Response<T>> =
                 super.send(request, manifest)
                     .logOnErrorAndRetry(request)
 

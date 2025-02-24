@@ -127,6 +127,7 @@ internal class HaEthereumTransportProviderTest {
             readWriteTimeoutMs = 1000,
             maxBlockDelay = Duration.ofSeconds(100),
             allowTransactionsWithoutHash = false,
+            mediaType = MediaType.APPLICATION_JSON,
         )
 
         val response1 = FailoverRpcTransport(
@@ -326,6 +327,7 @@ internal class HaEthereumTransportProviderTest {
             readWriteTimeoutMs = 10000,
             maxBlockDelay = Duration.ofSeconds(10),
             allowTransactionsWithoutHash = false,
+            mediaType = MediaType.APPLICATION_JSON,
         )
 
         val response1 = FailoverRpcTransport(
@@ -395,6 +397,7 @@ internal class HaEthereumTransportProviderTest {
             readWriteTimeoutMs = 10000,
             maxBlockDelay = Duration.ofSeconds(10),
             allowTransactionsWithoutHash = false,
+            mediaType = MediaType.APPLICATION_JSON,
         )
 
         val response1 = FailoverRpcTransport(
@@ -438,6 +441,7 @@ internal class HaEthereumTransportProviderTest {
             readWriteTimeoutMs = 10000,
             maxBlockDelay = Duration.ofSeconds(10),
             allowTransactionsWithoutHash = false,
+            mediaType = MediaType.APPLICATION_JSON,
         )
 
         internalServer.enqueue(
@@ -502,6 +506,7 @@ internal class HaEthereumTransportProviderTest {
             readWriteTimeoutMs = 10000,
             maxBlockDelay = Duration.ofSeconds(10),
             allowTransactionsWithoutHash = false,
+            mediaType = MediaType.APPLICATION_JSON,
         )
 
         externalServer1.enqueue(
@@ -561,6 +566,7 @@ internal class HaEthereumTransportProviderTest {
             readWriteTimeoutMs = 10000,
             maxBlockDelay = Duration.ofSeconds(10),
             allowTransactionsWithoutHash = false,
+            mediaType = MediaType.APPLICATION_JSON,
         )
         nodeServer.enqueue(
             MockResponse()
@@ -707,7 +713,8 @@ internal class HaEthereumTransportProviderTest {
             requestTimeoutMs = 10000,
             readWriteTimeoutMs = 10000,
             allowTransactionsWithoutHash = true,
-            maxBlockDelay = Duration.ofDays(100000)
+            maxBlockDelay = Duration.ofDays(100000),
+            mediaType = MediaType.APPLICATION_JSON,
         )
 
         val transport = provider.getRpcTransport()
@@ -787,6 +794,7 @@ internal class HaEthereumTransportProviderTest {
                 readWriteTimeoutMs = 10000,
                 maxBlockDelay = Duration.ofSeconds(10),
                 allowTransactionsWithoutHash = false,
+                mediaType = MediaType.APPLICATION_JSON,
             ),
             failoverPredicate = NoopFailoverPredicate(),
         )

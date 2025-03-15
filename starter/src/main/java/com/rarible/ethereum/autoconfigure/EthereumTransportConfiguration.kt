@@ -68,7 +68,7 @@ class EthereumTransportConfiguration(
                 monitoringThreadInterval = ethereumProperties.monitoringThreadInterval,
                 maxBlockDelay = ethereumProperties.maxBlockDelay,
                 allowTransactionsWithoutHash = ethereumProperties.allowTransactionsWithoutHash,
-                mediaType = ethereumProperties.mediaType,
+                mediaType = ethereumProperties.reconciliationMediaType,
             )
         }
     }

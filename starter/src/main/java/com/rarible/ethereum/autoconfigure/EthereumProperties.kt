@@ -26,6 +26,7 @@ data class EthereumProperties(
     val maxBlockDelay: Duration = Duration.ofMinutes(2),
     val allowTransactionsWithoutHash: Boolean = false,
     val mediaType: MediaType = MediaType.APPLICATION_JSON,
+    val reconciliationMediaType: MediaType = MediaType.APPLICATION_JSON,
 )
 
 data class CacheProperties(

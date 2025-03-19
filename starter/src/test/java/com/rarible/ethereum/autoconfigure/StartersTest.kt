@@ -11,6 +11,7 @@ import org.springframework.boot.autoconfigure.EnableAutoConfiguration
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.boot.test.context.TestConfiguration
 import org.springframework.context.annotation.Import
+import org.springframework.test.context.ActiveProfiles
 import org.springframework.test.context.junit.jupiter.SpringExtension
 
 @ExtendWith(SpringExtension::class)
@@ -20,6 +21,7 @@ import org.springframework.test.context.junit.jupiter.SpringExtension
         "rarible.ethereum.parity.httpUrl=localhost:6543"
     ]
 )
+@ActiveProfiles("core")
 @Import(StartersTest.Configuration::class)
 @EnableAutoConfiguration
 class StartersTest {

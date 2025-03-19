@@ -87,6 +87,7 @@ class EthereumTransportConfiguration(
                 failoverPredicates = listOf(
                     SimplePredicate(code = -32000, errorMessagePrefix = "required historical state unavailable"),
                     SimplePredicate(code = -32601, errorMessagePrefix = "the method"),
+                    SimplePredicate(code = -32603, errorMessagePrefix = "Unexpected error (code=40000)"),
                 )
             )
         } else {

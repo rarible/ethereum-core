@@ -1,0 +1,11 @@
+rarible:
+  ethereum:
+    failoverPredicates:
+      - code: -32000
+        errorMessagePrefix: "required historical state unavailable"
+      - code: -32601
+        errorMessagePrefix: "the method"
+      - code: -32602
+        errorMessagePrefix: "invalid block range"
+      - code: -32603
+        errorMessagePrefix: "Unexpected error (code=40000)"

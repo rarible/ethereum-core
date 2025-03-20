@@ -82,13 +82,11 @@ class EthereumTransportConfiguration(
         ethereumRpc(reconciliationEthereumTransportProvider)
 
     private fun ethereumRpc(ethereumTransportProvider: EthereumTransportProvider): MonoRpcTransport {
-        val predicate = if (ethereumProperties.failoverEnabled) {
+        val predicate = if (ethereumProperties.failoverPredicates.isNotEmpty()) {
             CompositeFailoverPredicate(
-                failoverPredicates = listOf(
-                    SimplePredicate(code = -32000, errorMessagePrefix = "required historical state unavailable"),
-                    SimplePredicate(code = -32601, errorMessagePrefix = "the method"),
-                    SimplePredicate(code = -32603, errorMessagePrefix = "Unexpected error (code=40000)"),
-                )
+                failoverPredicates = ethereumProperties.failoverPredicates.map { config ->
+                    SimplePredicate(code = config.code, errorMessagePrefix = config.errorMessagePrefix)
+                }
             )
         } else {
             NoopFailoverPredicate()

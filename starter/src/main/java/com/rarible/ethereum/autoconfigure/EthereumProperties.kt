@@ -27,6 +27,7 @@ data class EthereumProperties(
     val allowTransactionsWithoutHash: Boolean = false,
     val mediaType: MediaType = MediaType.APPLICATION_JSON,
     val reconciliationMediaType: MediaType = MediaType.APPLICATION_JSON,
+    val failoverPredicates: List<FailoverPredicateConfig>
 )
 
 data class CacheProperties(

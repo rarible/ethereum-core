@@ -22,7 +22,7 @@ class ERC1271SignService(
     @Throws(CheckSignatureException::class, InvalidSignatureException::class)
     suspend fun isSigner(signer: Address, message: String, signature: Binary): Boolean {
         val hash = Word(Hash.sha3(addStart(message).bytes()))
-        logger.info("hash is $hash for messaage $message")
+        logger.debug("hash is $hash for messaage $message")
         return isSigner(signer, hash, signature)
     }
 
@@ -39,10 +39,10 @@ class ERC1271SignService(
             val result = erc1271.isValidSignature(hash.bytes(), signature.bytes()).call().awaitFirst()
             Binary.apply(result) == MAGIC_VALUE
         } catch (ex: RpcCodeException) {
-            logger.error("Error calling isValidSignature", ex)
+            logger.warn("Error calling isValidSignature", ex)
             false
         } catch (ex: IllegalArgumentException) {
-            logger.error("Error calling isValidSignature", ex)
+            logger.warn("Error calling isValidSignature", ex)
             false
         } catch (ex: Exception) {
             throw CheckSignatureException("Can't get method call result", ex)

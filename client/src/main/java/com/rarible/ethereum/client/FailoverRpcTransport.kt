@@ -26,7 +26,7 @@ class FailoverRpcTransport(
                 }
                 return@mono response
             } catch (e: Exception) {
-                logger.error("Rpc transport encountered an error", e)
+                logger.warn("Rpc transport encountered an error", e)
                 ethereumTransportProvider.rpcError()
                 throw e
             }
